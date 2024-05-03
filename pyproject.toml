@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loadest2"
+description = "Estimate constituent loads and concentrations in rivers using Gaussian processes."
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["LOADEST", "streamflow", "rating curve"]
+license = {file = "LICENSE.md"}
+maintainers = [
+  {name = "Timothy Hodson", email = "thodson@usgs.gov"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "pymc >= 5.0.0",
+]
+
+dynamic = ["version"]
+
+[tool.setuptools]
+packages = ["loadest2","loadest2.providers","loadest2.models", "loadest2.tests"]
+
+[project.optional-dependencies]
+test = [
+  "flake8",
+  "ruff",
+  "pytest > 5.0.0",
+  "pytest-cov[all]",
+]
+
+provider_usgs = [
+  "dataretrieval",
+]
+
+[project.urls]
+homepage = "https://github.com/thodson-usgs/loadest2"
+repository = "https://github.com/thodson-usgs/loadest2.git"
+
+[tool.setuptools_scm]
+write_to = "loadest2/_version.py"
+
+[tool.ruff]
+# Set the maximum line length to 127 (width of GitHub editor)
+line-length = 127
+
+[tool.ruff.lint]
+# Add the `line-too-long` rule to the enforced rule set. By default, Ruff omits rules that
+# overlap with the use of a formatter, like Black, but we can override this behavior by
+# explicitly adding the rule.
+extend-select = ["E501"]
