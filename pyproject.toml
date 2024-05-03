@@ -18,6 +18,7 @@ classifiers = [
 
 dependencies = [
     "pymc >= 5.0.0",
+    "xarray",
 ]
 
 dynamic = ["version"]

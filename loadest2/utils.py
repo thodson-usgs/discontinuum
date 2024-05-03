@@ -36,6 +36,10 @@ class DataManager:
         pass
 
     @cached_property
+    def target_daily(self):
+        return aggregate_to_daily(self.target.data)
+
+    @cached_property
     def training_data(self):
         pass
 
