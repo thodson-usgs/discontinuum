@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import pandas as pd
 
 if TYPE_CHECKING:
+    from xarray import Dataset
     from pandas import DatetimeIndex, DatetimeArray, Series, DataFrame
     from typing import Boolean, Dict, Union
 
@@ -19,15 +20,9 @@ class Parameter:
 
 
 @dataclass
-class DataSet:
-    data: DataFrame  # with time index
-    metadata: Dict[str, Parameter]
-
-
-@dataclass
 class DataManager:
-    target: DataSet  # observations
-    features: DataSet
+    target: Dataset  # observations
+    features: Dataset
 
     def __post_init__(self):
         # setup transforms
@@ -47,7 +42,7 @@ class DataManager:
     def input_data(self):
         pass
 
-    def new_data(self, data: DataSet = None):
+    def new_data(self, data: Dataset = None):
         pass
 
 
@@ -70,20 +65,23 @@ def decimal_year(t: Union[DatetimeIndex, DatetimeArray]) -> Series:
     return year + day_of_year / days_in_year
 
 
-def aggregate_to_daily(data: Union[DataFrame, Series], utc: Boolean = True) -> Series:
+def aggregate_to_daily(ds: Dataset) -> Dataset:
     """Aggregate data to daily values.
 
     Parameters
     ----------
-    data : pandas.DataFrame or pandas.Series
+    ds : Dataset
         Data to aggregate.
-    utc : bool, optional
-        Whether to return the index as UTC. The default is True.
 
     Returns
     -------
-    pandas.Series
+    Dataset
         Daily aggregated data.
     """
-    daily = data.groupby(data.index.date).mean()
-    daily.index = pd.to_datetime(daily.index, utc=utc)
+    daily = ds.groupby(ds.time.dt.date).mean()
+    # the groupy changes the coordinate name and type,
+    # so we convert it back
+    daily["date"] = pd.to_datetime(daily["date"])
+    daily = daily.rename({"date": "time"})
+
+    return daily

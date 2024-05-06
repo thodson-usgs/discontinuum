@@ -4,10 +4,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-
+import pandas as pd
 
 if TYPE_CHECKING:
+    from typing import Dict
     from numpy.typing import ArrayLike
+    from xarray import DataArray, Dataset
 
 
 class Transform:
@@ -178,3 +180,84 @@ class UnitTransform(Transform):
             Unit interval transformed back to original units.
         """
         return z * self.max_
+
+
+class DecimalYearTransform(Transform):
+    """TODO FIX untransform returns the wrong date"""
+
+    def __init__(self, x: DataArray = None):
+        pass
+
+    def transform(self, x: DataArray) -> ArrayLike:
+        """Convert a timeseries to decimal year.
+
+        Parameters
+        ----------
+        x : DataArray
+            Timeseries to convert.
+        """
+        days_in_year = 365 + x.dt.is_leap_year
+        day_of_year = x.dt.dayofyear
+        year = x.dt.year
+        decimal_year = year + day_of_year / days_in_year
+        return decimal_year.to_numpy()
+
+    def untransform(self, z: ArrayLike) -> ArrayLike:
+        """TODO FIX"""
+        year = np.floor(z)
+        dt = pd.to_datetime(year, format="%Y")
+        days_in_year = 365 + dt.is_leap_year
+        day_of_year = np.floor((z - year) * days_in_year) + 1
+        dt = dt + pd.to_timedelta(day_of_year, unit="D")
+        return pd.to_datetime(dt.date)  # remove decimal part
+
+
+class DesignMatrixTransform(Transform):
+    """Transforms data to a design matrix"""
+
+    def __init__(self, x: Dataset, index: str, transforms: Dict[str, Transform]):
+        self._transforms = {}
+        self._index = index
+
+        for key, transform in transforms.items():
+            self._transforms[key] = transform(x[key])
+
+    def transform(self, x: Dataset) -> ArrayLike:
+        """Transform data to design matrix
+
+        Parameters
+        ----------
+        x : Dataset
+            Data to be transformed.
+
+        Returns
+        -------
+        ArrayLike
+            Design matrix.
+        """
+        index_len = x.sizes.get(self._index)
+        design_matrix = np.empty((index_len, len(self._transforms)))
+
+        for i, (key, transform) in enumerate(self._transforms.items()):
+            design_matrix[:, i] = transform.transform(x[key])
+
+        return design_matrix
+
+    def untransform(self, z: ArrayLike) -> Dataset:
+        """Transform design matrix back to original data
+
+        Parameters
+        ----------
+        z : ArrayLike
+            Design matrix.
+
+        Returns
+        -------
+        Dataset
+            Original data.
+        """
+        data = {}
+        for i, (key, transform) in enumerate(self._transforms.items()):
+            data[key] = transform.untransform(z[:, i])
+
+        return Dataset(data)

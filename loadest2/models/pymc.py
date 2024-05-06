@@ -1,5 +1,19 @@
 import pymc as pm
 
+from .base import BaseModel
+
+
+class PyMCModel(BaseModel):
+    def __init__(self):
+        pass
+
+    def fit(self, X, y=None):
+        self.is_fitted = True
+        return self
+
+    def predict(self, X):
+        pass
+
 
 def init_gp(
     X,
