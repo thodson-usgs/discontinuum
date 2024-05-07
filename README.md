@@ -1,2 +1,2 @@
-# loadest2
-Estimate constituent loads in rivers using Gaussian processes
+# discontinuum
+Estimate discontinuous timeseries from continuous covariates with Gaussian processes.
