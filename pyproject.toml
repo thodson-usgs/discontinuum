@@ -3,11 +3,11 @@ requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "loadest2"
-description = "Estimate constituent loads and concentrations in rivers using Gaussian processes."
+name = "discontinuum"
+description = "Estimate discontinuous timeseries from continuous covariates."
 readme = "README.md"
 requires-python = ">=3.9"
-keywords = ["LOADEST", "streamflow", "rating curve"]
+keywords = ["timeseries", "Gaussian processes", "discontinuous"]
 license = {file = "LICENSE.md"}
 maintainers = [
   {name = "Timothy Hodson", email = "thodson@usgs.gov"},
@@ -24,7 +24,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools]
-packages = ["loadest2","loadest2.providers","loadest2.models", "loadest2.tests"]
+packages = ["discontinuum","discontinuum.providers","discontinuum.models", "discontinuum.tests"]
 
 [project.optional-dependencies]
 test = [
@@ -39,11 +39,11 @@ provider_usgs = [
 ]
 
 [project.urls]
-homepage = "https://github.com/thodson-usgs/loadest2"
-repository = "https://github.com/thodson-usgs/loadest2.git"
+homepage = "https://github.com/thodson-usgs/discontinuum"
+repository = "https://github.com/thodson-usgs/discontinuum.git"
 
 [tool.setuptools_scm]
-write_to = "loadest2/_version.py"
+write_to = "discontinuum/_version.py"
 
 [tool.ruff]
 # Set the maximum line length to 127 (width of GitHub editor)

@@ -6,10 +6,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from xarray import Dataset
+
 if TYPE_CHECKING:
     from typing import Dict
     from numpy.typing import ArrayLike
-    from xarray import DataArray, Dataset
+    from xarray import DataArray
 
 
 class Transform:

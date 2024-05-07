@@ -5,12 +5,14 @@ from typing import TYPE_CHECKING
 
 from functools import cached_property
 from dataclasses import dataclass
+
 import pandas as pd
 
 if TYPE_CHECKING:
     from xarray import Dataset
     from pandas import DatetimeIndex, DatetimeArray, Series, DataFrame
     from typing import Boolean, Dict, Union
+    from discontinuum.transform import Transform
 
 
 @dataclass
@@ -23,6 +25,8 @@ class Parameter:
 class DataManager:
     target: Dataset  # observations
     features: Dataset
+    target_transform: Transform = None
+    feature_transform: Transform = None
 
     def __post_init__(self):
         # setup transforms
@@ -31,19 +35,15 @@ class DataManager:
         pass
 
     @cached_property
-    def target_daily(self):
-        return aggregate_to_daily(self.target.data)
+    def y(self):
+        self.target_transform.transform(self.target)
 
     @cached_property
-    def training_data(self):
-        pass
+    def X(self):
+        self.feature_transform.transform(self.features)
 
-    @cached_property
-    def input_data(self):
-        pass
-
-    def new_data(self, data: Dataset = None):
-        pass
+    def Xnew(self, ds: Dataset):
+        return self.feature_transform.transform(ds)
 
 
 def decimal_year(t: Union[DatetimeIndex, DatetimeArray]) -> Series:

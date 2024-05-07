@@ -8,7 +8,7 @@ import xarray as xr
 from dataclasses import dataclass
 from dataretrieval import nwis
 
-from loadest2.providers.base import Location
+from discontinuum.providers.base import Location
 
 if TYPE_CHECKING:
     # from pandas import DataFrame

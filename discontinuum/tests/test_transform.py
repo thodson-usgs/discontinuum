@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from ..transform import *
+from loadest2.transform import Transform, ZTransform, LogZTransform, UnitTransform
 
 
 @pytest.mark.parametrize('length', [2, 5, 10, 100, 1000, 10_000])

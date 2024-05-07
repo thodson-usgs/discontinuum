@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import matplotlib.pyplot as plt
 
-from loadest2.models import is_fitted
+from discontinuum.models import is_fitted
 
 if TYPE_CHECKING:
     from matplotlib.pyplot import Axes
