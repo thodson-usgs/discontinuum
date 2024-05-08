@@ -18,7 +18,7 @@ def is_fitted(func):
 
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
-        if self.is_fitted:
+        if not self.is_fitted:
             raise RuntimeError("The model hasn't been fitted yet, call .fit().")
         return func(self, *args, **kwargs)
 

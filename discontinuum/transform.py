@@ -217,12 +217,19 @@ class DecimalYearTransform(Transform):
 class DesignMatrixTransform(Transform):
     """Transforms data to a design matrix"""
 
-    def __init__(self, x: Dataset, index: str, transforms: Dict[str, Transform]):
+    def __init__(
+        self, x: Dataset, transforms: Dict[str, Transform], index: str = "time"
+    ):
         self._transforms = {}
         self._index = index
 
-        for key, transform in transforms.items():
+        default_transforms = {index: DecimalYearTransform}
+        default_transforms.update(transforms)
+
+        for key, transform in default_transforms.items():
             self._transforms[key] = transform(x[key])
+
+        self._transforms[index] = DecimalYearTransform()
 
     def transform(self, x: Dataset) -> ArrayLike:
         """Transform data to design matrix
