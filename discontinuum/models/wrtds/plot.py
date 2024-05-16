@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from xarray import DataArray
+from scipy.stats import norm
 
 from discontinuum.engines.base import is_fitted
 
@@ -71,7 +72,7 @@ class PlotMixin:
         return ax
 
     @is_fitted
-    def plot_concentration(self, covariates, ax: Axes = None):
+    def plot_concentration(self, covariates, ci=0.95, ax: Axes = None):
         """Plot predicted concentration versus time.
 
         Parameters
@@ -94,16 +95,17 @@ class PlotMixin:
             dims=['time'],
             attrs=self.dm.data.target.attrs,
         )
+        alpha = (1 - ci)/2
+        zscore = norm.ppf(1-alpha)
 
-        # ci = 1.96 * se
-        ci = se**1.96
+        cb = se**zscore
 
         # ax.scatter(samples.index, y, c='k', s=5, linewidths=0.5, edgecolors='white', zorder=3)
 
         target.plot.line(ax=ax, lw=1, zorder=2)
 
         ax.fill_between(
-            target['time'], (target / ci), (target * ci), color='b', alpha=0.1, zorder=1
+            target['time'], (target / cb), (target * cb), color='b', alpha=0.1, zorder=1
         )
 
         self.plot_observations(ax, zorder=3)
