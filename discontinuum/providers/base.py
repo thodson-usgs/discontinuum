@@ -11,10 +11,9 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Parameter:
+class Covariate:
     standard_name: str
     units: str
-
 
 @dataclass
 class Location:
@@ -24,8 +23,8 @@ class Location:
     longitude: float
 
 
-def get_daily(
-    site: str, start_date: str, end_date: str, params: list[Parameter]
+def get_timeseries(
+    site: str, start_date: str, end_date: str, params: list[Covariate]
 ) -> DataSet:
     """Return timeseries of daily data for monitoring site."""
     raise NotImplementedError
@@ -36,11 +35,11 @@ def get_location(site: str) -> Location:
     raise NotImplementedError
 
 
-def get_parameters() -> Parameter:
+def get_covariates() -> Covariates:
     """Return timeseries of paramete"""
     raise NotImplementedError
 
 
-def get_samples(site: str, start_date: str, end_date: str, param: Parameter) -> DataSet:
+def get_target(location: str, start_date: str, end_date: str, target: Covariate) -> DataSet:
     """Return sample data for monitoring site."""
     raise NotImplementedError

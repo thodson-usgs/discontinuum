@@ -3,12 +3,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+import pymc as pm
+import numpy as np
+
+from xarray import DataArray
+
+from discontinuum.engines.base import BaseModel, is_fitted
+
+
 if TYPE_CHECKING:
     from typing import Dict
-
-import pymc as pm
-
-from discontinuum.models.base import BaseModel, is_fitted
 
 
 class PyMCModel(BaseModel):
@@ -17,10 +21,11 @@ class PyMCModel(BaseModel):
         model_config: Dict = None,
     ):
         """ """
+        self.dm = None  # DataManager
         self.model_config = model_config
         self.is_fitted = False
 
-    def fit(self, X, y=None):
+    def fit(self, covariates, target=None):
         """Fit the model to data.
 
         Parameters
@@ -31,24 +36,29 @@ class PyMCModel(BaseModel):
             Target values.
         """
         self.is_fitted = True
-        # preprocess data; data manager
-        self.X = X
-        self.y = y
+        # preprocessing: setup data manager
+        self.dm.fit(target=target, covariates=covariates)
+        self.X = self.dm.X
+        self.y = self.dm.y
 
-        self.build_model(self.X, self.y)
+        self.model = self.build_model(self.X, self.y)
 
-        with self.model:
-            self.mp = pm.find_MAP(method="BFGS")
+        self.mp = pm.find_MAP(method="BFGS", model=self.model)
 
     @is_fitted
-    def predict(self, Xnew, diag=True, pred_noise=True):
+    def predict(self, covariates, diag=True, pred_noise=True) -> DataArray:
         """Uses the fitted model to make predictions on new data."""
-        with self.model:
-            mu, cov = self.gp.predict(
-                Xnew, point=self.mp, diag=diag, pred_noise=pred_noise
-            )
-        # return self.gp.predict(Xnew, point=self.mp, diag=diag, pred_noise=pred_noise)
-        return mu, cov
+        Xnew = self.dm.Xnew(covariates)
+
+        mu, cov = self.gp.predict(
+            Xnew, point=self.mp, diag=diag, pred_noise=pred_noise, model=self.model
+        )
+
+        target = self.dm.y_t(mu)
+        # TODO the reshape should be done in the pipeline
+        se = self.dm.error_pipeline.inverse_transform(cov.reshape(-1, 1))
+
+        return target, se
 
     def build_model(self, X, y, **kwargs):
         """
