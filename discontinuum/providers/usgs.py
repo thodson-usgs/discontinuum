@@ -3,12 +3,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+import pandas as pd
 import xarray as xr
 
 from dataclasses import dataclass
-from dataretrieval import nwis
+from dataretrieval import nwis, wqp
 
-from discontinuum.providers.base import Location
+from discontinuum.providers.base import MetaData
 
 if TYPE_CHECKING:
     # from pandas import DataFrame
@@ -89,8 +90,8 @@ def get_parameters(pcodes: Dict[str, str]) -> Union[USGSParameter, List[USGSPara
     return params
 
 
-def get_location(site: str) -> Location:
-    """Get site information from the USGS NWIS API.
+def get_metadata(site: str) -> MetaData:
+    """Get site metadata from the USGS NWIS API.
 
     Parameters
     ----------
@@ -105,7 +106,7 @@ def get_location(site: str) -> Location:
     df, _ = nwis.get_info(sites=site)
     row = df.iloc[0]
 
-    return Location(
+    return MetaData(
         id=row["site_no"],
         name=row["station_nm"],
         latitude=row["dec_lat_va"],
@@ -152,12 +153,97 @@ def get_daily(
     # ds["date"] = ds["date"].dt.date
 
     # set metadata
-    ds.attrs = get_location(site).__dict__
+    ds.attrs = get_metadata(site).__dict__
 
     for param in params:
         ds[param.name] = ds[param.name] * param.conversion
         # xarray metadata assignment must come after all other operations
         ds[param.name].attrs = param.__dict__
+
+    return ds
+
+def get_wqp_samples(
+        site: str,
+        start_date: str,
+        end_date: str,
+        characteristic: str,
+        fraction: str,
+        provider: str = "NWIS",
+        name: str = "concentration",
+):
+    """Get sample data from the Water Quality Portal API.
+    
+    Parameters
+    ----------
+    site : str
+        Site number.
+    start_date : str
+        Start date in the format 'YYYY-MM-DD'.
+    end_date : str
+        End date in the format 'YYYY-MM-DD'.
+    characteristic : str
+        The name of the parameter to retrieve.
+    fraction : str
+        The fraction of the parameter to retrieve. Options are 'Total', 'Dissolved', 'Suspended'.
+    provider : str
+        The data provider. Options are 'NWIS' or 'STORET'.
+    name : str
+        Short name for the parameter. Default is 'concentration'.
+    """
+    if fraction and fraction not in ["Total", "Dissolved", "Suspended"]:
+        raise ValueError("Fraction must be 'Total', 'Dissolved', 'Suspended'")
+
+    if provider not in ["NWIS", "STORET"]:
+        raise ValueError("Provider must be 'NWIS' or 'STORET'") 
+
+    if provider == 'NWIS' and not site.startswith("USGS-"):
+        print(f"NWIS site {site} must include a 'USGS-' prefix")
+
+    # reformat dates from 'YYYY-MM-DD' to 'MM-DD-YYYY'
+    start_date = '-'.join(start_date.split('-')[1:] + [start_date.split('-')[0]])
+
+    df, _ = wqp.get_results(
+        siteid = site,
+        startDateLo = start_date,
+        startDateHi = end_date,
+        characteristicName = characteristic,
+        provider = provider,
+    )
+
+    # filter by fraction
+    if fraction:
+        df = df[df["ResultSampleFractionText"] == fraction]
+
+    # create datetime index
+    df.index = pd.to_datetime(
+        df["ActivityStartDate"] + ' ' + df["ActivityStartTime/Time"]
+    )
+
+    df[name] = df['ResultMeasureValue'].astype(float)
+    df = df[[name]]
+    df.index.name = "time"
+    df.index = df.index.tz_localize(None)
+
+    ds = xr.Dataset.from_dataframe(df)
+
+    if provider == 'NWIS':
+        # strip the "USGS-" prefix from the site number
+        site_id = site[5:]
+        ds.attrs = get_metadata(site_id).__dict__
+
+        # add parameter metadata
+        if len(set(df['USGSPCode'])) != 1:
+            raise ValueError("Multiple parameters returned from NWIS.")
+        
+        else: 
+            pcode = set(df["USGSPCode"])[0]
+            # left pad with zeros to make 5 characters
+            pcode = str(pcode).zfill(5)
+            attrs = get_parameters({name: pcode})
+            ds[name].attrs = attrs.__dict__
+
+    if provider == 'STORET':
+        pass
 
     return ds
 
@@ -207,7 +293,7 @@ def get_samples(
     # rename "datetime" to "time", which is xarray convention
     ds = ds.rename({"datetime": "time"})
 
-    ds.attrs = get_location(site).__dict__
+    ds.attrs = get_metadata(site).__dict__
     ds[name].attrs = attrs.__dict__
 
     return ds

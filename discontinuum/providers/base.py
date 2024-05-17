@@ -6,17 +6,12 @@ from dataclasses import dataclass
 
 if TYPE_CHECKING:
     # from pandas import DataFrame
-    from xarray import DataArray, DataSet
+    from xarray import Dataset
     from typing import Optional, List, Union, Dict
 
 
 @dataclass
-class Covariate:
-    standard_name: str
-    units: str
-
-@dataclass
-class Location:
+class MetaData:
     id: str
     name: str
     latitude: float
@@ -24,22 +19,15 @@ class Location:
 
 
 def get_timeseries(
-    site: str, start_date: str, end_date: str, params: list[Covariate]
-) -> DataSet:
+    location: str, start_date: str, end_date: str, variable: str
+) -> Dataset:
     """Return timeseries of daily data for monitoring site."""
     raise NotImplementedError
 
-
-def get_location(site: str) -> Location:
-    """Return metadata for monitoring site."""
+def get_target(location: str, start_date: str, end_date: str, variabe: str) -> Dataset:
+    """Return target data."""
     raise NotImplementedError
 
-
-def get_covariates() -> Covariates:
-    """Return timeseries of paramete"""
-    raise NotImplementedError
-
-
-def get_target(location: str, start_date: str, end_date: str, target: Covariate) -> DataSet:
-    """Return sample data for monitoring site."""
+def get_metadata(location: str) -> MetaData:
+    """Return metadata."""
     raise NotImplementedError
