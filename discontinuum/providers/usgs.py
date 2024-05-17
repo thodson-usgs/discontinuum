@@ -1,10 +1,13 @@
 """Helper functions for pulling USGS data."""
 
 from __future__ import annotations
+from tracemalloc import start
 from typing import TYPE_CHECKING
 
 import pandas as pd
 import xarray as xr
+
+import warnings
 
 from dataclasses import dataclass
 from dataretrieval import nwis, wqp
@@ -162,7 +165,11 @@ def get_daily(
 
     return ds
 
-def get_wqp_samples(
+def format_wqp_date(date: str) -> str:  
+    """Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'."""
+    return '-'.join(date.split('-')[1:] + [date.split('-')[0]])
+
+def get_samples(
         site: str,
         start_date: str,
         end_date: str,
@@ -197,10 +204,11 @@ def get_wqp_samples(
         raise ValueError("Provider must be 'NWIS' or 'STORET'") 
 
     if provider == 'NWIS' and not site.startswith("USGS-"):
-        print(f"NWIS site {site} must include a 'USGS-' prefix")
+        site = "USGS-" + site
 
     # reformat dates from 'YYYY-MM-DD' to 'MM-DD-YYYY'
-    start_date = '-'.join(start_date.split('-')[1:] + [start_date.split('-')[0]])
+    start_date = format_wqp_date(start_date)
+    end_date = format_wqp_date(end_date)    
 
     df, _ = wqp.get_results(
         siteid = site,
@@ -220,11 +228,17 @@ def get_wqp_samples(
     )
 
     df[name] = df['ResultMeasureValue'].astype(float)
-    df = df[[name]]
     df.index.name = "time"
     df.index = df.index.tz_localize(None)
 
-    ds = xr.Dataset.from_dataframe(df)
+    # create xarray dataset and remove unnecessary columns
+    # TODO include censoring flag
+    ds = xr.Dataset.from_dataframe(df[[name]])
+
+    # drop censored values and warn user
+    if any(ds[name].isnull()):
+        ds = ds.dropna(dim='time')
+        warnings.warn("Censored values have been removed from the dataset.")
 
     if provider == 'NWIS':
         # strip the "USGS-" prefix from the site number
@@ -236,7 +250,7 @@ def get_wqp_samples(
             raise ValueError("Multiple parameters returned from NWIS.")
         
         else: 
-            pcode = set(df["USGSPCode"])[0]
+            pcode = df["USGSPCode"].iloc[0]
             # left pad with zeros to make 5 characters
             pcode = str(pcode).zfill(5)
             attrs = get_parameters({name: pcode})
@@ -248,10 +262,12 @@ def get_wqp_samples(
     return ds
 
 
-def get_samples(
+def get_qwdata_samples(
     site: str, start_date: str, end_date: str, pcode: str, name: str = "concentration"
 ) -> Dataset:
     """Get sample data from the USGS NWIS API.
+
+    Warning: The QWData service is deprecated and no longer receives data.
 
     Parameters
     ----------
