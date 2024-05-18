@@ -46,7 +46,7 @@ class PyMCModel(BaseModel):
         self.mp = pm.find_MAP(method="BFGS", model=self.model)
 
     @is_fitted
-    def predict(self, covariates, diag=True, pred_noise=True) -> DataArray:
+    def predict(self, covariates, diag=True, pred_noise=False) -> DataArray:
         """Uses the fitted model to make predictions on new data."""
         Xnew = self.dm.Xnew(covariates)
 
@@ -59,6 +59,37 @@ class PyMCModel(BaseModel):
         se = self.dm.error_pipeline.inverse_transform(cov.reshape(-1, 1))
 
         return target, se
+    
+    def sample(self, covariates, n=1000) -> DataArray:
+        """Sample from the posterior distribution of the model.
+
+        Parameters
+        ----------
+        covariates : Dataset
+            Covariates for prediction.
+        n : int, optional
+            Number of samples to draw.
+        """
+        Xnew = self.dm.Xnew(covariates)
+        mu, cov = self.gp.predict(
+            Xnew, point=self.mp, diag=False, pred_noise=False, model=self.model
+        )
+        rng = np.random.default_rng()
+        sim = rng.multivariate_normal(mu, cov, size=n, method="cholesky")
+
+        # TODO modify transform to handle samples/draws HACK
+        temp = self.dm.y_t(sim)
+        data = temp.data.reshape(n, -1)
+        attrs = temp.attrs
+        da = DataArray(
+            data,
+            coords={"time" : covariates.time, "draw" : np.arange(n)},
+            dims=["draw", "time"],
+            attrs=attrs,
+        )
+
+        return da
+    
 
     def build_model(self, X, y, **kwargs):
         """
