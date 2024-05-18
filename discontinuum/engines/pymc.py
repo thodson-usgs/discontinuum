@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from typing import Dict
 
 
-class PyMCModel(BaseModel):
+class MarginalGP(BaseModel):
     def __init__(
         self,
         model_config: Dict = None,

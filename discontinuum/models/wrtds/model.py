@@ -1,12 +1,18 @@
 import pymc as pm
 
-from discontinuum.engines.pymc import PyMCModel
+from discontinuum.engines.pymc import MarginalGP
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import LogStandardPipeline, TimePipeline
 from discontinuum.models.wrtds.plot import PlotMixin
 
 
-class WRTDSModel(PyMCModel, PlotMixin):
+class LoadestGP(MarginalGP, PlotMixin):
+    """
+    Gaussian Process implementation of the LOAD ESTimation (LOADEST) model.
+    
+    NOTE: This model currrently uses the marginal likelihood implementation, which is fast but does not
+    account for censored data. Censored data require a slower latent variable implementation.
+    """
     def __init__(self):
         """ """
         super().__init__()
@@ -43,29 +49,27 @@ class WRTDSModel(PyMCModel, PlotMixin):
             cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(2, ls_trend, active_dims=[0])
             gp_trend = pm.gp.Marginal(cov_func=cov_trend)
 
-            # flow trend
-            eta_flow = pm.HalfNormal("eta_flow", sigma=2)  # was 2
-            ls_flow = pm.LogNormal("ls_flow", mu=-1.1, sigma=1, initval=0.5)
-            cov_flow = eta_flow**2 * pm.gp.cov.ExpQuad(2, ls=ls_flow, active_dims=[1])
-            gp_flow = pm.gp.Marginal(cov_func=cov_flow)
+            # covariate trend
+            eta_covariates = pm.HalfNormal("eta_covariates", sigma=2)
+            ls_covariates = pm.LogNormal("ls_covariates", mu=-1.1, sigma=1, initval=0.5)
+            cov_covariates = eta_covariates**2 \
+                * pm.gp.cov.ExpQuad(2, ls=ls_covariates, active_dims=[1])
+            gp_covariates = pm.gp.Marginal(cov_func=cov_covariates)
 
-            # noise model
-            eta_noise = pm.Exponential(
-                "eta_noise", scale=0.2
-            )  # 0.5 worked good for chop: 720 and 1:17
-            ls_noise = pm.LogNormal("ls_noise", mu=-1.1, sigma=1, shape=2)
-            # ls_cov_noise = pm.LogNormal("ls_cov_noise", mu=-1.1, sigma=1, initval=0.1)
-            cov_noise = eta_noise**2 * pm.gp.cov.ExpQuad(
-                2, ls_noise, active_dims=[0, 1]
-            )
-            gp_noise = pm.gp.Marginal(cov_func=cov_noise)
+            # residual trend
+            # potentially merge with covariate model
+            eta_res = pm.Exponential("eta_res", scale=0.2)
+            ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=2)
+            cov_res = eta_res**2 * pm.gp.cov.ExpQuad(2, ls_res, active_dims=[0, 1])
+            gp_res = pm.gp.Marginal(cov_func=cov_res)
 
-            gp = gp_trend + gp_seasonal + gp_noise + gp_flow
+            gp = gp_trend + gp_seasonal + gp_covariates + gp_res
 
             # noise_model
-            cov_measure = pm.gp.cov.WhiteNoise(0.1)  # 40 seconds with  eta_noise = 0.1
+            # setting a small value ensures cov is positive definite
+            cov_noise = pm.gp.cov.WhiteNoise(0.1)
 
-            y_ = gp.marginal_likelihood("y", X=X, y=y, sigma=cov_measure)
+            y_ = gp.marginal_likelihood("y", X=X, y=y, sigma=cov_noise)
 
             self.gp = gp
 

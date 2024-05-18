@@ -18,7 +18,7 @@ from sklearn.pipeline import Pipeline
 
 if TYPE_CHECKING:
     from xarray import Dataset
-    from typing import Dict
+    from typing import Dict, Type, Mapping
     from numpy.typing import ArrayLike
 
 
@@ -48,9 +48,9 @@ class Data:
 class DataManager:
     """ """
 
-    target_pipeline: Pipeline = LogStandardPipeline
-    error_pipeline: Pipeline = LogErrorPipeline
-    covariate_pipelines: Dict[str, Pipeline] = None  # TODO optional
+    target_pipeline: Type[Pipeline] = LogStandardPipeline
+    error_pipeline: Type[Pipeline] = LogErrorPipeline
+    covariate_pipelines: Dict[str, Pipeline] = None
 
     def fit(self, target: Dataset, covariates: Dataset):
         """Initialize DataManager for a given data distribution."""
