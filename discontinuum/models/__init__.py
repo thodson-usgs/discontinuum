@@ -1,1 +1,1 @@
-from .wrtds.model import LoadestGP
+from .loadest_gp.model import LoadestGP

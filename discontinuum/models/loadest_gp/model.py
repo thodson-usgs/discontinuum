@@ -3,7 +3,7 @@ import pymc as pm
 from discontinuum.engines.pymc import MarginalGP
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import LogStandardPipeline, TimePipeline
-from discontinuum.models.wrtds.plot import PlotMixin
+from discontinuum.models.loadest_gp.plot import PlotMixin
 
 
 class LoadestGP(MarginalGP, PlotMixin):
