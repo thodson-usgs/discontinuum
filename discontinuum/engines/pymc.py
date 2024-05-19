@@ -1,12 +1,14 @@
 """Data transformations to improve optimization"""
 
 from __future__ import annotations
+from math import e
 from typing import TYPE_CHECKING
 
 import pymc as pm
 import numpy as np
 
 from xarray import DataArray
+
 
 from discontinuum.engines.base import BaseModel, is_fitted
 
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
 class MarginalGP(BaseModel):
     def __init__(
         self,
-        model_config: Dict = None,
+        model_config: Dict = {},
     ):
         """ """
         self.dm = None  # DataManager
@@ -60,7 +62,7 @@ class MarginalGP(BaseModel):
 
         return target, se
     
-    def sample(self, covariates, n=1000) -> DataArray:
+    def sample(self, covariates, n=1000, diag=False, pred_noise=False, method='cholesky', tol=1e-6) -> DataArray:
         """Sample from the posterior distribution of the model.
 
         Parameters
@@ -69,13 +71,18 @@ class MarginalGP(BaseModel):
             Covariates for prediction.
         n : int, optional
             Number of samples to draw.
+        method{ ‘svd’, ‘eigh’, ‘cholesky’}, optional
+            Method to use for covariance matrix decomposition. The default is ‘cholesky’.
+        tol : float, optional
+            Tolerance when checking the singular values in covariance matrix. The default is 1e-6.
         """
         Xnew = self.dm.Xnew(covariates)
         mu, cov = self.gp.predict(
-            Xnew, point=self.mp, diag=False, pred_noise=False, model=self.model
+            Xnew, point=self.mp, diag=diag, pred_noise=pred_noise, model=self.model
         )
+
         rng = np.random.default_rng()
-        sim = rng.multivariate_normal(mu, cov, size=n, method="cholesky")
+        sim = rng.multivariate_normal(mu, cov, size=n, method=method, tol=tol)
 
         # TODO modify transform to handle samples/draws HACK
         temp = self.dm.y_t(sim)

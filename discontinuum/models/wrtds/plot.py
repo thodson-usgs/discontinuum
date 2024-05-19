@@ -72,7 +72,7 @@ class PlotMixin:
         return ax
 
     @is_fitted
-    def plot_concentration(self, covariates, ci=0.95, ax: Axes = None):
+    def plot(self, covariates, ci=0.95, ax: Axes = None):
         """Plot predicted concentration versus time.
 
         Parameters
@@ -196,7 +196,7 @@ class PlotMixin:
         SECONDS_TO_DAY = 86400
         MG_TO_KG = 1e-6
         L_TO_M3 = 1e-3
-
+        #TODO I think this is wrong
         a = concentration * MG_TO_KG * flow * SECONDS_TO_DAY * L_TO_M3
         da = DataArray(a, dims=['time'], coords=[flow.time], attrs=attrs)
         return da

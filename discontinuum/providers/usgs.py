@@ -177,6 +177,7 @@ def get_samples(
         fraction: str,
         provider: str = "NWIS",
         name: str = "concentration",
+        filter_pcodes: Union[List[str],None] = None,
 ):
     """Get sample data from the Water Quality Portal API.
     
@@ -231,6 +232,17 @@ def get_samples(
     df.index.name = "time"
     df.index = df.index.tz_localize(None)
 
+    if provider == 'NWIS':
+        # add parameter metadata
+        if not filter_pcodes and len(set(df['USGSPCode'])) != 1:
+            # TODO print the pcodes
+            raise ValueError("Multiple parameters returned from NWIS.")
+        
+        elif filter_pcodes:
+            # filter df by list of pcodes
+            df = df[df["USGSPCode"].isin(filter_pcodes)]
+
+
     # create xarray dataset and remove unnecessary columns
     # TODO include censoring flag
     ds = xr.Dataset.from_dataframe(df[[name]])
@@ -245,16 +257,16 @@ def get_samples(
         site_id = site[5:]
         ds.attrs = get_metadata(site_id).__dict__
 
-        # add parameter metadata
-        if len(set(df['USGSPCode'])) != 1:
-            raise ValueError("Multiple parameters returned from NWIS.")
-        
-        else: 
+        if filter_pcodes:
+            pcode = filter_pcodes[0]
+
+        else:
             pcode = df["USGSPCode"].iloc[0]
-            # left pad with zeros to make 5 characters
-            pcode = str(pcode).zfill(5)
-            attrs = get_parameters({name: pcode})
-            ds[name].attrs = attrs.__dict__
+        
+        pcode = str(pcode).zfill(5)
+
+        attrs = get_parameters({name: pcode})
+        ds[name].attrs = attrs.__dict__
 
     if provider == 'STORET':
         pass
