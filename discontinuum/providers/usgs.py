@@ -50,7 +50,8 @@ class USGSParameter:
 USGSFlow = USGSParameter(
     pcode="00060",
     standard_name="flow",
-    units="m^3/s",
+    long_name="Streamflow",
+    units="cubic meters per second",
     suffix="_Mean",
     conversion=0.0283168,
 )

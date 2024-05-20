@@ -1,12 +1,14 @@
 """Plotting functions"""
 
 from __future__ import annotations
+from re import A
 from typing import TYPE_CHECKING
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from xarray import DataArray
+from xarray.plot.utils import label_from_attrs
 from scipy.stats import norm
 
 from discontinuum.engines.base import is_fitted
@@ -133,11 +135,12 @@ class PlotMixin:
         ax : Axes
             Generated matplotlib axes.
         """
+        # TODO FINISH 
         ax = self.setup_plot(ax)
         mu, se = self.predict(covariates, diag=True, pred_noise=True)
 
-        flux = self.compute_daily_flux(mu, covariates['flow'])
-        flux_se = self.compute_daily_flux(se, covariates['flow'])
+        flux = self.daily_flux(mu, covariates['flow'])
+        flux_se = self.daily_flux(se, covariates['flow'])
 
         ci = 1.96 * flux_se
 
@@ -168,14 +171,33 @@ class PlotMixin:
         return ax
 
     @is_fitted
-    def contourf(self, ax: Axes = None):
-        pass
+    def contourf(self, covariate='flow', ax: Axes = None, cbar_kwargs={}, **kwargs):
+        """Plot contourf
+        TODO predict_grid does not work with named covariates
+        """
+        cbar_defaults = {'rotation': 270, 'labelpad': 25}
+        cbar_defaults.update(cbar_kwargs)
+        
+        ax = self.setup_plot(ax)
+        ax.set_yscale('log')
+
+        target, time, cov = self.predict_grid(covariate=covariate, t_step=12)
+        X2, X1 = np.meshgrid(cov, time) # might need to flip these
+        cs = ax.contourf(X1, X2, target, **kwargs)
+
+        ax.set_ylabel(label_from_attrs(self.dm.data.covariates[covariate]))
+        ax.set_xlabel('Year')
+
+        fig = ax.get_figure()   
+        cbar = fig.colorbar(cs, ax=ax)  
+        cbar.ax.set_ylabel(label_from_attrs(self.dm.data.target), **cbar_defaults) 
+        return ax
 
     @is_fitted
     def countourf_diff(self, ax: Axes = None):
         pass
 
-    def compute_daily_flux(self, concentration, flow):
+    def daily_flux(self, concentration, flow):
         """Compute load from concentration and flow.
 
         Parameters
@@ -200,3 +222,5 @@ class PlotMixin:
         a = concentration * MG_TO_KG * flow * SECONDS_TO_DAY * L_TO_M3
         da = DataArray(a, dims=['time'], coords=[flow.time], attrs=attrs)
         return da
+    
+    

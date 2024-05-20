@@ -101,3 +101,23 @@ class DataManager:
     def y_t(self, y: ArrayLike) -> Dataset:
         """Convenience function for DataManager.target.untransform"""
         return self.target_pipeline.inverse_transform(y.reshape(-1, 1))
+    
+    def get_dim(self, dim: str, index='time') -> int:
+        """Get the dimension of a variable.
+
+        In other words, its column in the design matrix.
+
+        Parameters
+        ----------
+        dim : str
+            Dimension name.
+
+        Returns
+        -------
+        int
+            Dimension (column) in design matrix.
+        """
+        cov_list = [index] + list(self.data.covariates)
+
+        return cov_list.index(dim)
+        

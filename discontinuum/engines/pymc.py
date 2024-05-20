@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from math import e
+from re import X
 from typing import TYPE_CHECKING
 
 import pymc as pm
@@ -62,6 +63,52 @@ class MarginalGP(BaseModel):
 
         return target, se
     
+    @is_fitted
+    def predict_grid(self, covariate: str, index='time', t_step=12):
+        """Predict on a grid of points.
+
+        Parameters
+        ----------
+        covariate_dim : int, optional
+            Dimension to predict on. The default is 1.
+        t_step : int, optional
+            Time steps per year. The default is 12.
+        """
+        time_dim = self.dm.get_dim(index)
+        covariate_dim = self.dm.get_dim(covariate)  
+
+        x_max = self.dm.X.max(axis=0)
+        x_min = self.dm.X.min(axis=0)
+        x_range = x_max - x_min
+
+        n_cov = 18
+        n_time = np.round(x_range[time_dim] * t_step).astype(int)
+
+        x_time = np.linspace(x_min[time_dim], x_max[time_dim], n_time)
+        x_cov = np.linspace(x_min[covariate_dim], x_max[covariate_dim], n_cov)
+
+        # TODO check dependency
+        # tested with this on WSL with pymc v5.14.0
+        #X_grid = pm.math.cartesian(x_cov[:, None], x_time[None, :])
+        # best OSX with pymc v5.15.0
+        X_grid = pm.math.cartesian(x_time, x_cov)
+        
+        #import pdb; pdb.set_trace()
+
+        mu, _ = self.gp.predict(X_grid, point=self.mp, diag=True, pred_noise=True, model=self.model)
+
+        target = self.dm.y_t(mu)
+        # TODO return a Dataset with the correct shape
+        #target = target.data.reshape(n_cov, n_time) # TODO might need to flip these
+        target = target.data.reshape(n_time, n_cov) # TODO might need to flip these
+
+        index = x_time
+        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
+
+        return target, index, covariate
+
+    
+    @is_fitted
     def sample(self, covariates, n=1000, diag=False, pred_noise=False, method='cholesky', tol=1e-6) -> DataArray:
         """Sample from the posterior distribution of the model.
 
@@ -113,3 +160,4 @@ class MarginalGP(BaseModel):
         self.gp = None
 
         raise NotImplementedError("This method must be implemented in a subclass")
+
