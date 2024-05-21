@@ -18,6 +18,20 @@ if TYPE_CHECKING:
     from typing import Dict
 
 
+class LatentGP(BaseModel):
+    def __init__(
+        self,
+        model_config: Dict = {},
+    ):
+        """ """
+        self.dm = None
+        self.model_config = model_config
+        self.is_fitted = False
+
+    def fit(self, covariates, target=None):
+        pass
+
+
 class MarginalGP(BaseModel):
     def __init__(
         self,

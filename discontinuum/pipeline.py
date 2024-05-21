@@ -33,7 +33,7 @@ def time_to_decimal_year(x: ArrayLike) -> ArrayLike:
     dt = pd.to_datetime(x.flatten())
 
     days_in_year = 365 + dt.is_leap_year
-    day_of_year = dt.dayofyear
+    day_of_year = dt.dayofyear - 1
     year = dt.year
     decimal_year = year + day_of_year / days_in_year
     return decimal_year.to_numpy()
@@ -45,12 +45,11 @@ def decimal_year_to_time(z: ArrayLike) -> ArrayLike:
     year = np.floor(z)
     dt = pd.to_datetime(year, format="%Y")
     days_in_year = 365 + dt.is_leap_year
-    day_of_year = np.floor((z - year) * days_in_year) + 1
+    day_of_year = np.round((z - year) * days_in_year) + 1
     dt = dt + pd.to_timedelta(day_of_year, unit="D")
     return pd.to_datetime(dt.date)  # remove decimal part
 
 
-# class TimeTransformer(TransformerMixin, BaseEstimator):
 class TimeTransformer:
     def __init__(self):
         pass
