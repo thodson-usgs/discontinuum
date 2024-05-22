@@ -1,10 +1,10 @@
-import pymc as pm
 import numpy as np
+import pymc as pm
 
-from discontinuum.engines.pymc import MarginalGP
 from discontinuum.data_manager import DataManager
-from discontinuum.pipeline import LogStandardPipeline, TimePipeline
+from discontinuum.engines.pymc import MarginalGP
 from discontinuum.models.loadest_gp.plot import PlotMixin
+from discontinuum.pipeline import LogStandardPipeline, TimePipeline
 
 
 class LoadestGP(MarginalGP, PlotMixin):
@@ -17,7 +17,7 @@ class LoadestGP(MarginalGP, PlotMixin):
     def __init__(self):
         """ """
         super().__init__()
-        covariate_pipelines = {'time': TimePipeline, 'flow': LogStandardPipeline}
+        covariate_pipelines = {"time": TimePipeline, "flow": LogStandardPipeline}
         target_pipeline = LogStandardPipeline
 
         self.dm = DataManager(
@@ -76,7 +76,7 @@ class LoadestGP(MarginalGP, PlotMixin):
             # or use a HalfNormal prior
             cov_noise = pm.gp.cov.WhiteNoise(0.1)
 
-            y_ = gp.marginal_likelihood("y", X=X, y=y, sigma=cov_noise)
+            y_ = gp.marginal_likelihood("y", X=X, y=y, sigma=cov_noise)  # noqa: F841
 
             self.gp = gp
 

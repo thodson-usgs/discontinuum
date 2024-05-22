@@ -34,8 +34,16 @@ test = [
   "pytest-cov[all]",
 ]
 
-provider_usgs = [
+loadest_gp = [
   "dataretrieval",
+]
+
+doc = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "nbsphinx",
+  "ipython",
+  "ipykernel",
 ]
 
 [project.urls]
@@ -46,11 +54,13 @@ repository = "https://github.com/thodson-usgs/discontinuum.git"
 write_to = "discontinuum/_version.py"
 
 [tool.ruff]
-# Set the maximum line length to 127 (width of GitHub editor)
-line-length = 127
+line-length = 127 # 79
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+docstring-code-line-length = 72
 
 [tool.ruff.lint]
-# Add the `line-too-long` rule to the enforced rule set. By default, Ruff omits rules that
-# overlap with the use of a formatter, like Black, but we can override this behavior by
-# explicitly adding the rule.
-extend-select = ["E501"]
+# Default ["E4", "E7", "E9", and "F"] --> Pyflakes ("F") and pycodestyle ("E")
+extend-select = ["B", "E501", "I", "Q"]

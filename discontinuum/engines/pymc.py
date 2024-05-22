@@ -1,32 +1,26 @@
 """Data transformations to improve optimization"""
 
 from __future__ import annotations
-from math import e
-from re import X
+
 from typing import TYPE_CHECKING
 
-import pymc as pm
 import numpy as np
-
+import pymc as pm
 from xarray import DataArray
-
 
 from discontinuum.engines.base import BaseModel, is_fitted
 
-
 if TYPE_CHECKING:
-    from typing import Dict
+    from typing import Dict, Optional
 
 
 class LatentGP(BaseModel):
     def __init__(
         self,
-        model_config: Dict = {},
+        model_config: Optional[Dict] = None,
     ):
         """ """
-        self.dm = None
-        self.model_config = model_config
-        self.is_fitted = False
+        super().__init__(model_config=model_config)     
 
     def fit(self, covariates, target=None):
         pass
@@ -35,12 +29,11 @@ class LatentGP(BaseModel):
 class MarginalGP(BaseModel):
     def __init__(
         self,
-        model_config: Dict = {},
+        model_config: Optional[Dict] = None,
     ):
         """ """
-        self.dm = None  # DataManager
-        self.model_config = model_config
-        self.is_fitted = False
+        super().__init__(model_config=model_config)     
+
 
     def fit(self, covariates, target=None):
         """Fit the model to data.
@@ -78,7 +71,7 @@ class MarginalGP(BaseModel):
         return target, se
     
     @is_fitted
-    def predict_grid(self, covariate: str, index='time', t_step=12):
+    def predict_grid(self, covariate: str, index="time", t_step=12):
         """Predict on a grid of points.
 
         Parameters
@@ -123,7 +116,7 @@ class MarginalGP(BaseModel):
 
     
     @is_fitted
-    def sample(self, covariates, n=1000, diag=False, pred_noise=False, method='cholesky', tol=1e-6) -> DataArray:
+    def sample(self, covariates, n=1000, diag=False, pred_noise=False, method="cholesky", tol=1e-6) -> DataArray:
         """Sample from the posterior distribution of the model.
 
         Parameters

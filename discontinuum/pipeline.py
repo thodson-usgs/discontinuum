@@ -1,24 +1,44 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-
 
 import numpy as np
 import pandas as pd
-
+from numpy.typing import ArrayLike
+from sklearn.base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
-
-from sklearn.base import BaseEstimator, TransformerMixin, OneToOneFeatureMixin
-
 from xarray import DataArray
 
 
-from numpy.typing import ArrayLike
+def zero_clip(a: ArrayLike) -> ArrayLike:
+    """Clip an array to zero.
+
+    Parameters
+    ----------
+    a : ArrayLike
+        Array to clip.
+
+    Returns
+    -------
+    ArrayLike
+        Clipped array.
+    """
+    return np.clip(a, a_min=0, a_max=None)
 
 
-zero_clip = lambda a: np.clip(a, a_min=0, a_max=None)
+def log_clip(a: ArrayLike) -> ArrayLike:
+    """Clip an array to a small value.
 
-log_clip = lambda a: np.clip(a, a_min=1e-6, a_max=None)
+    Parameters
+    ----------
+    a : ArrayLike
+        Array to clip.
+
+    Returns
+    -------
+    ArrayLike
+        Clipped array.
+    """
+    return np.clip(a, a_min=1e-6, a_max=None)
 
 
 def time_to_decimal_year(x: ArrayLike) -> ArrayLike:
@@ -28,7 +48,15 @@ def time_to_decimal_year(x: ArrayLike) -> ArrayLike:
     ----------
     x : DataArray
         Timeseries to convert.
+
+    Returns
+    -------
+    ArrayLike
+        Decimal year array.
     """
+    if not np.issubdtype(x.dtype, np.datetime64):
+        raise ValueError("Array must contain numpy datetime64 objects.")
+
     # not flattening the array will cause an error
     dt = pd.to_datetime(x.flatten())
 
@@ -40,18 +68,30 @@ def time_to_decimal_year(x: ArrayLike) -> ArrayLike:
 
 
 def decimal_year_to_time(z: ArrayLike) -> ArrayLike:
-    """TODO FIX"""
+    """Convert a decimal year to a datetime.
+
+    Parameters
+    ----------
+    z : ArrayLike
+        Decimal year to convert.
+
+    Returns
+    -------
+    ArrayLike
+        Datetime array.
+    """
     z = z.flatten()
     year = np.floor(z)
     dt = pd.to_datetime(year, format="%Y")
     days_in_year = 365 + dt.is_leap_year
     day_of_year = np.round((z - year) * days_in_year) + 1
     dt = dt + pd.to_timedelta(day_of_year, unit="D")
-    return pd.to_datetime(dt.date)  # remove decimal part
+    return pd.to_datetime(dt.date)  # remove the decimal part
 
 
 class TimeTransformer:
     def __init__(self):
+        """Transform time to decimal year."""
         pass
 
     def fit(self, X, y=None):
@@ -66,10 +106,11 @@ class TimeTransformer:
 
 class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
     def __init__(self):
+        """Store xarray metadata (attrs)."""
         self.attrs = None
 
     def fit(self, X, y=None):
-        """
+        """Store metadata from a xarray DataArray.
 
         Parameters
         ----------
@@ -86,6 +127,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
 
     def transform(self, X):
         """
+        TODO should we use a separate tranformer for reshaping?
 
         Parameters
         ----------
@@ -98,7 +140,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         return X.values.reshape(-1, 1)
 
     def inverse_transform(self, X):
-        """
+        """Add xarray metadata to a numpy array.
 
         Parameters
         ----------
@@ -118,6 +160,8 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
 
 class LogStandardPipeline(Pipeline):
     def __init__(self):
+        """Pipeline for log-distributed data.
+        """
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
@@ -130,10 +174,13 @@ class LogStandardPipeline(Pipeline):
 
 class StandardPipeline(Pipeline):
     def __init__(self):
+        """Pipeline for normally distributed data.
+        """
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("clip", FunctionTransformer(func=zero_clip, inverse_func=zero_clip)),
+                ("clip", FunctionTransformer(func=zero_clip, 
+                                             inverse_func=zero_clip)),
                 ("scaler", StandardScaler()),
             ]
         )
@@ -141,6 +188,7 @@ class StandardPipeline(Pipeline):
 
 class TimePipeline(Pipeline):
     def __init__(self):
+        """Pipeline for time data."""
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),

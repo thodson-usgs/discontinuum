@@ -1,25 +1,27 @@
 """Data preprocessing utilities."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-
-from functools import cached_property
-from dataclasses import dataclass
-from xarray import DataArray, Dataset
 
 import functools
-import pandas as pd
+from dataclasses import dataclass
+from functools import cached_property
+from typing import TYPE_CHECKING
+
 import numpy as np
-
-
-from discontinuum.pipeline import LogStandardPipeline, TimePipeline, LogErrorPipeline
-
 from sklearn.pipeline import Pipeline
+from xarray import Dataset
+
+from discontinuum.pipeline import (
+    LogErrorPipeline,
+    LogStandardPipeline,
+    TimePipeline,
+)
 
 if TYPE_CHECKING:
-    from xarray import Dataset
-    from typing import Dict, Type, Mapping
+    from typing import Dict, Type
+
     from numpy.typing import ArrayLike
+    from xarray import Dataset
 
 
 def is_initialized(func):
@@ -56,7 +58,7 @@ class DataManager:
         """Initialize DataManager for a given data distribution."""
         # ensure time comes first in the dict
 
-        default_pipeline = {'time': TimePipeline}
+        default_pipeline = {"time": TimePipeline}
         default_pipeline.update(self.covariate_pipelines)
         self.covariate_pipelines = default_pipeline
 
@@ -102,7 +104,7 @@ class DataManager:
         """Convenience function for DataManager.target.untransform"""
         return self.target_pipeline.inverse_transform(y.reshape(-1, 1))
     
-    def get_dim(self, dim: str, index='time') -> int:
+    def get_dim(self, dim: str, index="time") -> int:
         """Get the dimension of a variable.
 
         In other words, its column in the design matrix.

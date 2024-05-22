@@ -1,9 +1,23 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Dict, Optional
+
 import functools
 
 
 class BaseModel:
-    def __init__(self):
+    def __init__(self, model_config: Optional[Dict] = None):
+        """ """
+        if model_config is None:
+            model_config = {}
+
+        self.dm = None
+        self.model_config = model_config
         self.is_fitted = False
+ 
 
     def fit(self, X, y=None):
         self.is_fitted = True

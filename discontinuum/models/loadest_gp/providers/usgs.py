@@ -1,23 +1,22 @@
 """Helper functions for pulling USGS data."""
 
 from __future__ import annotations
-from tracemalloc import start
+
+import warnings
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pandas as pd
 import xarray as xr
-
-import warnings
-
-from dataclasses import dataclass
 from dataretrieval import nwis, wqp
 
 from discontinuum.providers.base import MetaData
 
 if TYPE_CHECKING:
     # from pandas import DataFrame
-    from xarray import DataArray, Dataset
-    from typing import Optional, List, Union, Dict
+    from typing import Dict, List, Optional, Union
+
+    from xarray import Dataset
 
 CFS_TO_M3 = 0.0283168
 
@@ -120,7 +119,10 @@ def get_metadata(site: str) -> MetaData:
 
 # TODO pass a dict not a list of params
 def get_daily(
-    site: str, start_date: str, end_date: str, params: List[USGSParameter] = [USGSFlow]
+    site: str,
+    start_date: str,
+    end_date: str,
+    params: Union[List[USGSParameter], USGSParameter] = USGSFlow,
 ) -> Dataset:
     """Get daily data from the USGS NWIS API.
 
@@ -140,6 +142,9 @@ def get_daily(
     Dataset
         Dataset with the requested data.
     """
+    if not isinstance(params, list):
+        params = [params]   
+
     pcodes = [param.pcode for param in params]
 
     df, _ = nwis.get_dv(sites=site, start=start_date, end=end_date, parameterCd=pcodes)
@@ -168,7 +173,7 @@ def get_daily(
 
 def format_wqp_date(date: str) -> str:  
     """Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'."""
-    return '-'.join(date.split('-')[1:] + [date.split('-')[0]])
+    return "-".join(date.split("-")[1:] + [date.split("-")[0]])
 
 def get_samples(
         site: str,
@@ -205,7 +210,7 @@ def get_samples(
     if provider not in ["NWIS", "STORET"]:
         raise ValueError("Provider must be 'NWIS' or 'STORET'") 
 
-    if provider == 'NWIS' and not site.startswith("USGS-"):
+    if provider == "NWIS" and not site.startswith("USGS-"):
         site = "USGS-" + site
 
     # reformat dates from 'YYYY-MM-DD' to 'MM-DD-YYYY'
@@ -226,16 +231,16 @@ def get_samples(
 
     # create datetime index
     df.index = pd.to_datetime(
-        df["ActivityStartDate"] + ' ' + df["ActivityStartTime/Time"]
+        df["ActivityStartDate"] + " " + df["ActivityStartTime/Time"]
     )
 
-    df[name] = df['ResultMeasureValue'].astype(float)
+    df[name] = df["ResultMeasureValue"].astype(float)
     df.index.name = "time"
     df.index = df.index.tz_localize(None)
 
-    if provider == 'NWIS':
+    if provider == "NWIS":
         # add parameter metadata
-        if not filter_pcodes and len(set(df['USGSPCode'])) != 1:
+        if not filter_pcodes and len(set(df["USGSPCode"])) != 1:
             # TODO print the pcodes
             raise ValueError("Multiple parameters returned from NWIS.")
         
@@ -250,10 +255,10 @@ def get_samples(
 
     # drop censored values and warn user
     if any(ds[name].isnull()):
-        ds = ds.dropna(dim='time')
-        warnings.warn("Censored values have been removed from the dataset.")
+        ds = ds.dropna(dim="time")
+        warnings.warn("Censored values have been removed from the dataset.", stacklevel=1)
 
-    if provider == 'NWIS':
+    if provider == "NWIS":
         # strip the "USGS-" prefix from the site number
         site_id = site[5:]
         ds.attrs = get_metadata(site_id).__dict__
@@ -269,7 +274,7 @@ def get_samples(
         attrs = get_parameters({name: pcode})
         ds[name].attrs = attrs.__dict__
 
-    if provider == 'STORET':
+    if provider == "STORET":
         pass
 
     return ds
@@ -307,10 +312,10 @@ def get_qwdata_samples(
     ppcode = "p" + pcode
 
     # check if data are strings
-    if df[ppcode].dtype == 'O':
+    if df[ppcode].dtype == "O":
         # remove "<" and ">" from values and convert to float
         # TODO handle censoring
-        df[ppcode] = df[ppcode].str.extract('(\d+.\d+)', expand=False).astype(float)
+        df[ppcode] = df[ppcode].str.extract("(\d+.\d+)", expand=False).astype(float)
 
     df = df.rename(columns={ppcode: name})
 
