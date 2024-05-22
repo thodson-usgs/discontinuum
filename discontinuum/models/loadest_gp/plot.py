@@ -193,7 +193,7 @@ class PlotMixin:
         ax.set_yscale("log")
 
         target, time, cov = self.predict_grid(covariate=covariate, t_step=12)
-        X2, X1 = np.meshgrid(cov, time) # might need to flip these
+        X2, X1 = np.meshgrid(cov, time)  # might need to flip these
         cs = ax.contourf(X1, X2, target, **kwargs)
 
         ax.set_ylabel(label_from_attrs(self.dm.data.covariates[covariate]))

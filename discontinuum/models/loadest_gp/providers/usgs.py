@@ -185,14 +185,14 @@ def get_samples(
         fraction: str,
         provider: str = "NWIS",
         name: str = "concentration",
-        filter_pcodes: Union[List[str],None] = None,
+        filter_pcodes: Optional[List[str]] = None,
 ):
     """Get sample data from the Water Quality Portal API.
 
     Parameters
     ----------
     site : str
-        Site number.
+        Water Quality Portal site id; e.g., 'USGS-12345678'.
     start_date : str
         Start date in the format 'YYYY-MM-DD'.
     end_date : str
@@ -200,7 +200,8 @@ def get_samples(
     characteristic : str
         The name of the parameter to retrieve.
     fraction : str
-        The fraction of the parameter to retrieve. Options are 'Total', 'Dissolved', 'Suspended'.
+        The fraction of the parameter to retrieve. Options are 'Total',
+        'Dissolved', 'Suspended'.
     provider : str
         The data provider. Options are 'NWIS' or 'STORET'.
     name : str

@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from typing import Dict, Type
 
     from numpy.typing import ArrayLike
-    from xarray import Dataset
 
 
 def is_initialized(func):
