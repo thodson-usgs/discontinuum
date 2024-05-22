@@ -116,7 +116,6 @@ class PlotMixin:
 
         self.plot_observations(ax, zorder=3)
 
-
         return ax
 
     @is_fitted
@@ -136,7 +135,7 @@ class PlotMixin:
         ax : Axes
             Generated matplotlib axes.
         """
-        # TODO FINISH 
+        # TODO FINISH
         ax = self.setup_plot(ax)
         mu, se = self.predict(covariates, diag=True, pred_noise=True)
 
@@ -174,8 +173,8 @@ class PlotMixin:
     @is_fitted
     def contourf(
         self,
-        covariate: Optional[str]= "flow",
-        ax: Optional[Axes] = None, 
+        covariate: Optional[str] = "flow",
+        ax: Optional[Axes] = None,
         cbar_kwargs: Optional[Dict] = None,
         **kwargs,
         ):
@@ -189,7 +188,7 @@ class PlotMixin:
 
         cbar_defaults = {"rotation": 270, "labelpad": 25}
         cbar_defaults.update(cbar_kwargs)
-        
+
         ax = self.setup_plot(ax)
         ax.set_yscale("log")
 
@@ -200,9 +199,9 @@ class PlotMixin:
         ax.set_ylabel(label_from_attrs(self.dm.data.covariates[covariate]))
         ax.set_xlabel("Year")
 
-        fig = ax.get_figure()   
-        cbar = fig.colorbar(cs, ax=ax)  
-        cbar.ax.set_ylabel(label_from_attrs(self.dm.data.target), **cbar_defaults) 
+        fig = ax.get_figure()
+        cbar = fig.colorbar(cs, ax=ax)
+        cbar.ax.set_ylabel(label_from_attrs(self.dm.data.target), **cbar_defaults)
         return ax
 
     @is_fitted
@@ -230,8 +229,7 @@ class PlotMixin:
         SECONDS_TO_DAY = 86400
         MG_TO_KG = 1e-6
         L_TO_M3 = 1e-3
-        #TODO I think this is wrong
+        # TODO double check conversion
         a = concentration * MG_TO_KG * flow * SECONDS_TO_DAY * L_TO_M3
         da = DataArray(a, dims=["time"], coords=[flow.time], attrs=attrs)
         return da
-    

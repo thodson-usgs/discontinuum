@@ -17,7 +17,6 @@ class BaseModel:
         self.dm = None
         self.model_config = model_config
         self.is_fitted = False
- 
 
     def fit(self, X, y=None):
         self.is_fitted = True
@@ -33,7 +32,9 @@ def is_fitted(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
         if not self.is_fitted:
-            raise RuntimeError("The model hasn't been fitted yet, call .fit().")
+            raise RuntimeError(
+                "The model hasn't been fitted yet, call .fit()."
+            )
         return func(self, *args, **kwargs)
 
     return inner

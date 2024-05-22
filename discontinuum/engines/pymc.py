@@ -20,7 +20,7 @@ class LatentGP(BaseModel):
         model_config: Optional[Dict] = None,
     ):
         """ """
-        super().__init__(model_config=model_config)     
+        super().__init__(model_config=model_config)
 
     def fit(self, covariates, target=None):
         pass
@@ -32,8 +32,7 @@ class MarginalGP(BaseModel):
         model_config: Optional[Dict] = None,
     ):
         """ """
-        super().__init__(model_config=model_config)     
-
+        super().__init__(model_config=model_config)
 
     def fit(self, covariates, target=None):
         """Fit the model to data.
@@ -69,7 +68,7 @@ class MarginalGP(BaseModel):
         se = self.dm.error_pipeline.inverse_transform(cov.reshape(-1, 1))
 
         return target, se
-    
+
     @is_fitted
     def predict_grid(self, covariate: str, index="time", t_step=12):
         """Predict on a grid of points.
@@ -82,7 +81,7 @@ class MarginalGP(BaseModel):
             Time steps per year. The default is 12.
         """
         time_dim = self.dm.get_dim(index)
-        covariate_dim = self.dm.get_dim(covariate)  
+        covariate_dim = self.dm.get_dim(covariate)
 
         x_max = self.dm.X.max(axis=0)
         x_min = self.dm.X.min(axis=0)
@@ -96,17 +95,13 @@ class MarginalGP(BaseModel):
 
         # TODO check dependency
         # tested with this on WSL with pymc v5.14.0
-        #X_grid = pm.math.cartesian(x_cov[:, None], x_time[None, :])
-        # best OSX with pymc v5.15.0
+        # X_grid = pm.math.cartesian(x_cov[:, None], x_time[None, :])
         X_grid = pm.math.cartesian(x_time, x_cov)
-        
-        #import pdb; pdb.set_trace()
 
         mu, _ = self.gp.predict(X_grid, point=self.mp, diag=True, pred_noise=True, model=self.model)
 
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
-        #target = target.data.reshape(n_cov, n_time) # TODO might need to flip these
         target = target.data.reshape(n_time, n_cov) # TODO might need to flip these
 
         index = x_time
@@ -114,7 +109,6 @@ class MarginalGP(BaseModel):
 
         return target, index, covariate
 
-    
     @is_fitted
     def sample(self, covariates, n=1000, diag=False, pred_noise=False, method="cholesky", tol=1e-6) -> DataArray:
         """Sample from the posterior distribution of the model.
@@ -144,13 +138,12 @@ class MarginalGP(BaseModel):
         attrs = temp.attrs
         da = DataArray(
             data,
-            coords={"time" : covariates.time, "draw" : np.arange(n)},
+            coords={"time": covariates.time, "draw": np.arange(n)},
             dims=["draw", "time"],
             attrs=attrs,
         )
 
         return da
-    
 
     def build_model(self, X, y, **kwargs):
         """
@@ -167,4 +160,3 @@ class MarginalGP(BaseModel):
         self.gp = None
 
         raise NotImplementedError("This method must be implemented in a subclass")
-

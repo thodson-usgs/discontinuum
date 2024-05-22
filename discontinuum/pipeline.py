@@ -179,7 +179,7 @@ class StandardPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("clip", FunctionTransformer(func=zero_clip, 
+                ("clip", FunctionTransformer(func=zero_clip,
                                              inverse_func=zero_clip)),
                 ("scaler", StandardScaler()),
             ]

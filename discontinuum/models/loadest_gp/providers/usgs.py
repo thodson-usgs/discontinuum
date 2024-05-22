@@ -143,7 +143,7 @@ def get_daily(
         Dataset with the requested data.
     """
     if not isinstance(params, list):
-        params = [params]   
+        params = [params]
 
     pcodes = [param.pcode for param in params]
 
@@ -171,9 +171,11 @@ def get_daily(
 
     return ds
 
-def format_wqp_date(date: str) -> str:  
+
+def format_wqp_date(date: str) -> str:
     """Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'."""
     return "-".join(date.split("-")[1:] + [date.split("-")[0]])
+
 
 def get_samples(
         site: str,
@@ -186,7 +188,7 @@ def get_samples(
         filter_pcodes: Union[List[str],None] = None,
 ):
     """Get sample data from the Water Quality Portal API.
-    
+
     Parameters
     ----------
     site : str
@@ -208,21 +210,21 @@ def get_samples(
         raise ValueError("Fraction must be 'Total', 'Dissolved', 'Suspended'")
 
     if provider not in ["NWIS", "STORET"]:
-        raise ValueError("Provider must be 'NWIS' or 'STORET'") 
+        raise ValueError("Provider must be 'NWIS' or 'STORET'")
 
     if provider == "NWIS" and not site.startswith("USGS-"):
         site = "USGS-" + site
 
     # reformat dates from 'YYYY-MM-DD' to 'MM-DD-YYYY'
     start_date = format_wqp_date(start_date)
-    end_date = format_wqp_date(end_date)    
+    end_date = format_wqp_date(end_date)
 
     df, _ = wqp.get_results(
-        siteid = site,
-        startDateLo = start_date,
-        startDateHi = end_date,
-        characteristicName = characteristic,
-        provider = provider,
+        siteid=site,
+        startDateLo=start_date,
+        startDateHi=end_date,
+        characteristicName=characteristic,
+        provider=provider,
     )
 
     # filter by fraction
@@ -243,11 +245,10 @@ def get_samples(
         if not filter_pcodes and len(set(df["USGSPCode"])) != 1:
             # TODO print the pcodes
             raise ValueError("Multiple parameters returned from NWIS.")
-        
+
         elif filter_pcodes:
             # filter df by list of pcodes
             df = df[df["USGSPCode"].isin(filter_pcodes)]
-
 
     # create xarray dataset and remove unnecessary columns
     # TODO include censoring flag
@@ -256,7 +257,10 @@ def get_samples(
     # drop censored values and warn user
     if any(ds[name].isnull()):
         ds = ds.dropna(dim="time")
-        warnings.warn("Censored values have been removed from the dataset.", stacklevel=1)
+        warnings.warn(
+            "Censored values have been removed from the dataset.",
+            stacklevel=1,
+            )
 
     if provider == "NWIS":
         # strip the "USGS-" prefix from the site number
@@ -268,7 +272,7 @@ def get_samples(
 
         else:
             pcode = df["USGSPCode"].iloc[0]
-        
+
         pcode = str(pcode).zfill(5)
 
         attrs = get_parameters({name: pcode})

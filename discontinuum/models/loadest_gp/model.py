@@ -9,9 +9,9 @@ from discontinuum.pipeline import LogStandardPipeline, TimePipeline
 
 class LoadestGP(MarginalGP, PlotMixin):
     """
-    Gaussian Process implementation of the LOAD ESTimation (LOADEST) model.
-    
-    NOTE: This model currrently uses the marginal likelihood implementation, which is fast but does not
+    Gaussian Process implementation of the LOAD ESTimation (LOADEST) model
+
+    This model currrently uses the marginal likelihood implementation, which is fast but does not
     account for censored data. Censored data require a slower latent variable implementation.
     """
     def __init__(self):
