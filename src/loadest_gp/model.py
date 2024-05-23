@@ -63,14 +63,20 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
             # covariate trend
             # could include time with a different prior on ls
             eta_covariates = pm.HalfNormal("eta_covariates", sigma=2)
-            ls_covariates = pm.LogNormal("ls_covariates", mu=-1.1, sigma=1, initval=0.5)
+            ls_covariates = pm.LogNormal(
+                "ls_covariates",
+                mu=-1.1,
+                sigma=1,
+                initval=[0.5],
+                shape=n_d-1,  # exclude time
+                )
             cov_covariates = eta_covariates**2 \
                 * pm.gp.cov.ExpQuad(n_d, ls=ls_covariates, active_dims=cov_dims)
             gp_covariates = pm.gp.Marginal(cov_func=cov_covariates)
 
             # residual trend
             eta_res = pm.Exponential("eta_res", scale=0.2)
-            ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=dims)
+            ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=n_d)
             cov_res = eta_res**2 * pm.gp.cov.ExpQuad(n_d, ls_res, active_dims=dims)
             gp_res = pm.gp.Marginal(cov_func=cov_res)
 

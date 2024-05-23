@@ -58,7 +58,7 @@ def datetime_to_decimal_year(x: ArrayLike) -> ArrayLike:
         raise ValueError("Array must contain numpy datetime64 objects.")
 
     # not flattening the array will cause an error
-    dt = pd.to_datetime(x)
+    dt = pd.to_datetime(x.flatten())
 
     julian = dt.to_julian_date()
     days_in_year = 365 + dt.is_leap_year
