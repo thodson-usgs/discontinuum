@@ -18,7 +18,7 @@ classifiers = [
 
 dependencies = [
     "pymc >= 5.0.0",
-    "sklearn",
+    "scikit-learn",
     "xarray",
 ]
 
