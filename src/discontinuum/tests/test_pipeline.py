@@ -10,7 +10,7 @@ def test_time_transform():
         ["2022-01-01", "2022-02-01", "2022-03-01"],
         dtype="datetime64[ns]"  # ns precision
         )
-    expected_result = np.array([2022.0, 2022.084, 2022.167])
+    expected_result = np.array([2022. , 2022.08493151, 2022.16164384])
 
     # Create TimeTransformer instance
     transformer = TimeTransformer()
@@ -22,7 +22,7 @@ def test_time_transform():
     inverse_transformed_data = transformer.inverse_transform(transformed_data)
 
     # Check if the transformed data matches the expected result
-    np.testing.assert_array_almost_equal(transformed_data, expected_result, decimal=2)
+    np.testing.assert_array_almost_equal(transformed_data, expected_result, decimal=6)
 
     # Check if the inverse transformed data matches the original data
-    np.testing.assert_equal(data, inverse_transformed_data.values)
+    np.testing.assert_equal(data, inverse_transformed_data)
