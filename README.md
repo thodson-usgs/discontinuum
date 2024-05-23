@@ -24,7 +24,7 @@ Only one for now.
 
 ### loadset-gp
 LOAD ESTimator (LOADEST) is a software program for estimating river constituent timeseries using surrogate variables (covariates).
-For example, to estimate nitrate concentration based on date and flow.
+For example, estimating nitrate concentration based on date and streamflow.
 However, LOADEST has several serious limitations---it's essentially a linear regression---
 and it has been all but replaced by the more flexible Weighted Regression on Time Discharge and Season (WRTDS),
 which allows the relation between target and covariate to vary through time.
