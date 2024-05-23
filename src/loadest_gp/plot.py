@@ -6,15 +6,14 @@ from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
+from discontinuum.engines.base import is_fitted
 from scipy.stats import norm
-from discontinuum.data_manager import Data
 from xarray import DataArray
 from xarray.plot.utils import label_from_attrs
 
-from discontinuum.engines.base import is_fitted
-
 if TYPE_CHECKING:
     from typing import Dict, Optional
+
     from matplotlib.pyplot import Axes
     from xarray import Dataset
 

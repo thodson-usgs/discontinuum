@@ -1,11 +1,11 @@
 import numpy as np
 import pymc as pm
-
 from discontinuum.data_manager import DataManager
 from discontinuum.engines.pymc import MarginalGP
 from discontinuum.pipeline import LogStandardPipeline, TimePipeline
 
 from loadest_gp.plot import LoadestPlotMixin
+
 
 class LoadestGP(MarginalGP, LoadestPlotMixin):
     """
@@ -74,7 +74,7 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
             # noise_model
             # set to a small value to ensure cov is positive definite
             # or use a HalfNormal prior
-            cov_noise = pm.gp.cov.WhiteNoise(0.1)
+            cov_noise = pm.gp.cov.WhiteNoise(sigma=0.1)
 
             y_ = gp.marginal_likelihood("y", X=X, y=y, sigma=cov_noise)  # noqa: F841
 

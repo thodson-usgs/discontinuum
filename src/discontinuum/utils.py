@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 if TYPE_CHECKING:
     from xarray import Dataset
@@ -55,8 +55,8 @@ def time_substitution(ds: Dataset, interval: slice) -> Dataset:
     out = ds.copy()
     ds_slice = ds.sel(time=interval)
 
-    n_d = ds['time'].shape[0]
-    n_s = ds_slice['time'].shape[0]
+    n_d = ds["time"].shape[0]
+    n_s = ds_slice["time"].shape[0]
 
     rep = np.ceil(n_d / n_s)
 

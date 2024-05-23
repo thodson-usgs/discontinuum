@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import xarray as xr
 from dataretrieval import nwis, wqp
-
 from discontinuum.providers.base import MetaData
 
 if TYPE_CHECKING:
