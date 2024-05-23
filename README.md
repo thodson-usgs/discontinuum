@@ -37,6 +37,7 @@ model = LoadestGP()
 model.fit(target, covariates)
 model.plot(covariates)
 ```
+![example plot](https://github.com/thodson-usgs/discontinuum/blob/main/docs/assets/illinois-river-nitrate.png?raw=true)
 
 ## Engines
 Currently, the only engine is `pymc`'s marginal likelihood implementation.
