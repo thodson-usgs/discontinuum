@@ -319,7 +319,7 @@ def get_qwdata_samples(
     if df[ppcode].dtype == "O":
         # remove "<" and ">" from values and convert to float
         # TODO handle censoring
-        df[ppcode] = df[ppcode].str.extract("(\d+.\d+)", expand=False).astype(float)
+        df[ppcode] = df[ppcode].str.extract(r"(\d+.\d+)", expand=False).astype(float)
 
     df = df.rename(columns={ppcode: name})
 

@@ -93,7 +93,7 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
     # Calculate the datetime corresponding to the decimal year
     dt = start_of_year + pd.to_timedelta(remainder * days_in_year, unit="D")
 
-    return dt.round('1s').to_numpy()
+    return dt.round("1s").to_numpy()
 
 
 class TimeTransformer:

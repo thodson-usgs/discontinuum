@@ -26,7 +26,7 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
     def build_model(self, X, y) -> pm.Model:
         """ """
-        n_d = X.shape[1] # number of dimensions
+        n_d = X.shape[1]  # number of dimensions
         dims = np.arange(n_d)
         time_dim = [dims[0]]
         cov_dims = dims[1:]
