@@ -26,8 +26,8 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
     def build_model(self, X, y) -> pm.Model:
         """ """
-        n_covariates = X.shape[1]
-        dims = np.arange(n_covariates)
+        n_d = X.shape[1] # number of dimensions
+        dims = np.arange(n_d)
         time_dim = [dims[0]]
         cov_dims = dims[1:]
 
@@ -41,8 +41,8 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
             cov_seasonal = (
                 eta_per**2
-                * pm.gp.cov.Periodic(2, period, ls_psmooth, active_dims=time_dim)
-                * pm.gp.cov.Matern52(2, ls_pdecay, active_dims=time_dim)
+                * pm.gp.cov.Periodic(n_d, period, ls_psmooth, active_dims=time_dim)
+                * pm.gp.cov.Matern52(n_d, ls_pdecay, active_dims=time_dim)
             )
             gp_seasonal = pm.gp.Marginal(cov_func=cov_seasonal)
 
@@ -52,7 +52,7 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
                 "eta_trend", scale=1.5
             )  # Exponential might to limit outliers dictating a trend
             ls_trend = pm.LogNormal("ls_trend", mu=2, sigma=1)
-            cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(2, ls_trend, active_dims=time_dim)
+            cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(n_d, ls_trend, active_dims=time_dim)
             gp_trend = pm.gp.Marginal(cov_func=cov_trend)
 
             # covariate trend
@@ -60,13 +60,13 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
             eta_covariates = pm.HalfNormal("eta_covariates", sigma=2)
             ls_covariates = pm.LogNormal("ls_covariates", mu=-1.1, sigma=1, initval=0.5)
             cov_covariates = eta_covariates**2 \
-                * pm.gp.cov.ExpQuad(2, ls=ls_covariates, active_dims=cov_dims)
+                * pm.gp.cov.ExpQuad(n_d, ls=ls_covariates, active_dims=cov_dims)
             gp_covariates = pm.gp.Marginal(cov_func=cov_covariates)
 
             # residual trend
             eta_res = pm.Exponential("eta_res", scale=0.2)
             ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=2)
-            cov_res = eta_res**2 * pm.gp.cov.ExpQuad(2, ls_res, active_dims=dims)
+            cov_res = eta_res**2 * pm.gp.cov.ExpQuad(n_d, ls_res, active_dims=dims)
             gp_res = pm.gp.Marginal(cov_func=cov_res)
 
             gp = gp_trend + gp_seasonal + gp_covariates + gp_res
