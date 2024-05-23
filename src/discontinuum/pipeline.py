@@ -41,7 +41,7 @@ def log_clip(a: ArrayLike) -> ArrayLike:
     return np.clip(a, a_min=1e-6, a_max=None)
 
 
-def time_to_decimal_year(x: ArrayLike) -> ArrayLike:
+def datetime_to_decimal_year(x: ArrayLike) -> ArrayLike:
     """Convert a timeseries to decimal year.
 
     Parameters
@@ -58,21 +58,23 @@ def time_to_decimal_year(x: ArrayLike) -> ArrayLike:
         raise ValueError("Array must contain numpy datetime64 objects.")
 
     # not flattening the array will cause an error
-    dt = pd.to_datetime(x.flatten())
+    dt = pd.to_datetime(x)
 
+    julian = dt.to_julian_date()
     days_in_year = 365 + dt.is_leap_year
-    day_of_year = dt.dayofyear - 1
+    start_of_year = pd.to_datetime(dt.year, format="%Y").to_julian_date()
     year = dt.year
-    decimal_year = year + day_of_year / days_in_year
+
+    decimal_year = year + (julian - start_of_year)/(days_in_year)
     return decimal_year.to_numpy()
 
 
-def decimal_year_to_time(z: ArrayLike) -> ArrayLike:
+def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
     """Convert a decimal year to a datetime.
 
     Parameters
     ----------
-    z : ArrayLike
+    x : ArrayLike
         Decimal year to convert.
 
     Returns
@@ -80,13 +82,18 @@ def decimal_year_to_time(z: ArrayLike) -> ArrayLike:
     ArrayLike
         Datetime array.
     """
-    z = z.flatten()
-    year = np.floor(z)
-    dt = pd.to_datetime(year, format="%Y")
-    days_in_year = 365 + dt.is_leap_year
-    day_of_year = np.round((z - year) * days_in_year) + 1
-    dt = dt + pd.to_timedelta(day_of_year, unit="D")
-    return pd.to_datetime(dt.date)  # remove the decimal part
+    year = np.floor(x).astype(int)
+    remainder = x - year
+
+    start_of_year = pd.to_datetime(year, format="%Y")
+
+    # Calculate the number of days in the year
+    days_in_year = 365 + start_of_year.is_leap_year
+
+    # Calculate the datetime corresponding to the decimal year
+    dt = start_of_year + pd.to_timedelta(remainder * days_in_year, unit="D")
+
+    return dt.round('1s').to_numpy()
 
 
 class TimeTransformer:
@@ -98,10 +105,10 @@ class TimeTransformer:
         return self
 
     def transform(self, X):
-        return time_to_decimal_year(X)
+        return datetime_to_decimal_year(X)
 
     def inverse_transform(self, X):
-        return decimal_year_to_time(X)
+        return decimal_year_to_datetime(X)
 
 
 class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
