@@ -2,4 +2,4 @@
 > [!WARNING]  
 > Experimental.
 
-Estimate discontinuous timeseries from continuous covariates with Gaussian processes.
+Predict sparse timeseries from continuous covariates with Gaussian processes.
