@@ -11,17 +11,22 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
     """
     Gaussian Process implementation of the LOAD ESTimation (LOADEST) model
 
-    This model currrently uses the marginal likelihood implementation, which is fast but does not
-    account for censored data. Censored data require a slower latent variable implementation.
+    This model currrently uses the marginal likelihood implementation, which is
+    fast but does not account for censored data. Censored data require a slower
+    latent variable implementation.
     """
     def __init__(self):
         """ """
         super().__init__()
-        covariate_pipelines = {"time": TimePipeline, "flow": LogStandardPipeline}
+        covariate_pipelines = {
+            "time": TimePipeline,
+            "flow": LogStandardPipeline
+        }
         target_pipeline = LogStandardPipeline
 
         self.dm = DataManager(
-            target_pipeline=target_pipeline, covariate_pipelines=covariate_pipelines
+            target_pipeline=target_pipeline,
+            covariate_pipelines=covariate_pipelines
         )
 
     def build_model(self, X, y) -> pm.Model:
@@ -65,7 +70,7 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
             # residual trend
             eta_res = pm.Exponential("eta_res", scale=0.2)
-            ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=2)
+            ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=dims)
             cov_res = eta_res**2 * pm.gp.cov.ExpQuad(n_d, ls_res, active_dims=dims)
             gp_res = pm.gp.Marginal(cov_func=cov_res)
 
