@@ -3,11 +3,11 @@ import pymc as pm
 
 from discontinuum.data_manager import DataManager
 from discontinuum.engines.pymc import MarginalGP
-from discontinuum.models.loadest_gp.plot import PlotMixin
 from discontinuum.pipeline import LogStandardPipeline, TimePipeline
 
+from loadest_gp.plot import LoadestPlotMixin
 
-class LoadestGP(MarginalGP, PlotMixin):
+class LoadestGP(MarginalGP, LoadestPlotMixin):
     """
     Gaussian Process implementation of the LOAD ESTimation (LOADEST) model
 

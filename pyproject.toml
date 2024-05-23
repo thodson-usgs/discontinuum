@@ -24,7 +24,8 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools]
-packages = ["discontinuum","discontinuum.proviers","discontinuum.models", "discontinuum.tests"]
+package-dir = {"" = "src"}
+# packages = ["discontinuum","discontinuum.providers","discontinuum.models", "discontinuum.tests"]
 
 [project.optional-dependencies]
 dev = [
@@ -51,7 +52,7 @@ homepage = "https://github.com/thodson-usgs/discontinuum"
 repository = "https://github.com/thodson-usgs/discontinuum.git"
 
 [tool.setuptools_scm]
-write_to = "discontinuum/_version.py"
+write_to = "src/discontinuum/_version.py"
 
 [tool.ruff]
 line-length = 127 # 79

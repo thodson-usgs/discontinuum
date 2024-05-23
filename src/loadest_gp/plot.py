@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
+from discontinuum.data_manager import Data
 from xarray import DataArray
 from xarray.plot.utils import label_from_attrs
 
 from discontinuum.engines.base import is_fitted
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional, Union
-
+    from typing import Dict, Optional
     from matplotlib.pyplot import Axes
     from xarray import Dataset
 
@@ -24,7 +24,7 @@ NARROW_LINE = 1
 REGULAR_LINE = NARROW_LINE * 1.5
 
 
-class PlotMixin:
+class LoadestPlotMixin:
     """Mixin plotting functions for Model class"""
 
     @staticmethod
@@ -47,7 +47,7 @@ class PlotMixin:
         return ax
 
     @is_fitted
-    def plot_observations(self, ax: Union[Axes, None] = None, **kwargs):
+    def plot_observations(self, ax: Optional[Axes] = None, **kwargs):
         """Plot observations versus time.
 
         Parameters
@@ -173,13 +173,30 @@ class PlotMixin:
     @is_fitted
     def contourf(
         self,
-        covariate: Optional[str] = "flow",
+        covariate: str = "flow",
         ax: Optional[Axes] = None,
         cbar_kwargs: Optional[Dict] = None,
+        y_scale: str = "log",
         **kwargs,
-        ):
+    ):
         """Plot contourf
-        TODO predict_grid does not work with named covariates
+
+        TODO: plot any pair of variables on x and y axes.
+
+        Parameters
+        ----------
+        covariate : str
+            Covariate to plot.
+        ax : Axes, optional
+            Pre-defined matplotlib axes.
+        cbar_kwargs : dict, optional
+            Colorbar keyword arguments. The default is None.
+        y_scale : str, optional
+            y-axis scale. The default is "log".
+        kwargs : dict
+            Contourf keyword arguments.
+
+
         """
         ax = self.setup_plot(ax)
 
@@ -190,7 +207,7 @@ class PlotMixin:
         cbar_defaults.update(cbar_kwargs)
 
         ax = self.setup_plot(ax)
-        ax.set_yscale("log")
+        ax.set_yscale(y_scale)
 
         target, time, cov = self.predict_grid(covariate=covariate, t_step=12)
         X2, X1 = np.meshgrid(cov, time)  # might need to flip these
@@ -207,29 +224,3 @@ class PlotMixin:
     @is_fitted
     def countourf_diff(self, ax: Optional[Axes] = None):
         pass
-
-    def daily_flux(self, concentration, flow):
-        """Compute load from concentration and flow.
-
-        Parameters
-        ----------
-        concentration : array_like
-            Concentration.
-        flow : array_like
-            Flow.
-
-        Returns
-        -------
-        array_like
-            Load.
-        """
-        attrs = self.dm.data.target.attrs
-
-        attrs.update({"units": "kg/day"})
-        SECONDS_TO_DAY = 86400
-        MG_TO_KG = 1e-6
-        L_TO_M3 = 1e-3
-        # TODO double check conversion
-        a = concentration * MG_TO_KG * flow * SECONDS_TO_DAY * L_TO_M3
-        da = DataArray(a, dims=["time"], coords=[flow.time], attrs=attrs)
-        return da
