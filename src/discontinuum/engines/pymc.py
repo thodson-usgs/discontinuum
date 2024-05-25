@@ -13,6 +13,8 @@ from discontinuum.engines.base import BaseModel, is_fitted
 if TYPE_CHECKING:
     from typing import Dict, Optional
 
+    from xarray import Dataset
+
 
 class LatentGP(BaseModel):
     def __init__(
@@ -34,15 +36,17 @@ class MarginalGP(BaseModel):
         """ """
         super().__init__(model_config=model_config)
 
-    def fit(self, covariates, target=None):
+    def fit(self, covariates: Dataset, target: Dataset, method: str = "BFGS"):
         """Fit the model to data.
 
         Parameters
         ----------
-        X : array-like
-            Feature matrix.
-        y : array-like
-            Target values.
+        covariates : Dataset
+            Covariates for prediction.
+        target : Dataset
+            Target data for prediction.
+        method : str, optional
+            Optimization method. The default is "BFGS".
         """
         self.is_fitted = True
         # preprocessing: setup data manager
@@ -52,7 +56,7 @@ class MarginalGP(BaseModel):
 
         self.model = self.build_model(self.X, self.y)
 
-        self.mp = pm.find_MAP(method="BFGS", model=self.model)
+        self.mp = pm.find_MAP(method=method, model=self.model)
 
     @is_fitted
     def predict(self, covariates, diag=True, pred_noise=False) -> DataArray:
@@ -60,7 +64,11 @@ class MarginalGP(BaseModel):
         Xnew = self.dm.Xnew(covariates)
 
         mu, cov = self.gp.predict(
-            Xnew, point=self.mp, diag=diag, pred_noise=pred_noise, model=self.model
+            Xnew,
+            point=self.mp,
+            diag=diag,
+            pred_noise=pred_noise,
+            model=self.model,
         )
 
         target = self.dm.y_t(mu)
@@ -98,11 +106,17 @@ class MarginalGP(BaseModel):
         # X_grid = pm.math.cartesian(x_cov[:, None], x_time[None, :])
         X_grid = pm.math.cartesian(x_time, x_cov)
 
-        mu, _ = self.gp.predict(X_grid, point=self.mp, diag=True, pred_noise=True, model=self.model)
+        mu, _ = self.gp.predict(
+            X_grid,
+            point=self.mp,
+            diag=True,
+            pred_noise=True,
+            model=self.model,
+            )
 
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
-        target = target.data.reshape(n_time, n_cov)  # TODO might need to flip these
+        target = target.data.reshape(n_time, n_cov)
 
         index = x_time
         covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
@@ -110,7 +124,14 @@ class MarginalGP(BaseModel):
         return target, index, covariate
 
     @is_fitted
-    def sample(self, covariates, n=1000, diag=False, pred_noise=False, method="cholesky", tol=1e-6) -> DataArray:
+    def sample(self,
+               covariates,
+               n=1000,
+               diag=False,
+               pred_noise=False,
+               method="cholesky",
+               tol=1e-6,
+               ) -> DataArray:
         """Sample from the posterior distribution of the model.
 
         Parameters
@@ -120,13 +141,19 @@ class MarginalGP(BaseModel):
         n : int, optional
             Number of samples to draw.
         method{ ‘svd’, ‘eigh’, ‘cholesky’}, optional
-            Method to use for covariance matrix decomposition. The default is ‘cholesky’.
+            Method to use for covariance matrix decomposition. The default is
+            ‘cholesky’.
         tol : float, optional
-            Tolerance when checking the singular values in covariance matrix. The default is 1e-6.
+            Tolerance when checking the singular values in covariance matrix.
+            The default is 1e-6.
         """
         Xnew = self.dm.Xnew(covariates)
         mu, cov = self.gp.predict(
-            Xnew, point=self.mp, diag=diag, pred_noise=pred_noise, model=self.model
+            Xnew,
+            point=self.mp,
+            diag=diag,
+            pred_noise=pred_noise,
+            model=self.model,
         )
 
         rng = np.random.default_rng()
@@ -147,8 +174,8 @@ class MarginalGP(BaseModel):
 
     def build_model(self, X, y, **kwargs):
         """
-        Creates an instance of pm.Model based on provided data and model_config, and
-        attaches it to self.
+        Creates an instance of pm.Model based on provided data and
+        model_config, and attaches it to self.
 
         The subclass method must instantiate self.model and self.gp.
 
@@ -159,4 +186,6 @@ class MarginalGP(BaseModel):
         self.model = None
         self.gp = None
 
-        raise NotImplementedError("This method must be implemented in a subclass")
+        raise NotImplementedError(
+            "This method must be implemented in a subclass"
+            )

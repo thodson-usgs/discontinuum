@@ -30,7 +30,8 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
         )
 
     def build_model(self, X, y) -> pm.Model:
-        """ """
+        """Build marginal likelihood version of LoadestGP
+        """
         n_d = X.shape[1]  # number of dimensions
         dims = np.arange(n_d)
         time_dim = [dims[0]]
@@ -38,11 +39,11 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
         with pm.Model() as model:
             # seasonal trend
-            eta_per = pm.HalfNormal("eta_per", sigma=1, initval=1)  # was 2
+            eta_per = pm.HalfNormal("eta_per", sigma=1, initval=1)
             ls_pdecay = pm.LogNormal("ls_pdecay", mu=2, sigma=1)
             # https://peterroelants.github.io/posts/gaussian-process-kernels/
             period = pm.Normal("period", mu=1, sigma=0.05)
-            ls_psmooth = pm.LogNormal("ls_psmooth", mu=1, sigma=1)  # 14 sec at 0,0.5
+            ls_psmooth = pm.LogNormal("ls_psmooth", mu=1, sigma=1)
 
             cov_seasonal = (
                 eta_per**2
@@ -52,10 +53,9 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
             gp_seasonal = pm.gp.Marginal(cov_func=cov_seasonal)
 
             # longterm trend
-            # eta_trend =  pm.HalfNormal("eta_trend", sigma=1) # was 2
             eta_trend = pm.Exponential(
                 "eta_trend", scale=1.5
-            )  # Exponential might to limit outliers dictating a trend
+            )  # Exponential to dampen outlier effects
             ls_trend = pm.LogNormal("ls_trend", mu=2, sigma=1)
             cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(n_d, ls_trend, active_dims=time_dim)
             gp_trend = pm.gp.Marginal(cov_func=cov_trend)
