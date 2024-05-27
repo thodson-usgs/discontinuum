@@ -77,7 +77,7 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
             # residual trend
             eta_res = pm.Exponential("eta_res", scale=0.2)
             ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=n_d)
-            cov_res = eta_res**2 * pm.gp.cov.ExpQuad(n_d, ls_res, active_dims=dims)
+            cov_res = eta_res**2 * pm.gp.cov.Matern32(n_d, ls_res, active_dims=dims)
             gp_res = pm.gp.Marginal(cov_func=cov_res)
 
             gp = gp_trend + gp_seasonal + gp_covariates + gp_res
