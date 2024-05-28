@@ -40,10 +40,10 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
         with pm.Model() as model:
             # seasonal trend
             eta_per = pm.HalfNormal("eta_per", sigma=1, initval=1)
-            ls_pdecay = pm.LogNormal("ls_pdecay", mu=2, sigma=1)
+            ls_pdecay = pm.Gamma("ls_pdecay", alpha=10, beta=1)
             # https://peterroelants.github.io/posts/gaussian-process-kernels/
             period = pm.Normal("period", mu=1, sigma=0.05)
-            ls_psmooth = pm.LogNormal("ls_psmooth", mu=1, sigma=1)
+            ls_psmooth = pm.Gamma("ls_psmooth", alpha=4, beta=3)
 
             cov_seasonal = (
                 eta_per**2
@@ -56,17 +56,17 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
             eta_trend = pm.Exponential(
                 "eta_trend", scale=1.5
             )  # Exponential to dampen outlier effects
-            ls_trend = pm.LogNormal("ls_trend", mu=2, sigma=1)
+            ls_trend = pm.Gamma("ls_trend", alpha=4, beta=1)
             cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(n_d, ls_trend, active_dims=time_dim)
             gp_trend = pm.gp.Marginal(cov_func=cov_trend)
 
             # covariate trend
             # could include time with a different prior on ls
             eta_covariates = pm.HalfNormal("eta_covariates", sigma=2)
-            ls_covariates = pm.LogNormal(
+            ls_covariates = pm.Gamma(
                 "ls_covariates",
-                mu=-1.1,
-                sigma=1,
+                alpha=2,
+                beta=3,
                 initval=[0.5],
                 shape=n_d-1,  # exclude time
                 )
@@ -76,7 +76,7 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
             # residual trend
             eta_res = pm.Exponential("eta_res", scale=0.2)
-            ls_res = pm.LogNormal("ls_res", mu=-1.1, sigma=1, shape=n_d)
+            ls_res = pm.Gamma("ls_res", alpha=2, beta=10, shape=n_d)
             cov_res = eta_res**2 * pm.gp.cov.Matern32(n_d, ls_res, active_dims=dims)
             gp_res = pm.gp.Marginal(cov_func=cov_res)
 
