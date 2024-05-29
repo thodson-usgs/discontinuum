@@ -84,8 +84,10 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
 
             # noise_model
             # set to a small value to ensure cov is positive definite
-            # or use a HalfNormal prior
-            cov_noise = pm.gp.cov.WhiteNoise(sigma=0.1)
+            sigma = 0.1
+            # or
+            # sigma = pm.HalfNormal("sigma", sigma=0.05)
+            cov_noise = pm.gp.cov.WhiteNoise(sigma=sigma)
 
             y_ = gp.marginal_likelihood("y", X=X, y=y, sigma=cov_noise)  # noqa: F841
 
