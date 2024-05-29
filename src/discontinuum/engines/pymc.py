@@ -117,8 +117,7 @@ class MarginalGP(BaseModel):
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
         target = target.data.reshape(n_time, n_cov)
-
-        index = x_time
+        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.reshape(-1, 1))
         covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
 
         return target, index, covariate
