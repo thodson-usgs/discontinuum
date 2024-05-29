@@ -82,7 +82,7 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
     ArrayLike
         Datetime array.
     """
-    x = x.flatten()
+    #x = x.flatten()
     year = np.floor(x).astype(int)
     remainder = x - year
 
@@ -205,9 +205,10 @@ class TimePipeline(Pipeline):
                    "reshape",
                    FunctionTransformer(
                        func=np.reshape,
-                       inverse_func=np.reshape,
+                       #inverse_func=np.reshape,
+                       inverse_func=np.ndarray.flatten,
                        kw_args={"newshape": (-1, 1)},
-                       inv_kw_args={"newshape": (1, -1)},
+                       #inv_kw_args={"newshape": (1, -1)},
                    ),
                 ),
                 ("scaler", StandardScaler(with_std=False)),
