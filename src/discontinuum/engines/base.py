@@ -18,11 +18,19 @@ class BaseModel:
         self.model_config = model_config
         self.is_fitted = False
 
+        self.build_datamanager()
+
     def fit(self, X, y=None):
         self.is_fitted = True
         return self
 
     def predict(self, X):
+        pass
+
+    def build_model(self, X, y):
+        pass
+
+    def build_datamanager(self):
         pass
 
 

@@ -1,13 +1,12 @@
 import numpy as np
 import pymc as pm
-from discontinuum.data_manager import DataManager
-from discontinuum.engines.pymc import MarginalGP
-from discontinuum.pipeline import LogStandardPipeline, TimePipeline
+from discontinuum.engines.pymc import MarginalPyMC
 
+from loadest_gp.models.base import LoadestDataMixin
 from loadest_gp.plot import LoadestPlotMixin
 
 
-class LoadestGP(MarginalGP, LoadestPlotMixin):
+class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
     """
     Gaussian Process implementation of the LOAD ESTimation (LOADEST) model
 
@@ -15,19 +14,10 @@ class LoadestGP(MarginalGP, LoadestPlotMixin):
     fast but does not account for censored data. Censored data require a slower
     latent variable implementation.
     """
-    def __init__(self):
+    def __init__(self, model_config=None):
         """ """
-        super().__init__()
-        covariate_pipelines = {
-            "time": TimePipeline,
-            "flow": LogStandardPipeline
-        }
-        target_pipeline = LogStandardPipeline
-
-        self.dm = DataManager(
-            target_pipeline=target_pipeline,
-            covariate_pipelines=covariate_pipelines
-        )
+        super(MarginalPyMC, self).__init__(model_config=model_config)
+        self.build_datamanager()
 
     def build_model(self, X, y) -> pm.Model:
         """Build marginal likelihood version of LoadestGP

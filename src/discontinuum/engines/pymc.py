@@ -16,25 +16,25 @@ if TYPE_CHECKING:
     from xarray import Dataset
 
 
-class LatentGP(BaseModel):
+class LatentPyMC(BaseModel):
     def __init__(
         self,
         model_config: Optional[Dict] = None,
     ):
         """ """
-        super().__init__(model_config=model_config)
+        pass
 
     def fit(self, covariates, target=None):
         pass
 
 
-class MarginalGP(BaseModel):
+class MarginalPyMC(BaseModel):
     def __init__(
         self,
         model_config: Optional[Dict] = None,
     ):
         """ """
-        super().__init__(model_config=model_config)
+        pass
 
     def fit(self, covariates: Dataset, target: Dataset, method: str = "BFGS"):
         """Fit the model to data.
@@ -50,6 +50,8 @@ class MarginalGP(BaseModel):
         """
         self.is_fitted = True
         # preprocessing: setup data manager
+        self.build_datamanager()
+        # self.dm = self.build_datamanager(target, covariates)
         self.dm.fit(target=target, covariates=covariates)
         self.X = self.dm.X
         self.y = self.dm.y
@@ -173,6 +175,8 @@ class MarginalGP(BaseModel):
 
     def build_model(self, X, y, **kwargs):
         """
+        TODO: move this to parent?
+
         Creates an instance of pm.Model based on provided data and
         model_config, and attaches it to self.
 
