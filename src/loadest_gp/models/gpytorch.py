@@ -41,8 +41,8 @@ class LoadestGPMarginalGPyTorch(
     def build_model(self, X, y) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of LoadestGP
         """
-        train_x = torch.tensor(X, dtype=torch.float32)
-        train_y = torch.tensor(y, dtype=torch.float32)
+        #train_x = torch.tensor(X, dtype=torch.float32)
+        #train_y = torch.tensor(y, dtype=torch.float32)
 
         noise_prior = HalfNormalPrior(scale=0.01)
 
@@ -50,7 +50,8 @@ class LoadestGPMarginalGPyTorch(
             noise_prior=noise_prior
         )
 
-        model = ExactGPModel(train_x, train_y, self.likelihood)
+        #model = ExactGPModel(train_x, train_y, self.likelihood)
+        model = ExactGPModel(X, y, self.likelihood)
 
         return model
 
