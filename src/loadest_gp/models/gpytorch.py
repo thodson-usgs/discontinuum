@@ -41,16 +41,17 @@ class LoadestGPMarginalGPyTorch(
     def build_model(self, X, y) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of LoadestGP
         """
-        #train_x = torch.tensor(X, dtype=torch.float32)
-        #train_y = torch.tensor(y, dtype=torch.float32)
+        # noise_prior = HalfNormalPrior(scale=0.01)
+        # self.likelihood = gpytorch.likelihoods.GaussianLikelihood(
+        #     noise_prior=noise_prior,
+        # )
 
-        noise_prior = HalfNormalPrior(scale=0.01)
-
-        self.likelihood = gpytorch.likelihoods.GaussianLikelihood(
-            noise_prior=noise_prior
+        noise = 0.1 * torch.ones(y.shape[0])
+        self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
+            noise=noise,
+            learn_additional_noise=False,
         )
 
-        #model = ExactGPModel(train_x, train_y, self.likelihood)
         model = ExactGPModel(X, y, self.likelihood)
 
         return model
@@ -61,9 +62,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
 
         n_d = train_x.shape[1]  # number of dimensions
-        dims = np.arange(n_d)
-        time_dim = [dims[0]]
-        cov_dims = dims[1:]
+        self.dims = np.arange(n_d)
+        self.time_dim = [self.dims[0]]
+        self.cov_dims = self.dims[1:]
 
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = (
@@ -84,20 +85,28 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         return ScaleKernel(
             RBFKernel(
-                active_dims=(0),
+                # active_dims=(0),
+                active_dims=self.time_dim,
                 lengthscale_prior=ls,
             ),
             outputscale_prior=eta,
         )
 
     def cov_seasonal(self):
-        # TODO add priors
+        # TODO add lengthscale priors
+        eta = HalfNormalPrior(scale=1)
         period = NormalPrior(loc=1, scale=0.01)
 
         return ScaleKernel(
-            PeriodicKernel(period_length_prior=period, active_dims=(0))
-            * MaternKernel(nu=2.5, active_dims=(0)),
-            # outputscale_prior=eta
+            PeriodicKernel(
+                period_length_prior=period,
+                active_dims=self.time_dim,
+                )
+            * MaternKernel(
+                nu=2.5,
+                active_dims=self.time_dim
+                ),
+            outputscale_prior=eta,
         )
 
     def cov_covariates(self):
@@ -107,7 +116,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             RBFKernel(
                 lengthscale_prior=ls,
-                active_dims=(1),
+                active_dims=self.cov_dims,
             ),
             outputscale_prior=eta,
         )
@@ -120,7 +129,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
             MaternKernel(
                 ard_num_dims=2,
                 nu=1.5,
-                active_dims=(0, 1),
+                active_dims=self.dims,
                 lengthscale_prior=ls,
             ),
             outputscale_prior=eta,

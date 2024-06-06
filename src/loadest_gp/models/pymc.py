@@ -45,7 +45,7 @@ class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
             # longterm trend
             eta_trend = pm.Exponential(
                 "eta_trend", scale=1.5
-            )  # Exponential to dampen outlier effects
+            )  # Exponential might dampen outlier effects
             ls_trend = pm.Gamma("ls_trend", alpha=4, beta=1)
             cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(n_d, ls_trend, active_dims=time_dim)
             gp_trend = pm.gp.Marginal(cov_func=cov_trend)
