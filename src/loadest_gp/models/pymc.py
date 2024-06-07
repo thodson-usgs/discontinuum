@@ -2,7 +2,7 @@ import numpy as np
 import pymc as pm
 from discontinuum.engines.pymc import MarginalPyMC
 
-from loadest_gp.models.base import LoadestDataMixin
+from loadest_gp.models.base import LoadestDataMixin, ModelConfig
 from loadest_gp.plot import LoadestPlotMixin
 
 
@@ -14,10 +14,13 @@ class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
     fast but does not account for censored data. Censored data require a slower
     latent variable implementation.
     """
-    def __init__(self, model_config=None):
+    def __init__(
+            self,
+            model_config: ModelConfig = ModelConfig(),
+    ):
         """ """
         super(MarginalPyMC, self).__init__(model_config=model_config)
-        self.build_datamanager()
+        self.build_datamanager(model_config)
 
     def build_model(self, X, y) -> pm.Model:
         """Build marginal likelihood version of LoadestGP

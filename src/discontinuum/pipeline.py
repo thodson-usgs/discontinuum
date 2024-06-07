@@ -205,13 +205,40 @@ class TimePipeline(Pipeline):
                    "reshape",
                    FunctionTransformer(
                        func=np.reshape,
-                       #inverse_func=np.reshape,
+                       # inverse_func=np.reshape,
                        inverse_func=np.ndarray.flatten,
                        kw_args={"newshape": (-1, 1)},
-                       #inv_kw_args={"newshape": (1, -1)},
+                       # inv_kw_args={"newshape": (1, -1)},
                    ),
                 ),
                 ("scaler", StandardScaler(with_std=False)),
+            ]
+        )
+
+
+class StandardErrorPipeline(Pipeline):
+    """Pipeline to transform error
+
+    inverse_transform converts variance to SE.
+    """
+
+    def __init__(self):
+        super().__init__(
+            steps=[
+                ("metadata", MetadataManager()),
+                ("scaler", StandardScaler(with_mean=False)),
+                (
+                    "square",
+                    FunctionTransformer(
+                        func=np.square, inverse_func=np.sqrt, check_inverse=False
+                    ),
+                ),
+                (
+                    "abs",
+                    FunctionTransformer(
+                        func=np.abs, inverse_func=np.abs, check_inverse=False
+                    ),
+                ),
             ]
         )
 
