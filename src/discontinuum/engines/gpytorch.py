@@ -59,8 +59,7 @@ class MarginalGPyTorch(BaseModel):
             Optimization method. The default is "adam".
         """
         self.is_fitted = True
-        # preprocessing: setup data manager
-        self.build_datamanager()
+        # setup data manager (self.dm)
         self.dm.fit(target=target, covariates=covariates)
 
         self.X = self.dm.X

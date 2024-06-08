@@ -49,9 +49,7 @@ class MarginalPyMC(BaseModel):
             Optimization method. The default is "BFGS".
         """
         self.is_fitted = True
-        # preprocessing: setup data manager
-        self.build_datamanager()
-        # self.dm = self.build_datamanager(target, covariates)
+        # set up the data manager (self.dm)
         self.dm.fit(target=target, covariates=covariates)
         self.X = self.dm.X
         self.y = self.dm.y
@@ -65,7 +63,7 @@ class MarginalPyMC(BaseModel):
         """Uses the fitted model to make predictions on new data."""
         Xnew = self.dm.Xnew(covariates)
 
-        mu, cov = self.gp.predict(
+        mu, var = self.gp.predict(
             Xnew,
             point=self.mp,
             diag=diag,
@@ -75,7 +73,7 @@ class MarginalPyMC(BaseModel):
 
         target = self.dm.y_t(mu)
         # TODO the reshape should be done in the pipeline
-        se = self.dm.error_pipeline.inverse_transform(cov.reshape(-1, 1))
+        se = self.dm.error_pipeline.inverse_transform(var.reshape(-1, 1))
 
         return target, se
 
@@ -119,8 +117,11 @@ class MarginalPyMC(BaseModel):
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
         target = target.data.reshape(n_time, n_cov)
-        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.reshape(-1, 1))
-        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
+        t_pipe = self.dm.covariate_pipelines["time"]
+        index = t_pipe.inverse_transform(x_time.reshape(-1, 1))
+
+        c_pipe = self.dm.covariate_pipelines[covariate]
+        covariate = c_pipe.inverse_transform(x_cov.reshape(-1, 1))
 
         return target, index, covariate
 

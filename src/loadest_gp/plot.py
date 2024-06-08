@@ -105,7 +105,11 @@ class LoadestPlotMixin:
         alpha = (1 - ci)/2
         zscore = norm.ppf(1-alpha)
 
-        cb = se**zscore
+        # todo create a method using config's transform/likelihood
+        if self.model_config.transform == "log":
+            cb = se**zscore
+        elif self.model_config.transform == "standard":
+            cb = se * zscore
 
         target.plot.line(ax=ax, lw=1, zorder=2)
 

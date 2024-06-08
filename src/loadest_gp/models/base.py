@@ -29,15 +29,16 @@ class LoadestDataMixin:
             self,
             model_config: ModelConfig = ModelConfig(),
             ):
+        """ """
         covariate_pipelines = {
             "time": TimePipeline,
             "flow": LogStandardPipeline
         }
 
-        if model_config['transform'] == "log":
+        if model_config.transform == "log":
             target_pipeline = LogStandardPipeline
             error_pipeline = LogErrorPipeline
-        elif model_config['transform'] == "standard":
+        elif model_config.transform == "standard":
             target_pipeline = StandardPipeline
             error_pipeline = StandardErrorPipeline
         else:

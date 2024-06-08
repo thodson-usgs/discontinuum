@@ -82,7 +82,7 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
     ArrayLike
         Datetime array.
     """
-    #x = x.flatten()
+    # x = x.flatten()
     year = np.floor(x).astype(int)
     remainder = x - year
 
@@ -230,13 +230,17 @@ class StandardErrorPipeline(Pipeline):
                 (
                     "square",
                     FunctionTransformer(
-                        func=np.square, inverse_func=np.sqrt, check_inverse=False
+                        func=np.square,
+                        inverse_func=np.sqrt,
+                        check_inverse=False,
                     ),
                 ),
                 (
                     "abs",
                     FunctionTransformer(
-                        func=np.abs, inverse_func=np.abs, check_inverse=False
+                        func=np.abs,
+                        inverse_func=np.abs,
+                        check_inverse=False,
                     ),
                 ),
             ]
@@ -265,20 +269,26 @@ class LogErrorPipeline(Pipeline):
                 (
                     "log",
                     FunctionTransformer(
-                        func=np.log, inverse_func=np.exp, check_inverse=False
+                        func=np.log,
+                        inverse_func=np.exp,
+                        check_inverse=False,
                     ),
                 ),
                 ("scaler", StandardScaler(with_mean=False)),
                 (
                     "square",
                     FunctionTransformer(
-                        func=np.square, inverse_func=np.sqrt, check_inverse=False
+                        func=np.square,
+                        inverse_func=np.sqrt,
+                        check_inverse=False,
                     ),
                 ),
                 (
                     "abs",
                     FunctionTransformer(
-                        func=np.abs, inverse_func=np.abs, check_inverse=False
+                        func=np.abs,
+                        inverse_func=np.abs,
+                        check_inverse=False,
                     ),
                 ),
             ]
