@@ -105,17 +105,31 @@ class LoadestPlotMixin:
         alpha = (1 - ci)/2
         zscore = norm.ppf(1-alpha)
 
+        target.plot.line(ax=ax, lw=1, zorder=2)
+
         # todo create a method using config's transform/likelihood
         if self.model_config.transform == "log":
             cb = se**zscore
+            ax.fill_between(
+                target["time"],
+                target / cb,
+                target * cb,
+                color="b",
+                alpha=0.1,
+                zorder=1,
+            )
+
         elif self.model_config.transform == "standard":
             cb = se * zscore
+            ax.fill_between(
+                target["time"],
+                target - cb,
+                target + cb,
+                color="b",
+                alpha=0.1,
+                zorder=1,
+            )
 
-        target.plot.line(ax=ax, lw=1, zorder=2)
-
-        ax.fill_between(
-            target["time"], (target / cb), (target * cb), color="b", alpha=0.1, zorder=1
-        )
 
         self.plot_observations(ax, zorder=3)
 
