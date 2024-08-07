@@ -87,6 +87,15 @@ NWISDischarge = NWISColumn(
     conversion=FT3_TO_M3,
 )
 
+NWISDischargeUnc = NWISColumn(
+    column_name="measured_rating_diff",
+    standard_name="discharge_unc",
+    long_name=("Stream discharge uncertainty estimated from qualitative "
+               "measurement rating codes"),
+    units="cubic meters per second",
+    conversion=FT3_TO_M3,
+)
+
 
 def get_daily_stage(
     site: str,
@@ -160,6 +169,7 @@ def get_measurements(
         sites=site,
         start=start_date,
         end=end_date,
+        format="rdb_expanded",
     )
     # covert timezone to UTC? ignore for now
     df.index = pd.to_datetime(
@@ -177,9 +187,24 @@ def get_measurements(
             }
         )
     # parse uncertainty from measured "measured_rating_diff"
-    ds = xr.Dataset.from_dataframe(df[["stage", "discharge"]])
+    qualitycode_to_uncertainty_fraction = {
+        'Excellent': '0.02',
+        'Good': '0.05',
+        'Fair': '0.08',
+        'Poor': '0.12',
+        'Unspecified': '0.12',
+    }
+    df['discharge_unc_frac'] = (df['measured_rating_diff']
+                                .replace(qualitycode_to_uncertainty_fraction)
+                                .astype(float))
+    # set indirect measurements as 20% uncertain regardless of quality code
+    df.loc[df['streamflow_method'] == 'QIDIR', 'discharge_unc_frac'] = 0.2
+    # assume the uncertainty fraction is a 2 sigma interval
+    df['discharge_unc'] = df['discharge'] * df['discharge_unc_frac'] / 2
 
-    for param in [NWISStage, NWISDischarge]:
+    ds = xr.Dataset.from_dataframe(df[["stage", "discharge", "discharge_unc"]])
+
+    for param in [NWISStage, NWISDischarge, NWISDischargeUnc]:
         ds[param.name] = ds[param.name] * param.conversion
         ds[param.name].attrs = param.__dict__
 
