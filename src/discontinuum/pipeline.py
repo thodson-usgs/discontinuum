@@ -184,6 +184,19 @@ class LogStandardPipeline(Pipeline):
         )
 
 
+class NoOpPipeline(Pipeline):
+    def __init__(self):
+        """Pipeline that does not transform data.
+        """
+        super().__init__(
+            steps=[
+                ("metadata", MetadataManager()),
+                ("clip", FunctionTransformer(func=zero_clip,
+                                             inverse_func=zero_clip)),
+            ]
+        )
+
+
 class StandardPipeline(Pipeline):
     def __init__(self):
         """Pipeline for normally distributed data.
