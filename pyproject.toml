@@ -17,7 +17,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "pymc >= 5.0.0",
+    "dataretrieval",
+    "gpytorch",
+    # "pymc >= 5.0.0", # disable pymc by default
     "scikit-learn",
     "xarray",
 ]
@@ -36,16 +38,32 @@ dev = [
   "pytest-cov[all]",
 ]
 
-loadest_gp = [
-  "dataretrieval",
-]
-
 doc = [
   "sphinx",
   "sphinx-rtd-theme",
   "nbsphinx",
   "ipython",
   "ipykernel",
+]
+
+# engines
+
+gpytorch = [
+  "gpytorch",
+]
+
+pymc = [
+  "pymc >= 5.0.0",
+]
+
+# models
+
+loadest_gp = [
+  "dataretrieval",
+]
+
+rating_gp = [
+  "dataretrieval",
 ]
 
 [project.urls]
