@@ -21,6 +21,7 @@ class PowerLawTransform(torch.nn.Module):
         self.c = torch.nn.Parameter(torch.zeros(1))
 
     def forward(self, x):
+        self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
         return self.a + (self.b * torch.log(x - self.c))
 
 
