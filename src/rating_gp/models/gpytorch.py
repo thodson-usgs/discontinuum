@@ -46,14 +46,17 @@ class RatingGPMarginalGPyTorch(
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
 
-    def build_model(self, X, y) -> gpytorch.models.ExactGP:
+    def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
         """
         # assume a constant measurement error for testing
-        noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
+        if y_unc is not None:
+            noise = y_unc
+        else:
+            noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
-            learn_additional_noise=False,
+            learn_additional_noise=True,
         )
 
         model = ExactGPModel(X, y, self.likelihood)
