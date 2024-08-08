@@ -13,6 +13,7 @@ from discontinuum.pipeline import (
     StandardErrorPipeline,
     TimePipeline,
 )
+from rating_gp.pipeline import LogUncertaintyPipeline
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -38,9 +39,11 @@ class RatingDataMixin:
 
         if model_config.transform == "log":
             target_pipeline = LogStandardPipeline
+            uncertainty_pipeline = LogUncertaintyPipeline
             error_pipeline = LogErrorPipeline
         elif model_config.transform == "standard":
             target_pipeline = StandardPipeline
+            uncertainty_pipeline = StandardErrorPipeline
             error_pipeline = StandardErrorPipeline
         else:
             raise ValueError(
@@ -49,6 +52,7 @@ class RatingDataMixin:
 
         self.dm = DataManager(
             target_pipeline=target_pipeline,
+            uncertainty_pipeline=uncertainty_pipeline,
             error_pipeline=error_pipeline,
             covariate_pipelines=covariate_pipelines
         )

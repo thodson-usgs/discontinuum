@@ -41,6 +41,7 @@ def is_initialized(func):
 class Data:
     target: Dataset
     covariates: Dataset
+    target_unc: Dataset = None
 
 
 # TODO create wrapper that validates input data
@@ -50,10 +51,11 @@ class DataManager:
     """ """
 
     target_pipeline: Type[Pipeline] = LogStandardPipeline
+    uncertainty_pipeline: Type[Pipeline] = None
     error_pipeline: Type[Pipeline] = LogErrorPipeline
     covariate_pipelines: Dict[str, Pipeline] = None
 
-    def fit(self, target: Dataset, covariates: Dataset):
+    def fit(self, target: Dataset, covariates: Dataset, target_unc: Dataset = None):
         """Initialize DataManager for a given data distribution."""
         # ensure time comes first in the dict
 
@@ -61,13 +63,18 @@ class DataManager:
         default_pipeline.update(self.covariate_pipelines)
         self.covariate_pipelines = default_pipeline
 
-        self.data = Data(target, covariates)
+        self.data = Data(target, covariates, target_unc)
 
         self.target_pipeline = self.target_pipeline().fit(target)
         self.error_pipeline = self.error_pipeline().fit(target)
 
         for key, value in self.covariate_pipelines.items():
             self.covariate_pipelines[key] = value().fit(covariates[key])
+
+        if target_unc is not None:
+            # fit the pipeline to target as error propagation requires
+            # scaling to match the target scaling (i.e., StandardScalar)
+            self.uncertainty_pipeline = self.uncertainty_pipeline().fit(target)
 
     def transform_covariates(self, covariates: Dataset) -> ArrayLike:
         """Transform covariates into design matrix"""
@@ -89,6 +96,11 @@ class DataManager:
     def y(self, dtype="float32") -> ArrayLike:
         """Convenience function for DataManager.target.transform"""
         return self.target_pipeline.transform(self.data.target).flatten()
+
+    @cached_property
+    def y_unc(self, dtype="float32") -> ArrayLike:
+        """Convenience function for DataManager.target.transform"""
+        return self.uncertainty_pipeline.transform(self.data.target_unc).flatten()
 
     @cached_property
     def X(self) -> ArrayLike:
