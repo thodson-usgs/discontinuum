@@ -19,9 +19,15 @@ lithops runtime build -b aws_lambda -f Dockerfile_discontinuum discontinuum-runt
 ```bash
 wget https://www.sciencebase.gov/catalog/file/get/655d2063d34ee4b6e05cc9e6?f=__disk__b3%2F3e%2F5b%2Fb33e5b0038f004c2a48818d0fcc88a0921f3f689 -O NWQN_sites.csv
 ```
+
+1. Create a s3 bucket for the output, then set
+```bash
+export DESTINATION_BUCKET=<path/to/bucket>
+```
+
 1. Run the script
 ```bash
-python discontinuum-with-lithops.py
+python naqwa-loadest-example.py
 ```
 
 ## Cleaning up
