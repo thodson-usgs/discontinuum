@@ -51,7 +51,6 @@ class DataManager:
     """ """
 
     target_pipeline: Type[Pipeline] = LogStandardPipeline
-    uncertainty_pipeline: Type[Pipeline] = None
     error_pipeline: Type[Pipeline] = LogErrorPipeline
     covariate_pipelines: Dict[str, Pipeline] = None
 
@@ -70,11 +69,6 @@ class DataManager:
 
         for key, value in self.covariate_pipelines.items():
             self.covariate_pipelines[key] = value().fit(covariates[key])
-
-        if target_unc is not None:
-            # fit the pipeline to target as error propagation requires
-            # scaling to match the target scaling (i.e., StandardScalar)
-            self.uncertainty_pipeline = self.uncertainty_pipeline().fit(target)
 
     def transform_covariates(self, covariates: Dataset) -> ArrayLike:
         """Transform covariates into design matrix"""
@@ -100,7 +94,7 @@ class DataManager:
     @cached_property
     def y_unc(self, dtype="float32") -> ArrayLike:
         """Convenience function for DataManager.target.transform"""
-        return self.uncertainty_pipeline.transform(self.data.target_unc).flatten()
+        return self.error_pipeline.transform(self.data.target_unc).flatten()
 
     @cached_property
     def X(self) -> ArrayLike:
