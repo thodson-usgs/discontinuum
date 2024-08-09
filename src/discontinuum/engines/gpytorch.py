@@ -42,6 +42,7 @@ class MarginalGPyTorch(BaseModel):
             self,
             covariates: Dataset,
             target: Dataset,
+            target_unc: Dataset = None,
             iterations: int = 100,
             optimizer: str = "adam",
             ):
@@ -53,6 +54,8 @@ class MarginalGPyTorch(BaseModel):
             Covariates for prediction.
         target : Dataset
             Target data for prediction.
+        target_unc : Dataset, optional
+            Uncertainty on target data for prediction.
         iterations : int, optional
             Number of iterations for optimization. The default is 100.
         optimizer : str, optional
@@ -60,15 +63,20 @@ class MarginalGPyTorch(BaseModel):
         """
         self.is_fitted = True
         # setup data manager (self.dm)
-        self.dm.fit(target=target, covariates=covariates)
+        self.dm.fit(target=target, covariates=covariates, target_unc=target_unc)
 
         self.X = self.dm.X
         self.y = self.dm.y
         train_x = torch.tensor(self.X, dtype=torch.float32)
         train_y = torch.tensor(self.y, dtype=torch.float32)
 
-        self.model = self.build_model(train_x, train_y)
-        # also sets self.likelihood
+        if target_unc is None:
+            self.model = self.build_model(train_x, train_y)
+            # also sets self.likelihood
+        else:
+            self.y_unc = self.dm.y_unc
+            train_y_unc = torch.tensor(self.y_unc, dtype=torch.float32)
+            self.model = self.build_model(train_x, train_y, train_y_unc)
 
         self.model.train()
         self.likelihood.train()

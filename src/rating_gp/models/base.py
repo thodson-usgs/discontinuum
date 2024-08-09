@@ -13,6 +13,7 @@ from discontinuum.pipeline import (
     StandardErrorPipeline,
     TimePipeline,
 )
+# from rating_gp.pipeline import LogUncertaintyPipeline
 
 if TYPE_CHECKING:
     from typing import Literal
