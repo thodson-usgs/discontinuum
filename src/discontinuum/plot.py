@@ -28,7 +28,7 @@ class BasePlotMixin:
 
     @staticmethod
     def setup_plot(ax: Optional[Axes] = None):
-        """Sets up figure and axes for rating curve plot.
+        """Sets up figure and axes for plot.
 
         Parameters
         ----------
