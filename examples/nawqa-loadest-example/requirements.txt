@@ -1,6 +1,6 @@
 boto3
-dataretrieval[nldi]
-discontinuum
+dataretrieval
+discontinuum  @ git+https://github.com/thodson-usgs/discontinuum
 gpytorch
 lithops
 pika

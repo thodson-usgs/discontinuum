@@ -5,6 +5,7 @@ FROM python:3.11-slim-buster
 RUN apt-get update \
     # Install aws-lambda-cpp build dependencies
     && apt-get install -y \
+      git \
       g++ \
       make \
       cmake \
