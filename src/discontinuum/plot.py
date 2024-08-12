@@ -73,7 +73,7 @@ class BasePlotMixin:
 
     @is_fitted
     def plot(self, covariates: Dataset, ci: float = 0.95, ax: Optional[Axes] = None):
-        """Plot predicted concentration versus time.
+        """Plot predicted data versus time.
 
         Parameters
         ----------
