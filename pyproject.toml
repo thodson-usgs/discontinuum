@@ -17,9 +17,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "dataretrieval",
     "gpytorch",
     # "pymc >= 5.0.0", # disable pymc by default
+    "matplotlib",
     "scikit-learn",
     "xarray",
 ]
@@ -34,7 +34,8 @@ package-dir = {"" = "src"}
 dev = [
   "flake8",
   "ruff",
-  "pytest > 5.0.0",
+  # "pytest > 5.0.0",
+  "gpytorch",
   "pytest-cov[all]",
 ]
 
