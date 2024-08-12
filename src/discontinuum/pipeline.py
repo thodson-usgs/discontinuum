@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+
+
+from abc import ABC, abstractmethod
 from numpy.typing import ArrayLike
+from scipy.stats import norm
 from sklearn.base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
@@ -216,7 +220,29 @@ class TimePipeline(Pipeline):
         )
 
 
-class StandardErrorPipeline(Pipeline):
+class ErrorPipeline(Pipeline, ABC):
+    @abstractmethod
+    def ci(self, mean, se, ci=0.95):
+        """Calculate confidence interval for a variable.
+
+        Parameters
+        ----------
+        mean : float
+            Mean of the variable.
+        se : float
+            Standard error of the variable.
+        ci : float
+            Confidence level.
+
+        Returns
+        -------
+        lower, upper : Tuple[float, float]
+            Lower and upper bound of the confidence interval.
+        """
+        pass
+
+
+class StandardErrorPipeline(ErrorPipeline):
     """Pipeline to transform error
 
     inverse_transform converts variance to SE.
@@ -246,8 +272,32 @@ class StandardErrorPipeline(Pipeline):
             ]
         )
 
+    def ci(self, mean, se, ci=0.95):
+        """Calculate confidence interval for a standard variable.
 
-class LogErrorPipeline(Pipeline):
+        Parameters
+        ----------
+        mean : float
+            Mean of the variable.
+        se : float
+            Standard error of the variable.
+        ci : float
+            Confidence level.
+
+        Returns
+        -------
+        lower, upper : Tuple[float, float]
+            Lower and upper bound of the confidence interval.
+        """
+        alpha = (1 - ci)/2
+        zscore = norm.ppf(1-alpha)
+        cb = se*zscore
+        lower = mean - cb
+        upper = mean + cb
+        return lower, upper
+
+
+class LogErrorPipeline(ErrorPipeline):
     """Pipelin to transform error
 
     inverse_transform converts variance (in log space) to a GSE
@@ -293,3 +343,27 @@ class LogErrorPipeline(Pipeline):
                 ),
             ]
         )
+
+    def ci(self, mean, se, ci=0.95):
+        """Calculate confidence interval for a log-transformed variable.
+
+        Parameters
+        ----------
+        mean : float
+            Mean of the variable.
+        se : float
+            Standard error of the variable.
+        ci : float
+            Confidence level.
+
+        Returns
+        -------
+        lower, upper : Tuple[float, float]
+            Lower and upper bound of the confidence interval.
+        """
+        alpha = (1 - ci)/2
+        zscore = norm.ppf(1-alpha)
+        cb = se**zscore
+        lower = mean / cb
+        upper = mean * cb
+        return lower, upper

@@ -14,7 +14,6 @@ from discontinuum.engines.base import BaseModel, is_fitted
 
 if TYPE_CHECKING:
     from typing import Dict, Optional
-
     from xarray import Dataset
 
 
@@ -50,9 +49,9 @@ class MarginalGPyTorch(BaseModel):
         Parameters
         ----------
         covariates : Dataset
-            Covariates for prediction.
+            Covariates for training.
         target : Dataset
-            Target data for prediction.
+            Target data for training.
         iterations : int, optional
             Number of iterations for optimization. The default is 100.
         optimizer : str, optional
@@ -95,8 +94,24 @@ class MarginalGPyTorch(BaseModel):
             optimizer.step()
 
     @is_fitted
-    def predict(self, covariates, diag=True, pred_noise=False) -> DataArray:
-        """Uses the fitted model to make predictions on new data."""
+    def predict(self,
+                covariates: Dataset,
+                diag=True,
+                pred_noise=False,
+                ) -> DataArray:
+        """Uses the fitted model to make predictions on new data.
+
+        Parameters
+        ----------
+        covariates : Dataset
+            Covariates for prediction.
+        diag : bool, optional
+            Return only the diagonal of the covariance matrix.
+            The default is True.
+        pred_noise : bool, optional
+            Include measurement uncertainty in the prediction.
+            The default is False.
+        """
         Xnew = torch.tensor(
             self.dm.Xnew(covariates),
             dtype=torch.float32,
