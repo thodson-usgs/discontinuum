@@ -55,8 +55,9 @@ USGSFlow = USGSParameter(
 )
 
 
-# better to use a dictionary here where the key becomes the name of the parameter
-def get_parameters(pcodes: Dict[str, str]) -> Union[USGSParameter, List[USGSParameter]]:
+def get_parameters(
+        pcodes: Dict[str, str],
+        ) -> Union[USGSParameter, List[USGSParameter]]:
     """Get USGS parameters from a list of parameter codes.
 
     Parameters
@@ -122,6 +123,7 @@ def get_daily(
     start_date: str,
     end_date: str,
     params: Union[List[USGSParameter], USGSParameter] = USGSFlow,
+    **kwargs,
 ) -> Dataset:
     """Get daily data from the USGS NWIS API.
 
@@ -135,6 +137,8 @@ def get_daily(
         End date in the format 'yyyy-mm-dd'.
     params : List[USGSParameter], optional
         List of parameters to retrieve. The default is flow only `[USGSFlow]`.
+    kwargs : Dict
+        Additional keyword arguments to pass to the NWIS API.
 
     Returns
     -------
@@ -146,7 +150,13 @@ def get_daily(
 
     pcodes = [param.pcode for param in params]
 
-    df, _ = nwis.get_dv(sites=site, start=start_date, end=end_date, parameterCd=pcodes)
+    df, _ = nwis.get_dv(
+        sites=site,
+        start=start_date,
+        end=end_date,
+        parameterCd=pcodes,
+        **kwargs,
+        )
 
     # rename columns
     df = df.rename(columns={param.pcode + param.suffix: param.name for param in params})
@@ -185,6 +195,7 @@ def get_samples(
         provider: str = "NWIS",
         name: str = "concentration",
         filter_pcodes: Optional[List[str]] = None,
+        **kwargs,
 ):
     """Get sample data from the Water Quality Portal API.
 
@@ -205,6 +216,10 @@ def get_samples(
         The data provider. Options are 'NWIS' or 'STORET'.
     name : str
         Short name for the parameter. Default is 'concentration'.
+    filter_pcodes : List[str]
+        List of parameter codes to filter the dataset. 
+    kwargs : Dict
+        Additional keyword arguments to pass to the WQP API.
     """
     if fraction and fraction not in ["Total", "Dissolved", "Suspended"]:
         raise ValueError("Fraction must be 'Total', 'Dissolved', 'Suspended'")
@@ -225,6 +240,7 @@ def get_samples(
         startDateHi=end_date,
         characteristicName=characteristic,
         provider=provider,
+        **kwargs,
     )
 
     # filter by fraction
