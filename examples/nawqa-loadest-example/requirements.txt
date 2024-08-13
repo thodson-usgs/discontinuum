@@ -1,6 +1,7 @@
 boto3
 dataretrieval
-discontinuum  @ git+https://github.com/thodson-usgs/discontinuum
+discontinuum[loadest_gp]  @ git+https://github.com/thodson-usgs/discontinuum
+pymc
 gpytorch
 lithops
 pika
