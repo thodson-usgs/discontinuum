@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import matplotlib.pyplot as plt
 import numpy as np
 from discontinuum.engines.base import is_fitted
+from discontinuum.plot import BasePlotMixin
 from scipy.stats import norm
 import xarray as xr
 from xarray import DataArray
@@ -20,34 +21,13 @@ if TYPE_CHECKING:
 
 
 DEFAULT_FIGSIZE = (5, 5)
-NARROW_LINE = 1
-REGULAR_LINE = NARROW_LINE * 1.5
 
 
-class RatingPlotMixin:
+class RatingPlotMixin(BasePlotMixin):
     """Mixin plotting functions for Model class"""
 
-    @staticmethod
-    def setup_plot(ax: Optional[Axes] = None):
-        """Sets up figure and axes for rating curve plot.
-
-        Parameters
-        ----------
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        if ax is None:
-            _, ax = plt.subplots(1, figsize=DEFAULT_FIGSIZE)
-
-        return ax
-
     @is_fitted
-    def plot_observations(self, ax: Optional[Axes] = None, **kwargs):
+    def plot_observed_rating(self, ax: Optional[Axes] = None, **kwargs):
         """Plot stage observations versus discharge observations.
 
         Parameters
@@ -73,11 +53,10 @@ class RatingPlotMixin:
                           **kwargs)
 
         # This converts the input uncertainty from GSE to SE
-        # unc = np.abs(np.log(self.dm.data.target_unc) * self.dm.data.target)
+        se_unc = np.log(self.dm.data.target_unc) * self.dm.data.target
         ax.errorbar(self.dm.data.covariates["stage"],
                     self.dm.data.target,
-                    yerr=self.dm.data.target_unc,
-                    # yerr=unc,
+                    yerr=se_unc,
                     c="k",
                     marker='',
                     linestyle='',
@@ -87,7 +66,10 @@ class RatingPlotMixin:
         return ax
 
     @is_fitted
-    def plot(self, covariates: Dataset, ci: float = 0.95, ax: Optional[Axes] = None):
+    def plot_rating(self,
+                    covariates: Dataset,
+                    ci: float = 0.95,
+                    ax: Optional[Axes] = None):
         """Plot predicted discharge versus stage.
 
         Parameters
@@ -106,9 +88,7 @@ class RatingPlotMixin:
         """
         ax = self.setup_plot(ax)
 
-        mu, se = self.predict(covariates.sortby('stage'),
-                              diag=True,
-                              pred_noise=True)
+        mu, se = self.predict(covariates, diag=True, pred_noise=True)
 
         target = DataArray(
             mu,
@@ -116,51 +96,34 @@ class RatingPlotMixin:
             dims=["time"],
             attrs=self.dm.data.target.attrs,
         )
-        alpha = (1 - ci)/2
-        zscore = norm.ppf(1-alpha)
+
+        # compute confidence bounds
+        lower, upper = self.dm.error_pipeline.ci(target, se, ci=ci)
 
         ax.plot(covariates["stage"], target, lw=1, zorder=2)
 
-        if self.model_config.transform == "log":
-            cb = se**zscore
-            ax.fill_between(
-                covariates['stage'],
-                target / cb,
-                target * cb,
-                color="b",
-                alpha=0.1,
-                zorder=1,
-            )
+        ax.fill_between(
+            covariates['stage'],
+            lower,
+            upper,
+            color="b",
+            alpha=0.1,
+            zorder=1,
+        )
 
-        elif self.model_config.transform == "standard":
-            cb = se * zscore
-            ax.fill_between(
-                covariates['stage'],
-                target - cb,
-                target + cb,
-                color="b",
-                alpha=0.1,
-                zorder=1,
-            )
-
-
-        self.plot_observations(ax, zorder=3)
+        self.plot_observed_rating(ax, zorder=3)
 
         return ax
 
     @is_fitted
-    def plot_observed_timeseries(self,
-                                 variable: Optional[str] = "stage",
-                                 ax: Optional[Axes] = None,
-                                 **kwargs
-                                ):
-        """Plot an observed variable versus time.
+    def plot_stage(self,
+                   covariates: Dataset = None,
+                   ax: Optional[Axes] = None,
+                   **kwargs):
+        """Plot observations versus time.
 
         Parameters
         ----------
-        variable : str, optional
-            Variable whose time series is to be plotted.
-            Options are 'stage' or 'discharge'.
         ax : Axes, optional
             Pre-defined matplotlib axes.
 
@@ -168,90 +131,20 @@ class RatingPlotMixin:
         -------
         ax : Axes
             Generated matplotlib axes.
-        """
-        ax = self.setup_plot(ax)
 
-        data = xr.merge([self.dm.data.covariates,
-                         self.dm.data.target])
-        data.plot.scatter(
-            y=variable,
+        """
+        self.dm.data.covariates.plot.scatter(
+            y='stage',
             c="k",
             s=5,
             linewidths=0.5,
             edgecolors="white",
             ax=ax,
+            zorder=2,
             **kwargs,
         )
 
-        return ax
-
-    @is_fitted
-    def plot_timeseries(self,
-                        covariates: Dataset,
-                        variable: Optional[str] = "stage",
-                        ci: float = 0.95,
-                        ax: Optional[Axes] = None,
-                        **kwargs
-                       ):
-        """Plot an observed variable versus time.
-
-        Parameters
-        ----------
-        covariates : Dataset
-            Covariates.
-        variable : str, optional
-            Variable whose time series is to be plotted.
-            Options are 'stage' or 'discharge'.
-        ci : float, optional
-            Confidence interval. The default is 0.95.
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        ax = self.setup_plot(ax)
-
-        if variable == 'stage':
-            covariates["stage"].plot(lw=1, zorder=2)
-        elif variable == 'discharge':
-            mu, se = self.predict(covariates, diag=True, pred_noise=True)
-
-            target = DataArray(
-                mu,
-                coords=[covariates.time],
-                dims=["time"],
-                attrs=self.dm.data.target.attrs,
-            )
-            alpha = (1 - ci)/2
-            zscore = norm.ppf(1-alpha)
-
-            target.plot(lw=1, zorder=2)
-
-            if self.model_config.transform == "log":
-                cb = se**zscore
-                ax.fill_between(
-                    target['time'],
-                    target / cb,
-                    target * cb,
-                    color="b",
-                    alpha=0.1,
-                    zorder=1,
-                )
-    
-            elif self.model_config.transform == "standard":
-                cb = se * zscore
-                ax.fill_between(
-                    target['time'],
-                    target - cb,
-                    target + cb,
-                    color="b",
-                    alpha=0.1,
-                    zorder=1,
-                )
-
-        self.plot_observed_timeseries(variable=variable, ax=ax, zorder=3)
+        if covariates is not None:
+            covariates["stage"].plot.line(ax=ax, lw=1, zorder=1)
 
         return ax
