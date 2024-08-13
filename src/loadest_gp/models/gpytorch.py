@@ -47,7 +47,7 @@ class LoadestGPMarginalGPyTorch(
         #     noise_prior=noise_prior,
         # )
 
-        noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1,-1)
+        noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
             learn_additional_noise=False,

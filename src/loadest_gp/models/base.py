@@ -16,6 +16,7 @@ from discontinuum.pipeline import (
 if TYPE_CHECKING:
     from typing import Literal
 
+
 @dataclass
 class ModelConfig:
     """ """

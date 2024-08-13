@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import matplotlib.pyplot as plt
 import numpy as np
+
 from discontinuum.engines.base import is_fitted
-from scipy.stats import norm
-from xarray import DataArray
+from discontinuum.plot import BasePlotMixin
 from xarray.plot.utils import label_from_attrs
 
 if TYPE_CHECKING:
@@ -23,118 +22,8 @@ NARROW_LINE = 1
 REGULAR_LINE = NARROW_LINE * 1.5
 
 
-class LoadestPlotMixin:
+class LoadestPlotMixin(BasePlotMixin):
     """Mixin plotting functions for Model class"""
-
-    @staticmethod
-    def setup_plot(ax: Optional[Axes] = None):
-        """Sets up figure and axes for rating curve plot.
-
-        Parameters
-        ----------
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        if ax is None:
-            _, ax = plt.subplots(1, figsize=DEFAULT_FIGSIZE)
-
-        return ax
-
-    @is_fitted
-    def plot_observations(self, ax: Optional[Axes] = None, **kwargs):
-        """Plot observations versus time.
-
-        Parameters
-        ----------
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        ax = self.setup_plot(ax)
-
-        # TODO provide easier access to data
-        self.dm.data.target.plot.scatter(
-            y="concentration",
-            c="k",
-            s=5,
-            linewidths=0.5,
-            edgecolors="white",
-            ax=ax,
-            **kwargs,
-        )
-
-        return ax
-
-    @is_fitted
-    def plot(self, covariates: Dataset, ci: float = 0.95, ax: Optional[Axes] = None):
-        """Plot predicted concentration versus time.
-
-        Parameters
-        ----------
-        covariates : Dataset
-            Covariates.
-        ci : float, optional
-            Confidence interval. The default is 0.95.
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        ax = self.setup_plot(ax)
-
-        mu, se = self.predict(covariates, diag=True, pred_noise=True)
-
-        target = DataArray(
-            mu,
-            coords=[covariates.time],
-            dims=["time"],
-            attrs=self.dm.data.target.attrs,
-        )
-        alpha = (1 - ci)/2
-        zscore = norm.ppf(1-alpha)
-
-        target.plot.line(ax=ax, lw=1, zorder=2)
-
-        # todo create a method using config's transform/likelihood
-        if self.model_config.transform == "log":
-            cb = se**zscore
-            ax.fill_between(
-                target["time"],
-                target / cb,
-                target * cb,
-                color="b",
-                alpha=0.1,
-                zorder=1,
-            )
-
-        elif self.model_config.transform == "standard":
-            cb = se * zscore
-            ax.fill_between(
-                target["time"],
-                target - cb,
-                target + cb,
-                color="b",
-                alpha=0.1,
-                zorder=1,
-            )
-
-
-        self.plot_observations(ax, zorder=3)
-
-        return ax
-
     @is_fitted
     def plot_flux(self, covariates: Dataset, ax: Optional[Axes] = None):
         """Plot predicted flux versus time.
@@ -166,24 +55,6 @@ class LoadestPlotMixin:
         ax.fill_between(
             flux["time"], (flux - ci), (flux + ci), color="b", alpha=0.1, zorder=1
         )
-
-        return ax
-
-    @is_fitted
-    def observed_vs_predicted(self, ax: Optional[Axes] = None):
-        """Plot observed versus predicted concentrations.
-
-        Parameters
-        ----------
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        ax = self.setup_plot(ax)
 
         return ax
 
@@ -235,7 +106,10 @@ class LoadestPlotMixin:
 
         fig = ax.get_figure()
         cbar = fig.colorbar(cs, ax=ax)
-        cbar.ax.set_ylabel(label_from_attrs(self.dm.data.target), **cbar_defaults)
+        cbar.ax.set_ylabel(
+            label_from_attrs(self.dm.data.target),
+            **cbar_defaults,
+        )
         return ax
 
     @is_fitted
