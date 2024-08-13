@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Union
 
     from xarray import Dataset
+    from pandas import DataFrame
 
 CFS_TO_M3 = 0.0283168
 
@@ -186,6 +187,54 @@ def format_wqp_date(date: str) -> str:
     return "-".join(date.split("-")[1:] + [date.split("-")[0]])
 
 
+def format_wqp_samples(
+        df: DataFrame,
+        name: str = "concentration",
+        pcode: Optional[str] = None,
+) -> Dataset:
+    """Format results of dataretrieval.wqp.get_results.
+
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe returned from dataretrieval.wqp.get_results.
+    name : str
+        Short name for the parameter. Default is 'concentration'.
+    pcode : str
+        USGS parameter code for populating metadata.
+
+    Returns
+    -------
+    Dataset
+    """
+    # create datetime index
+    df.index = pd.to_datetime(
+        df["ActivityStartDate"] + " " + df["ActivityStartTime/Time"]
+    )
+
+    df[name] = df["ResultMeasureValue"].astype(float)
+    df.index.name = "time"
+    df.index = df.index.tz_localize(None)
+
+    # create xarray dataset and remove unnecessary columns
+    # TODO include censoring flag
+    ds = xr.Dataset.from_dataframe(df[[name]])
+
+    # drop censored values and warn user
+    if any(ds[name].isnull()):
+        ds = ds.dropna(dim="time")
+        warnings.warn(
+            "Censored values have been removed from the dataset.",
+            stacklevel=1,
+            )
+
+    if pcode:
+        attrs = get_parameters({name: pcode})
+        ds[name].attrs = attrs.__dict__
+
+    return ds
+
+
 def get_samples(
         site: str,
         start_date: str,
@@ -196,7 +245,7 @@ def get_samples(
         name: str = "concentration",
         filter_pcodes: Optional[List[str]] = None,
         **kwargs,
-):
+) -> Dataset:
     """Get sample data from the Water Quality Portal API.
 
     Parameters
@@ -241,71 +290,54 @@ def get_samples(
         characteristicName=characteristic,
         provider=provider,
         **kwargs,
-    )
+        )
 
     # filter by fraction
     if fraction:
         df = df[df["ResultSampleFractionText"] == fraction]
 
-    # create datetime index
-    df.index = pd.to_datetime(
-        df["ActivityStartDate"] + " " + df["ActivityStartTime/Time"]
-    )
-
-    df[name] = df["ResultMeasureValue"].astype(float)
-    df.index.name = "time"
-    df.index = df.index.tz_localize(None)
-
     if provider == "NWIS":
-        # add parameter metadata
-        if not filter_pcodes and len(set(df["USGSPCode"])) != 1:
-            # TODO print the pcodes
-            raise ValueError("Multiple parameters returned from NWIS.")
-
-        elif filter_pcodes:
+        if filter_pcodes:
             # filter df by list of pcodes
             df = df[df["USGSPCode"].isin(filter_pcodes)]
+            pcode = filter_pcodes[0]
 
-    # create xarray dataset and remove unnecessary columns
-    # TODO include censoring flag
-    ds = xr.Dataset.from_dataframe(df[[name]])
+        elif len(set(df["USGSPCode"])) != 1:
+            raise ValueError("Multiple parameters returned from NWIS.")
 
-    # drop censored values and warn user
-    if any(ds[name].isnull()):
-        ds = ds.dropna(dim="time")
-        warnings.warn(
-            "Censored values have been removed from the dataset.",
-            stacklevel=1,
-            )
+        else:
+            # only one pcode returned, so take the first entry
+            pcode = df["USGSPCode"].iloc[0]
+
+        pcode = str(pcode).zfill(5)
+
+    else:
+        pcode = None
+
+    ds = format_wqp_samples(df, name, pcode)
 
     if provider == "NWIS":
         # strip the "USGS-" prefix from the site number
         site_id = site[5:]
         ds.attrs = get_metadata(site_id).__dict__
 
-        if filter_pcodes:
-            pcode = filter_pcodes[0]
-
-        else:
-            pcode = df["USGSPCode"].iloc[0]
-
-        pcode = str(pcode).zfill(5)
-
-        attrs = get_parameters({name: pcode})
-        ds[name].attrs = attrs.__dict__
-
     if provider == "STORET":
+        # TODO check for "USGS-" prefix, then get metadata
         pass
 
     return ds
 
 
 def get_qwdata_samples(
-    site: str, start_date: str, end_date: str, pcode: str, name: str = "concentration"
+    site: str,
+    start_date: str,
+    end_date: str,
+    pcode: str,
+    name: str = "concentration",
 ) -> Dataset:
     """Get sample data from the USGS NWIS API.
 
-    Warning: The QWData service is deprecated and no longer receives data.
+    WARNING: The QWData service is deprecated and no longer receives data.
 
     Parameters
     ----------
