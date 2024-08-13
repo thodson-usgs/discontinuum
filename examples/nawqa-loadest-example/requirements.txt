@@ -1,6 +1,6 @@
 boto3
 dataretrieval
-discontinuum[loadest_gp]  @ git+https://github.com/thodson-usgs/discontinuum
+discontinuum[loadest_gp]  @ git+https://github.com/thodson-usgs/discontinuum@34b1e11cc8ccad2f95143b4e42072ce71af63a3f
 pymc
 gpytorch
 lithops
