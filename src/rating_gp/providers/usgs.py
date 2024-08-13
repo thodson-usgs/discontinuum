@@ -128,6 +128,10 @@ def get_daily_stage(
         parameterCd=param.pcode,
         )
 
+    if len(df) == 0:
+        raise ValueError("No daily stage data is available for USGS site "
+                         f"number: {site}")
+
     # rename columns
     df = df.rename(columns={param.pcode + param.suffix: param.name})
     # drop columns
@@ -165,12 +169,19 @@ def get_measurements(
     end_date : str
         End date in the format 'YYYY-MM-DD'.
     """
-    df, _ = nwis.get_discharge_measurements(
-        sites=site,
-        start=start_date,
-        end=end_date,
-        format="rdb_expanded",
+    # df, _ = nwis.get_discharge_measurements(
+    #     sites=site,
+    #     start=start_date,
+    #     end=end_date,
+    #     format="rdb_expanded",
+    # )
+    # Need this till get_discharge_measurements update is uploaded
+    response = nwis.query_waterdata(
+        'measurements', ssl_check=True, format="rdb_expanded",
+        site_no=site, begin_date=start_date, end_date=end_date,
     )
+    df = nwis._read_rdb(response.text)
+
     # covert timezone to UTC? ignore for now
     df.index = pd.to_datetime(
         df["measurement_dt"],
@@ -178,12 +189,10 @@ def get_measurements(
     )
     df.index.name = "time"
     # df.index = df.index.tz_localize(None)
-    # TODO set metadata and apply unit conversions
-    # TODO OR use NWISColumn to rename and set metadata
     df = df.rename(
         columns={
-            "gage_height_va": "stage",
-            "discharge_va": "discharge",
+            NWISStage.column_name: NWISStage.standard_name,
+            NWISDischarge.column_name: NWISDischarge.standard_name,
             }
         )
     # parse uncertainty from measured "measured_rating_diff"
@@ -199,13 +208,17 @@ def get_measurements(
                                 .astype(float))
     # set indirect measurements as 20% uncertain regardless of quality code
     df.loc[df['streamflow_method'] == 'QIDIR', 'discharge_unc_frac'] = 0.2
-    # assume the uncertainty fraction is a 2 sigma interval
-    df['discharge_unc'] = df['discharge'] * df['discharge_unc_frac'] / 2
+    # convert fractional uncertainty to uncertainty assuming the uncertainty
+    # fraction is a 2 sigma gse interval. (GSE = frac + 1)
+    # (GSE -> exp(sigma_ln(Q)))
+    df['discharge_unc'] = df['discharge_unc_frac'] / 2 + 1
 
     ds = xr.Dataset.from_dataframe(df[["stage", "discharge", "discharge_unc"]])
 
-    for param in [NWISStage, NWISDischarge, NWISDischargeUnc]:
+    for param in [NWISStage, NWISDischarge]:
         ds[param.name] = ds[param.name] * param.conversion
         ds[param.name].attrs = param.__dict__
+
+    ds['discharge_unc'].attrs = NWISDischargeUnc.__dict__
 
     return ds

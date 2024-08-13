@@ -9,6 +9,7 @@ from gpytorch.kernels import (
 )
 
 from rating_gp.models.base import RatingDataMixin, ModelConfig
+from rating_gp.plot import RatingPlotMixin
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -27,7 +28,7 @@ class PowerLawTransform(torch.nn.Module):
 
 class RatingGPMarginalGPyTorch(
     RatingDataMixin,
-    # LoadestPlotMixin,
+    RatingPlotMixin,
     # comes last b/c it conflics with Mixin
     MarginalGPyTorch,
 ):
