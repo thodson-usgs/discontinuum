@@ -76,23 +76,27 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.time_dim = [self.dims[0]]
         self.stage_dim = [self.dims[1]]
 
-        self.powerlaw = PowerLawTransform() 
+        self.powerlaw = PowerLawTransform()
 
-        self.mean_module = gpytorch.means.ConstantMean()
+        # TODO: test different mean and kernel functions.
+        # Currently, we use a linear mean function and a Matern kernel, but we
+        # might try a constant mean with a linear * Matern kernel.
+
+        #self.mean_module = gpytorch.means.ConstantMean()
+        self.mean_module = gpytorch.means.LinearMean(input_size=1)
         self.covar_module = self.cov_kernel()
 
     def forward(self, x):
-        x = x.clone()
-        x[:, self.stage_dim] = self.powerlaw(x[:, self.stage_dim])
+        x_t = x.clone()
+        x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
 
-        mean_x = self.mean_module(x)
-        covar_x = self.covar_module(x)
+        mean_x = self.mean_module(x_t[:, self.stage_dim])
+        covar_x = self.covar_module(x_t)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_kernel(self):
         return ScaleKernel(
              MaternKernel(
                 nu=2.5,
-                active_dims=self.dims,
                 ),
         )
