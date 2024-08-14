@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import (
     LogStandardPipeline,
-    LogErrorPipeline,
+    GeometricErrorPipeline,
+    LogStandardErrorPipeline,
     NoOpPipeline,
     StandardPipeline,
     StandardErrorPipeline,
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
 class ModelConfig:
     """ """
     transform: Literal["log", "standard"] = "log"
+    error_type: Literal["gse", "se"] = "gse"
 
 
 class RatingDataMixin:
@@ -39,10 +41,23 @@ class RatingDataMixin:
 
         if model_config.transform == "log":
             target_pipeline = LogStandardPipeline
-            error_pipeline = LogErrorPipeline
+            if model_config.error_type == "gse":
+                error_pipeline = GeometricErrorPipeline
+            elif model_config.error_type == "se":
+                error_pipeline = LogStandardErrorPipeline
+            else:
+                raise ValueError(
+                    "Model config error_type must be 'gse' or 'se' when using "
+                    "the 'log' transform."
+                )
         elif model_config.transform == "standard":
             target_pipeline = StandardPipeline
             error_pipeline = StandardErrorPipeline
+            if model_config.error_type != "se":
+                raise ValueError(
+                    "Model config error_type must be 'se' when using the "
+                    "'standard' transform."
+                )
         else:
             raise ValueError(
                 "Model config transform must be 'log' or 'standard'."

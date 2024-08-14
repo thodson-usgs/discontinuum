@@ -170,6 +170,56 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         )
 
 
+class LogPropagation(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
+    """Transformer for standard error propagation of log transforms
+    
+    Eq: f = ln(A) -> sigma_f = sigma_A / A
+    """
+
+    def fit(self, A):
+        """Store data from A for later division in the transform.
+
+        Parameters
+        ----------
+        A : ndarray
+        """
+        self.A_ = A
+
+        return self
+
+    def transform(self, X):
+        """
+        Propagate the uncertainty.
+
+        Parameters
+        ----------
+        X : ndarray
+
+        Returns
+        -------
+        ndarray
+        """
+        if (X == self.A_).all():
+            return X
+        else:
+            return X / self.A_
+
+    def inverse_transform(self, X, A=None):
+        """
+        Propagate the uncertainty.
+
+        Parameters
+        ----------
+        X : ndarray
+
+        Returns
+        -------
+        ndarray
+        """
+        return X * A
+
+
+
 class LogStandardPipeline(Pipeline):
     def __init__(self):
         """Pipeline for log-distributed data.
@@ -310,8 +360,40 @@ class StandardErrorPipeline(ErrorPipeline):
         return lower, upper
 
 
-class LogErrorPipeline(ErrorPipeline):
-    """Pipelin to transform error
+class LogStandardErrorPipeline(StandardErrorPipeline):
+    """Pipeline to transform error
+
+    inverse_transform converts variance (in log space) to a SE
+    """
+
+    def __init__(self):
+        super(StandardErrorPipeline, self).__init__(
+            steps=[
+                ("metadata", MetadataManager()),
+                ("log", LogPropagation().set_inverse_transform_request(A=True)),
+                ("scaler", StandardScaler(with_mean=False)),
+                (
+                    "square",
+                    FunctionTransformer(
+                        func=np.square,
+                        inverse_func=np.sqrt,
+                        check_inverse=False,
+                    ),
+                ),
+                (
+                    "abs",
+                    FunctionTransformer(
+                        func=np.abs,
+                        inverse_func=np.abs,
+                        check_inverse=False,
+                    ),
+                ),
+            ]
+        )
+
+
+class GeometricErrorPipeline(ErrorPipeline):
+    """Pipeline to transform error
 
     inverse_transform converts variance (in log space) to a GSE
     """
