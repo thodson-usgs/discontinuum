@@ -107,6 +107,7 @@ class DataManager:
 
     def y_t(self, y: ArrayLike) -> Dataset:
         """Convenience function for DataManager.target.untransform"""
+        # TODO handle reshaping in pipeline
         return self.target_pipeline.inverse_transform(y.reshape(-1, 1))
 
     def get_dim(self, dim: str, index="time") -> int:
