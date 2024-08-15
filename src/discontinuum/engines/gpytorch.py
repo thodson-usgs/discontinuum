@@ -17,6 +17,11 @@ if TYPE_CHECKING:
     from xarray import Dataset
 
 
+class NoOpMean(gpytorch.means.Mean):
+    def forward(self, x):
+        return x.squeeze(-1)
+ 
+
 class LatentGPyTorch(BaseModel):
     def __init__(
         self,
