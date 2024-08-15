@@ -1,7 +1,7 @@
 boto3
-dataretrieval
-discontinuum[loadest_gp]  @ git+https://github.com/thodson-usgs/discontinuum@34b1e11cc8ccad2f95143b4e42072ce71af63a3f
-pymc
+dataretrieval[nldi]
+discontinuum[loadest_gp]  @ git+https://github.com/thodson-usgs/discontinuum@5a5a4d7acede0417cd49f09c805cd3ea203c1d49
+# pymc
 gpytorch
 lithops
 pika
