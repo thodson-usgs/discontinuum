@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class NoOpMean(gpytorch.means.Mean):
     def forward(self, x):
         return x.squeeze(-1)
- 
+
 
 class LatentGPyTorch(BaseModel):
     def __init__(
@@ -139,8 +139,7 @@ class MarginalGPyTorch(BaseModel):
             var = observed_pred.variance
 
         target = self.dm.y_t(mu)
-        # TODO the reshape should be done in the pipeline
-        se = self.dm.error_pipeline.inverse_transform(var.reshape(-1, 1))
+        se = self.dm.error_pipeline.inverse_transform(var)
 
         return target, se
 
@@ -168,6 +167,7 @@ class MarginalGPyTorch(BaseModel):
         x_time = torch.linspace(x_min[time_dim], x_max[time_dim], n_time)
         x_cov = torch.linspace(x_min[covariate_dim], x_max[covariate_dim], n_cov)
 
+        # expects a 1D vector
         X_grid = torch.cartesian_prod(x_time, x_cov)
 
         self.model.eval()
@@ -179,8 +179,9 @@ class MarginalGPyTorch(BaseModel):
             # var = observed_pred.variance
 
         target = self.dm.y_t(mu)
-        # TODO return a Dataset with the correct shape
         target = target.data.reshape(n_time, n_cov)
+
+        # TODO handle reshaping in pipeline
         index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.reshape(-1, 1))
         covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
 

@@ -9,7 +9,7 @@ from numpy.typing import ArrayLike
 from scipy.stats import norm
 from sklearn.base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import FunctionTransformer, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from xarray import DataArray
 
 
@@ -120,12 +120,17 @@ class TimeTransformer(BaseTransformer):
 
 
 class ShapeTransformer(OneToOneFeatureMixin, BaseTransformer):
-    """Reshape a 1D array to 2D."""
+    """Reshape a 1D array to 2D.
+
+    Reshaping is a persistent issue that is still handled poorly.
+    One issue is StandardScaler expects a 2D array, and a lot of
+    the reshaping is to work around that.
+    """
     def transform(self, X):
         return X.reshape(-1, 1)
 
     def inverse_transform(self, X):
-        return X.ravel()
+        return X.squeeze()
 
 
 class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
