@@ -181,9 +181,9 @@ class MarginalGPyTorch(BaseModel):
         target = self.dm.y_t(mu)
         target = target.data.reshape(n_time, n_cov)
 
-        # TODO handle reshaping in pipeline
-        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.reshape(-1, 1))
-        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
+        # TODO handle type conversion in pipeline
+        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.numpy())
+        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.numpy())
 
         return target, index, covariate
 

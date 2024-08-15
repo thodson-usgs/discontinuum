@@ -9,7 +9,7 @@ from numpy.typing import ArrayLike
 from scipy.stats import norm
 from sklearn.base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+# from sklearn.preprocessing import StandardScaler
 from xarray import DataArray
 
 
@@ -110,15 +110,6 @@ class LogTransformer(BaseTransformer):
         return np.exp(X)
 
 
-class TimeTransformer(BaseTransformer):
-    """Convert a datetime to decimal year."""
-    def transform(self, X):
-        return datetime_to_decimal_year(X)
-
-    def inverse_transform(self, X):
-        return decimal_year_to_datetime(X)
-
-
 class ShapeTransformer(OneToOneFeatureMixin, BaseTransformer):
     """Reshape a 1D array to 2D.
 
@@ -140,6 +131,47 @@ class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
 
     def inverse_transform(self, X):
         return np.sqrt(X)
+
+
+class StandardScaler(BaseTransformer):
+    """Rescale a variable to have a mean of 0 and a standard deviation of 1.
+
+    Reimplemens the sklearn.preprocessing.StandardScaler but removes the
+    requirement of having 2D arrays.
+    """
+    def __init__(self, *, with_mean=True, with_std=True):
+        self.with_mean = with_mean
+        self.with_std = with_std
+
+    def fit(self, X, y=None):
+        if self.with_mean:
+            self.mean_ = X.mean(axis=0)
+        if self.with_std:
+            self.scale_ = X.std(axis=0)
+        return self
+
+    def transform(self, X):
+        if self.with_mean:
+            X = X - self.mean_
+        if self.with_std:
+            X = X / self.scale_
+        return X
+
+    def inverse_transform(self, X):
+        if self.with_std:
+            X = X * self.scale_
+        if self.with_mean:
+            X = X + self.mean_
+        return X
+
+
+class TimeTransformer(BaseTransformer):
+    """Convert a datetime to decimal year."""
+    def transform(self, X):
+        return datetime_to_decimal_year(X)
+
+    def inverse_transform(self, X):
+        return decimal_year_to_datetime(X)
 
 
 class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
