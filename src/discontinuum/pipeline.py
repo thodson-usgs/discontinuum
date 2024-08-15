@@ -13,38 +13,6 @@ from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from xarray import DataArray
 
 
-def zero_clip(a: ArrayLike) -> ArrayLike:
-    """Clip an array to zero.
-
-    Parameters
-    ----------
-    a : ArrayLike
-        Array to clip.
-
-    Returns
-    -------
-    ArrayLike
-        Clipped array.
-    """
-    return np.clip(a, a_min=0, a_max=None)
-
-
-def log_clip(a: ArrayLike) -> ArrayLike:
-    """Clip an array to a small value.
-
-    Parameters
-    ----------
-    a : ArrayLike
-        Array to clip.
-
-    Returns
-    -------
-    ArrayLike
-        Clipped array.
-    """
-    return np.clip(a, a_min=1e-6, a_max=None)
-
-
 def datetime_to_decimal_year(x: ArrayLike) -> ArrayLike:
     """Convert a timeseries to decimal year.
 
@@ -101,19 +69,72 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
     return dt.round("1s").to_numpy()
 
 
-class TimeTransformer:
+class BaseTransformer(TransformerMixin, BaseEstimator):
+    """Base class for transformers."""
     def __init__(self):
-        """Transform time to decimal year."""
         pass
 
     def fit(self, X, y=None):
         return self
 
+
+class ClipTransformer(BaseTransformer):
+    """Clip a variable."""
+    def __init__(self, min: float = None, max: float = None):
+        """Clip a variable.
+
+        Parameters
+        ----------
+        min : float
+            Minimum value to clip.
+
+        max : float
+            Maximum value to clip.
+        """
+        self.min = min
+        self.max = max
+
+    def transform(self, X):
+        return np.clip(X, a_min=self.min, a_max=self.max)
+
+    def inverse_transform(self, X):
+        return self.transform(X)
+
+
+class LogTransformer(BaseTransformer):
+    """Log-transform a variable."""
+    def transform(self, X):
+        return np.log(X)
+
+    def inverse_transform(self, X):
+        return np.exp(X)
+
+
+class TimeTransformer(BaseTransformer):
+    """Convert a datetime to decimal year."""
     def transform(self, X):
         return datetime_to_decimal_year(X)
 
     def inverse_transform(self, X):
         return decimal_year_to_datetime(X)
+
+
+class ShapeTransformer(OneToOneFeatureMixin, BaseTransformer):
+    """Reshape a 1D array to 2D."""
+    def transform(self, X):
+        return X.reshape(-1, 1)
+
+    def inverse_transform(self, X):
+        return X.ravel()
+
+
+class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
+    """Square a variable."""
+    def transform(self, X):
+        return X**2
+
+    def inverse_transform(self, X):
+        return np.sqrt(X)
 
 
 class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
@@ -149,7 +170,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         -------
         Numpy array
         """
-        return X.values.reshape(-1, 1)
+        return X.values
 
     def inverse_transform(self, X):
         """Add xarray metadata to a numpy array.
@@ -163,7 +184,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         DataArray
         """
         return DataArray(
-            X.ravel(),
+            X,
             attrs=self.attrs,
             name=self.name,
             dims=self.dims,
@@ -177,8 +198,9 @@ class LogStandardPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("clip", FunctionTransformer(func=log_clip)),
-                ("log", FunctionTransformer(func=np.log, inverse_func=np.exp)),
+                ("reshape", ShapeTransformer()),
+                ("clip", ClipTransformer(min=1e-6)),
+                ("log", LogTransformer()),
                 ("scaler", StandardScaler()),
             ]
         )
@@ -191,8 +213,8 @@ class NoOpPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("clip", FunctionTransformer(func=zero_clip,
-                                             inverse_func=zero_clip)),
+                ("reshape", ShapeTransformer()),
+                ("clip", ClipTransformer(min=0)),
             ]
         )
 
@@ -204,8 +226,8 @@ class StandardPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("clip", FunctionTransformer(func=zero_clip,
-                                             inverse_func=zero_clip)),
+                ("reshape", ShapeTransformer()),
+                ("clip", ClipTransformer(min=0)),
                 ("scaler", StandardScaler()),
             ]
         )
@@ -218,16 +240,7 @@ class TimePipeline(Pipeline):
             steps=[
                 ("metadata", MetadataManager()),
                 ("decimal_year", TimeTransformer()),
-                (
-                   "reshape",
-                   FunctionTransformer(
-                       func=np.reshape,
-                       # inverse_func=np.reshape,
-                       inverse_func=np.ndarray.flatten,
-                       kw_args={"newshape": (-1, 1)},
-                       # inv_kw_args={"newshape": (1, -1)},
-                   ),
-                ),
+                ("reshape", ShapeTransformer()),
                 ("scaler", StandardScaler(with_std=False)),
             ]
         )
@@ -265,23 +278,11 @@ class StandardErrorPipeline(ErrorPipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
+                ("reshape", ShapeTransformer()),
                 ("scaler", StandardScaler(with_mean=False)),
-                (
-                    "square",
-                    FunctionTransformer(
-                        func=np.square,
-                        inverse_func=np.sqrt,
-                        check_inverse=False,
-                    ),
-                ),
-                (
-                    "abs",
-                    FunctionTransformer(
-                        func=np.abs,
-                        inverse_func=np.abs,
-                        check_inverse=False,
-                    ),
-                ),
+                ("square", SquareTransformer()),
+                # clip formerly used np.abs
+                ("clip", ClipTransformer(min=0)),
             ]
         )
 
@@ -320,40 +321,12 @@ class LogErrorPipeline(ErrorPipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                # (
-                #    "reshape",
-                #    FunctionTransformer(
-                #        func=np.reshape,
-                #        inverse_func=np.reshape,
-                #        kw_args={"newshape": (-1, 1)},
-                #        inv_kw_args={"newshape": (1, -1)},
-                #    ),
-                # ),
-                (
-                    "log",
-                    FunctionTransformer(
-                        func=np.log,
-                        inverse_func=np.exp,
-                        check_inverse=False,
-                    ),
-                ),
+                ("reshape", ShapeTransformer()),
+                ("log", LogTransformer()),
                 ("scaler", StandardScaler(with_mean=False)),
-                (
-                    "square",
-                    FunctionTransformer(
-                        func=np.square,
-                        inverse_func=np.sqrt,
-                        check_inverse=False,
-                    ),
-                ),
-                (
-                    "abs",
-                    FunctionTransformer(
-                        func=np.abs,
-                        inverse_func=np.abs,
-                        check_inverse=False,
-                    ),
-                ),
+                ("square", SquareTransformer()),
+                # clip formerly used np.abs
+                ("clip", ClipTransformer(min=1e-6)),
             ]
         )
 
