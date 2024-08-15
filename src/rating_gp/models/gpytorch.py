@@ -1,12 +1,13 @@
 import gpytorch
 import numpy as np
 import torch
-from discontinuum.engines.gpytorch import MarginalGPyTorch
+from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 from gpytorch.kernels import (
     MaternKernel,
     ScaleKernel,
 )
+
 
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
@@ -83,7 +84,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # might try a constant mean with a linear * Matern kernel.
 
         #self.mean_module = gpytorch.means.ConstantMean()
-        self.mean_module = gpytorch.means.LinearMean(input_size=1)
+        #self.mean_module = gpytorch.means.LinearMean(input_size=1)
+        self.mean_module = NoOpMean()
         self.covar_module = self.cov_kernel()
 
     def forward(self, x):
