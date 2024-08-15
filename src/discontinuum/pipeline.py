@@ -13,39 +13,6 @@ from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from xarray import DataArray
 
 
-# TODO create a general transformer for zero clips that also replace nb.abs transform
-def zero_clip(a: ArrayLike) -> ArrayLike:
-    """Clip an array to zero.
-
-    Parameters
-    ----------
-    a : ArrayLike
-        Array to clip.
-
-    Returns
-    -------
-    ArrayLike
-        Clipped array.
-    """
-    return np.clip(a, a_min=0, a_max=None)
-
-
-def log_clip(a: ArrayLike) -> ArrayLike:
-    """Clip an array to a small value.
-
-    Parameters
-    ----------
-    a : ArrayLike
-        Array to clip.
-
-    Returns
-    -------
-    ArrayLike
-        Clipped array.
-    """
-    return np.clip(a, a_min=1e-6, a_max=None)
-
-
 def datetime_to_decimal_year(x: ArrayLike) -> ArrayLike:
     """Convert a timeseries to decimal year.
 
@@ -109,6 +76,29 @@ class BaseTransformer(TransformerMixin, BaseEstimator):
 
     def fit(self, X, y=None):
         return self
+
+
+class ClipTransformer(BaseTransformer):
+    """Clip a variable."""
+    def __init__(self, min: float = None, max: float = None):
+        """Clip a variable.
+
+        Parameters
+        ----------
+        min : float
+            Minimum value to clip.
+
+        max : float
+            Maximum value to clip.
+        """
+        self.min = min
+        self.max = max
+
+    def transform(self, X):
+        return np.clip(X, a_min=self.min, a_max=self.max)
+
+    def inverse_transform(self, X):
+        return self.transform(X)
 
 
 class LogTransformer(BaseTransformer):
@@ -209,7 +199,7 @@ class LogStandardPipeline(Pipeline):
             steps=[
                 ("metadata", MetadataManager()),
                 ("reshape", ShapeTransformer()),
-                ("clip", FunctionTransformer(func=log_clip)),
+                ("clip", ClipTransformer(min=1e-6)),
                 ("log", LogTransformer()),
                 ("scaler", StandardScaler()),
             ]
@@ -224,8 +214,7 @@ class NoOpPipeline(Pipeline):
             steps=[
                 ("metadata", MetadataManager()),
                 ("reshape", ShapeTransformer()),
-                ("clip", FunctionTransformer(func=zero_clip,
-                                             inverse_func=zero_clip)),
+                ("clip", ClipTransformer(min=0)),
             ]
         )
 
@@ -238,8 +227,7 @@ class StandardPipeline(Pipeline):
             steps=[
                 ("metadata", MetadataManager()),
                 ("reshape", ShapeTransformer()),
-                ("clip", FunctionTransformer(func=zero_clip,
-                                             inverse_func=zero_clip)),
+                ("clip", ClipTransformer(min=0)),
                 ("scaler", StandardScaler()),
             ]
         )
@@ -293,14 +281,8 @@ class StandardErrorPipeline(ErrorPipeline):
                 ("reshape", ShapeTransformer()),
                 ("scaler", StandardScaler(with_mean=False)),
                 ("square", SquareTransformer()),
-                (
-                    "abs",
-                    FunctionTransformer(
-                        func=np.abs,
-                        inverse_func=np.abs,
-                        check_inverse=False,
-                    ),
-                ),
+                # clip formerly used np.abs
+                ("clip", ClipTransformer(min=0)),
             ]
         )
 
@@ -343,14 +325,8 @@ class LogErrorPipeline(ErrorPipeline):
                 ("log", LogTransformer()),
                 ("scaler", StandardScaler(with_mean=False)),
                 ("square", SquareTransformer()),
-                (
-                    "abs",
-                    FunctionTransformer(
-                        func=np.abs,
-                        inverse_func=np.abs,
-                        check_inverse=False,
-                    ),
-                ),
+                # clip formerly used np.abs
+                ("clip", ClipTransformer(min=1e-6)),
             ]
         )
 
