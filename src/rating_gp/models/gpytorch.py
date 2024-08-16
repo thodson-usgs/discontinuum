@@ -99,6 +99,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
     def cov_kernel(self):
         return ScaleKernel(
              MaternKernel(
-                nu=2.5,
+                nu=2.5, ard_num_dims=2
                 ),
         )
