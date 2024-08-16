@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from discontinuum.engines.base import is_fitted
 from scipy.stats import norm
+import xarray as xr
 from xarray import DataArray
 from xarray.plot.utils import label_from_attrs
 
@@ -46,7 +47,11 @@ class BasePlotMixin:
         return ax
 
     @is_fitted
-    def plot_observations(self, ax: Optional[Axes] = None, **kwargs):
+    def plot_observations(self,
+                          xdim: str = 'time',
+                          ydim: str = None,
+                          ax: Optional[Axes] = None,
+                          **kwargs):
         """Plot observations versus time.
 
         Parameters
@@ -60,9 +65,38 @@ class BasePlotMixin:
             Generated matplotlib axes.
 
         """
-        # TODO provide easier access to data
-        self.dm.data.target.plot.scatter(
-            y=self.dm.data.target.name,
+        if ydim is None:
+            ydim = self.dm.data.target.name
+
+        ax = self.setup_plot(ax)
+        
+        data = xr.merge([self.dm.data.covariates,
+                         self.dm.data.target])
+        # This converts the input uncertainty from GSE to SE
+        if self.dm.data.target_unc is not None:
+            if xdim == self.dm.data.target.name:
+                xerr = np.log(self.dm.data.target_unc) * self.dm.data.target
+                yerr = None
+            if ydim == self.dm.data.target.name:
+                yerr = np.log(self.dm.data.target_unc) * self.dm.data.target
+                xerr = None
+        else:
+            xerr = None
+            yerr = None
+
+        ax.errorbar(data[xdim].values,
+                    data[ydim].values,
+                    xerr=xerr,
+                    yerr=yerr,
+                    c="k",
+                    marker='',
+                    linestyle='',
+                    capsize=2.5,
+                    **kwargs)
+
+        data.plot.scatter(
+            x=xdim,
+            y=ydim,
             c="k",
             s=5,
             linewidths=0.5,
@@ -71,9 +105,83 @@ class BasePlotMixin:
             **kwargs,
         )
 
+        return ax
+
+
     @is_fitted
-    def plot(self, covariates: Dataset, ci: float = 0.95, ax: Optional[Axes] = None):
-        """Plot predicted data versus time.
+    def plot_predictions(self,
+                         covariates: Dataset,
+                         xdim: str = 'time',
+                         ydim: str = None,
+                         ci: float = 0.95,
+                         ax: Optional[Axes] = None,
+                         **kwargs):
+        """Plot predicted versus time.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            Pre-defined matplotlib axes.
+
+        Returns
+        -------
+        ax : Axes
+            Generated matplotlib axes.
+
+        """
+        if ydim is None:
+            ydim = self.dm.data.target.name
+
+        if xdim == self.dm.data.target.name:
+            covariates = covariates.sortby(ydim)
+        elif ydim == self.dm.data.target.name:
+            covariates = covariates.sortby(xdim)
+
+        mu, se = self.predict(covariates, diag=True, pred_noise=True)
+
+        # compute confidence bounds
+        lower, upper = self.dm.error_pipeline.ci(mu, se, ci=ci)
+        data = xr.merge([covariates,
+                         mu,
+                         lower.rename(f'lower'),
+                         upper.rename(f'upper')])
+
+        ax = self.setup_plot(ax)
+
+        ax.plot(data[xdim], data[ydim], lw=1, zorder=2)
+        ax.set_xlabel(label_from_attrs(data[xdim]))
+        ax.set_ylabel(label_from_attrs(data[ydim]))
+
+        if ydim == self.dm.data.target.name:
+            ax.fill_between(
+                data[xdim],
+                data['lower'],
+                data['upper'],
+                color="b",
+                alpha=0.1,
+                zorder=1,
+            )
+        elif xdim == self.dm.data.target.name:
+            ax.fill_betweenx(
+                data[ydim],
+                data['lower'],
+                data['upper'],
+                color="b",
+                alpha=0.1,
+                zorder=1,
+            )
+
+        return ax
+            
+
+    @is_fitted
+    def plot(self,
+             covariates: Dataset,
+             xdim: str = 'time',
+             ydim: str = None,
+             ci: float = 0.95,
+             ax: Optional[Axes] = None):
+        """Plot predicted and observed data versus time.
 
         Parameters
         ----------
@@ -91,29 +199,7 @@ class BasePlotMixin:
         """
         ax = self.setup_plot(ax)
 
-        mu, se = self.predict(covariates, diag=True, pred_noise=True)
-
-        target = DataArray(
-            mu,
-            coords=[covariates.time],
-            dims=["time"],
-            attrs=self.dm.data.target.attrs,
-        )
-
-        # compute confidence bounds
-        lower, upper = self.dm.error_pipeline.ci(target, se, ci=ci)
-
-        target.plot.line(ax=ax, lw=1, zorder=2)
-
-        ax.fill_between(
-            target["time"],
-            lower,
-            upper,
-            color="b",
-            alpha=0.1,
-            zorder=1,
-        )
-
-        self.plot_observations(ax, zorder=3)
+        self.plot_observations(ax=ax, xdim=xdim, ydim=ydim, zorder=3)
+        self.plot_predictions(covariates, xdim=xdim, ydim=ydim, ax=ax, zorder=3)
 
         return ax

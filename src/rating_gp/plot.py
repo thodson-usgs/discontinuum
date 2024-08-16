@@ -27,55 +27,16 @@ class RatingPlotMixin(BasePlotMixin):
     """Mixin plotting functions for Model class"""
 
     @is_fitted
-    def plot_observed_rating(self, ax: Optional[Axes] = None, **kwargs):
-        """Plot stage observations versus discharge observations.
+    def plot_rating_in_time(self,
+                            time: str,
+                            ci: float = 0.95,
+                            ax: Optional[Axes] = None):
+        """Plot predicted discharge versus stage at a given point in time.
 
         Parameters
         ----------
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-        """
-        ax = self.setup_plot(ax)
-
-        data = xr.merge([self.dm.data.covariates["stage"],
-                         self.dm.data.target])
-        data.plot.scatter(x='stage',
-                          y='discharge',
-                          c="k",
-                          marker='o',
-                          s=20,
-                          ax=ax,
-                          **kwargs)
-
-        # This converts the input uncertainty from GSE to SE
-        se_unc = np.log(self.dm.data.target_unc) * self.dm.data.target
-        ax.errorbar(self.dm.data.covariates["stage"],
-                    self.dm.data.target,
-                    yerr=se_unc,
-                    c="k",
-                    marker='',
-                    linestyle='',
-                    capsize=2.5,
-                    **kwargs)
-
-        return ax
-
-    @is_fitted
-    def plot_rating(self,
-                    covariates: Dataset,
-                    ci: float = 0.95,
-                    ax: Optional[Axes] = None):
-        """Plot predicted discharge versus stage.
-
-        Parameters
-        ----------
-        covariates : Dataset
-            Covariates.
+        time : str
+            A date in the form of YYYY-MM-DD which to plot the rating.
         ci : float, optional
             Confidence interval. The default is 0.95.
         ax : Axes, optional
@@ -86,65 +47,21 @@ class RatingPlotMixin(BasePlotMixin):
         ax : Axes
             Generated matplotlib axes.
         """
-        ax = self.setup_plot(ax)
-
-        mu, se = self.predict(covariates, diag=True, pred_noise=True)
-
-        target = DataArray(
-            mu,
-            coords=[covariates.time],
-            dims=["time"],
-            attrs=self.dm.data.target.attrs,
+        n = 250
+        stage = np.linspace(self.dm.data.covariates['stage'].min(),
+                            self.dm.data.covariates['stage'].max(),
+                            n)
+        time = np.repeat(np.datetime64(f"{time} 00:00:00", 'ns'), n)
+        
+        ds = xr.Dataset(
+            data_vars=dict(
+                stage=(["time"], stage),
+            ),
+            coords=dict(
+                time=time,
+            ),
         )
 
-        # compute confidence bounds
-        lower, upper = self.dm.error_pipeline.ci(target, se, ci=ci)
-
-        ax.plot(covariates["stage"], target, lw=1, zorder=2)
-
-        ax.fill_between(
-            covariates['stage'],
-            lower,
-            upper,
-            color="b",
-            alpha=0.1,
-            zorder=1,
-        )
-
-        self.plot_observed_rating(ax, zorder=3)
-
-        return ax
-
-    @is_fitted
-    def plot_stage(self,
-                   covariates: Dataset = None,
-                   ax: Optional[Axes] = None,
-                   **kwargs):
-        """Plot observations versus time.
-
-        Parameters
-        ----------
-        ax : Axes, optional
-            Pre-defined matplotlib axes.
-
-        Returns
-        -------
-        ax : Axes
-            Generated matplotlib axes.
-
-        """
-        self.dm.data.covariates.plot.scatter(
-            y='stage',
-            c="k",
-            s=5,
-            linewidths=0.5,
-            edgecolors="white",
-            ax=ax,
-            zorder=2,
-            **kwargs,
-        )
-
-        if covariates is not None:
-            covariates["stage"].plot.line(ax=ax, lw=1, zorder=1)
+        self.plot_rating(ds)
 
         return ax
