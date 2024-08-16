@@ -141,6 +141,9 @@ class MarginalGPyTorch(BaseModel):
         target = self.dm.y_t(mu)
         se = self.dm.error_pipeline.inverse_transform(var)
 
+        target = target.assign_coords(covariates.coords)
+        se = se.assign_coords(covariates.coords)
+
         return target, se
 
     @is_fitted
