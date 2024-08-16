@@ -13,7 +13,8 @@ from xarray import DataArray
 from discontinuum.engines.base import BaseModel, is_fitted
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
+    from numpy.typing import ArrayLike
+    from typing import Dict, Optional, Tuple
     from xarray import Dataset
 
 
@@ -111,8 +112,10 @@ class MarginalGPyTorch(BaseModel):
                 covariates: Dataset,
                 diag=True,
                 pred_noise=False,
-                ) -> DataArray:
+                ) -> Tuple[DataArray, DataArray]:
         """Uses the fitted model to make predictions on new data.
+
+        The input and output are in the original data space.
 
         Parameters
         ----------
@@ -124,19 +127,20 @@ class MarginalGPyTorch(BaseModel):
         pred_noise : bool, optional
             Include measurement uncertainty in the prediction.
             The default is False.
+
+        Returns
+        -------
+        target : DataArray
+            Target prediction.
+        se : DataArray
+            Standard error of the prediction.
         """
         Xnew = torch.tensor(
             self.dm.Xnew(covariates),
             dtype=torch.float32,
         )
 
-        self.model.eval()
-        self.likelihood.eval()
-
-        with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            observed_pred = self.likelihood(self.model(Xnew))
-            mu = observed_pred.mean
-            var = observed_pred.variance
+        mu, var = self.__gpytorch_predict(Xnew)
 
         target = self.dm.y_t(mu)
         se = self.dm.error_pipeline.inverse_transform(var)
@@ -170,13 +174,7 @@ class MarginalGPyTorch(BaseModel):
         # expects a 1D vector
         X_grid = torch.cartesian_prod(x_time, x_cov)
 
-        self.model.eval()
-        self.likelihood.eval()
-
-        with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            observed_pred = self.likelihood(self.model(X_grid))
-            mu = observed_pred.mean
-            # var = observed_pred.variance
+        mu, var = self.__gpytorch_predict(X_grid)
 
         target = self.dm.y_t(mu)
         target = target.data.reshape(n_time, n_cov)
@@ -247,3 +245,32 @@ class MarginalGPyTorch(BaseModel):
         raise NotImplementedError(
             "This method must be implemented in a subclass"
             )
+
+    @is_fitted
+    def __gpytorch_predict(
+            self,
+            x: torch.Tensor,
+            ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Model-space prediction.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input data in the (transformed) model space.
+
+        Returns
+        -------
+        mu : torch.Tensor
+            Mean of the prediction in the model space.
+        var : torch.Tensor
+            Variance of the prediction in the model space.
+        """
+        self.model.eval()
+        self.likelihood.eval()
+
+        with torch.no_grad(), gpytorch.settings.fast_pred_var():
+            observed_pred = self.likelihood(self.model(x))
+            mu = observed_pred.mean
+            var = observed_pred.variance
+
+        return mu, var
