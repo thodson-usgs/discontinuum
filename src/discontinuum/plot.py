@@ -52,7 +52,7 @@ class BasePlotMixin:
                           ydim: str = None,
                           ax: Optional[Axes] = None,
                           **kwargs):
-        """Plot observations versus time.
+        """Plot observations.
 
         Parameters
         ----------
@@ -116,7 +116,7 @@ class BasePlotMixin:
                          ci: float = 0.95,
                          ax: Optional[Axes] = None,
                          **kwargs):
-        """Plot predicted versus time.
+        """Plot predicted values.
 
         Parameters
         ----------
@@ -181,7 +181,7 @@ class BasePlotMixin:
              ydim: str = None,
              ci: float = 0.95,
              ax: Optional[Axes] = None):
-        """Plot predicted and observed data versus time.
+        """Plot predicted and observed values.
 
         Parameters
         ----------
