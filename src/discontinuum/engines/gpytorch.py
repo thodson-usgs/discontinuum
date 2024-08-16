@@ -181,9 +181,9 @@ class MarginalGPyTorch(BaseModel):
         target = self.dm.y_t(mu)
         target = target.data.reshape(n_time, n_cov)
 
-        # TODO handle reshaping in pipeline
-        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.reshape(-1, 1))
-        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.reshape(-1, 1))
+        # TODO handle type conversion in pipeline
+        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.numpy())
+        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.numpy())
 
         return target, index, covariate
 
@@ -215,11 +215,11 @@ class MarginalGPyTorch(BaseModel):
 
         f_preds = self.model(Xnew)
 
-        # GPyTorch has several sampling optimizations, but none are working for me
         sim = f_preds.sample(sample_shape=torch.Size([n]))
 
-        # TODO modify transform to handle samples/draws HACK
-        temp = self.dm.y_t(sim)
+        # TODO modify transform to handle draws
+        # flatten then reshape to work around our transformation pipeline
+        temp = self.dm.y_t(sim.flatten())
         data = temp.data.reshape(n, -1)
         attrs = temp.attrs
         da = DataArray(

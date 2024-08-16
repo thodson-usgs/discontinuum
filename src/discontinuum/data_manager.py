@@ -30,7 +30,8 @@ def is_initialized(func):
     def inner(self, *args, **kwargs):
         if not self.is_initialized:
             raise RuntimeError(
-                "The DataManager has not been initialized, call .init(target, covariates)."
+                "The DataManager has not been initialized,",
+                "call .init(target, covariates)."
             )
         return func(self, *args, **kwargs)
 
@@ -54,8 +55,24 @@ class DataManager:
     error_pipeline: Type[Pipeline] = LogErrorPipeline
     covariate_pipelines: Dict[str, Pipeline] = None
 
-    def fit(self, target: Dataset, covariates: Dataset, target_unc: Dataset = None):
-        """Initialize DataManager for a given data distribution."""
+    def fit(
+            self,
+            target: Dataset,
+            covariates: Dataset,
+            target_unc: Dataset = None):
+        """Initialize DataManager for a given data distribution.
+
+        Parameters
+        ----------
+        target : Dataset
+            Target data.
+
+        covariates : Dataset
+            Covariate data.
+
+        target_unc : Dataset
+            Target uncertainty. Default is None.
+        """
         # ensure time comes first in the dict
 
         default_pipeline = {"time": TimePipeline}
@@ -83,7 +100,7 @@ class DataManager:
         # inverse transform each column of X using the corresponding pipeline
         covariates = {}
         for i, (key, value) in enumerate(self.covariate_pipelines.items()):
-            covariates[key] = value.inverse_transform(X[:, i].reshape(1, -1))
+            covariates[key] = value.inverse_transform(X[:, i])
         return Dataset(covariates)
 
     @cached_property
@@ -107,8 +124,7 @@ class DataManager:
 
     def y_t(self, y: ArrayLike) -> Dataset:
         """Convenience function for DataManager.target.untransform"""
-        # TODO handle reshaping in pipeline
-        return self.target_pipeline.inverse_transform(y.reshape(-1, 1))
+        return self.target_pipeline.inverse_transform(y)
 
     def get_dim(self, dim: str, index="time") -> int:
         """Get the dimension of a variable.
