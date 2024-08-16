@@ -215,11 +215,11 @@ class MarginalGPyTorch(BaseModel):
 
         f_preds = self.model(Xnew)
 
-        # GPyTorch has several sampling optimizations, but none are working for me
         sim = f_preds.sample(sample_shape=torch.Size([n]))
 
-        # TODO modify transform to handle samples/draws HACK
-        temp = self.dm.y_t(sim)
+        # TODO modify transform to handle draws
+        # flatten then reshape to work around our transformation pipeline
+        temp = self.dm.y_t(sim.flatten())
         data = temp.data.reshape(n, -1)
         attrs = temp.attrs
         da = DataArray(
