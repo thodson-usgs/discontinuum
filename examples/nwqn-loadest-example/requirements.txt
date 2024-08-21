@@ -1,0 +1,10 @@
+boto3
+discontinuum[loadest_gp]
+pymc
+gpytorch
+lithops
+pika
+ps_mem
+pyarrow
+s3fs
+tblib

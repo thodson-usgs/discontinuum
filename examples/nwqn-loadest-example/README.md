@@ -22,12 +22,14 @@ wget https://www.sciencebase.gov/catalog/file/get/655d2063d34ee4b6e05cc9e6?f=__d
 
 1. Create a s3 bucket for the output, then set
 ```bash
-export DESTINATION_BUCKET=<path/to/bucket>
+export DESTINATION_BUCKET=wma-uncertainty/nwqn-loadest-example
 ```
+
+1. Follow the demo at `dataretrieval` to pull the input data into an S3 bucket.
 
 1. Run the script
 ```bash
-python naqwa-loadest-example.py
+python nwqn-loadest-example.py
 ```
 
 ## Cleaning up
