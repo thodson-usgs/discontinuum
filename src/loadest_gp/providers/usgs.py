@@ -159,6 +159,35 @@ def get_daily(
         **kwargs,
         )
 
+    return format_nwis_daily(df, site, params)
+
+
+def format_wqp_date(date: str) -> str:
+    """Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'."""
+    return "-".join(date.split("-")[1:] + [date.split("-")[0]])
+
+
+def format_nwis_daily(
+        df: DataFrame,
+        site_id: Optional[str] = None,
+        params: Union[List[USGSParameter], USGSParameter] = [USGSFlow],
+) -> Dataset:
+    """
+    Format results of dataretrieval.nwis.get_dv.
+
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe returned from dataretrieval.nwis.get_dv.
+    site_id : str, optional
+        USGS site number for populating metadata. The default is None.
+    params : List[USGSParameter], optional
+        List of parameters to retrieve. The default is flow only `[USGSFlow]`.
+    """
+    if not isinstance(params, list):
+        params = [params]
+
+    df = df.copy()
     # rename columns
     df = df.rename(columns={param.pcode + param.suffix: param.name for param in params})
     # drop columns
@@ -172,7 +201,8 @@ def get_daily(
     # ds["date"] = ds["date"].dt.date
 
     # set metadata
-    ds.attrs = get_metadata(site).__dict__
+    if site_id:
+        ds.attrs = get_metadata(site_id).__dict__
 
     for param in params:
         ds[param.name] = ds[param.name] * param.conversion
@@ -180,11 +210,6 @@ def get_daily(
         ds[param.name].attrs = param.__dict__
 
     return ds
-
-
-def format_wqp_date(date: str) -> str:
-    """Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'."""
-    return "-".join(date.split("-")[1:] + [date.split("-")[0]])
 
 
 def format_wqp_samples(
@@ -357,6 +382,11 @@ def get_qwdata_samples(
     pandas.DataFrame
         Dataframe with the requested sample data.
     """
+    warnings.warn(
+        "The QWData service is deprecated and no longer receives data.",
+        DeprecationWarning,
+    )
+
     df, _ = nwis.get_qwdata(
         sites=site, start=start_date, end=end_date, parameterCd=pcode
     )
