@@ -213,6 +213,9 @@ def get_measurements(
     # (GSE -> exp(sigma_ln(Q)))
     df['discharge_unc'] = df['discharge_unc_frac'] / 2 + 1
 
+    # drop data that is <= 0 as we need all positive data
+    df = df[(df['stage'] > 0) & (df['discharge'] > 0)]
+
     ds = xr.Dataset.from_dataframe(df[["stage", "discharge", "discharge_unc"]])
 
     for param in [NWISStage, NWISDischarge]:
