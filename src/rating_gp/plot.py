@@ -44,13 +44,6 @@ class RatingPlotMixin(BasePlotMixin):
 
         data = xr.merge([self.dm.data.covariates["stage"],
                          self.dm.data.target])
-        data.plot.scatter(x='stage',
-                          y='discharge',
-                          c="k",
-                          marker='o',
-                          s=20,
-                          ax=ax,
-                          **kwargs)
 
         # This converts the input uncertainty from GSE to SE
         se_unc = np.log(self.dm.data.target_unc) * self.dm.data.target
@@ -60,8 +53,17 @@ class RatingPlotMixin(BasePlotMixin):
                     c="k",
                     marker='',
                     linestyle='',
-                    capsize=2.5,
-                    **kwargs)
+                    capsize=2.5)
+        data.plot.scatter(x='stage',
+                          y='discharge',
+                          hue="time",
+                          add_colorbar=False,
+                          add_legend=False,
+                          marker='o',
+                          edgecolors='face',
+                          s=10,
+                          ax=ax,
+                          **kwargs)
 
         return ax
 
@@ -134,17 +136,81 @@ class RatingPlotMixin(BasePlotMixin):
 
         """
         self.dm.data.covariates.plot.scatter(
+            x='time',
             y='stage',
-            c="k",
-            s=5,
-            linewidths=0.5,
-            edgecolors="white",
+            hue='time',
+            s=10,
+            edgecolors="face",
             ax=ax,
             zorder=2,
+            add_legend=False,
+            add_colorbar=False,
             **kwargs,
         )
 
         if covariates is not None:
             covariates["stage"].plot.line(ax=ax, lw=1, zorder=1)
+
+        return ax
+
+    @is_fitted
+    def plot_discharge(self,
+                       covariates: Dataset = None,
+                       ci: float = 0.95,
+                       ax: Optional[Axes] = None
+                      ):
+        """Plot predicted discharge versus time.
+
+        Parameters
+        ----------
+        covariates : Dataset, optional
+            Covariates.
+        ci : float, optional
+            Confidence interval. The default is 0.95.
+        ax : Axes, optional
+            Pre-defined matplotlib axes.
+
+        Returns
+        -------
+        ax : Axes
+            Generated matplotlib axes.
+        """
+        ax = self.setup_plot(ax)
+
+        if covariates is not None:
+            mu, se = self.predict(covariates, diag=True, pred_noise=True)
+    
+            target = DataArray(
+                mu,
+                coords=[covariates.time],
+                dims=["time"],
+                attrs=self.dm.data.target.attrs,
+            )
+    
+            # compute confidence bounds
+            lower, upper = self.dm.error_pipeline.ci(target, se, ci=ci)
+
+            target.plot.line(ax=ax, lw=1, zorder=2)
+
+            ax.fill_between(
+                target["time"],
+                lower,
+                upper,
+                color="b",
+                alpha=0.1,
+                zorder=1,
+            )
+
+        self.dm.data.target.plot.scatter(
+            x='time',
+            y='discharge',
+            hue='time',
+            s=10,
+            edgecolors="face",
+            ax=ax,
+            zorder=2,
+            add_legend=False,
+            add_colorbar=False,
+        )
 
         return ax

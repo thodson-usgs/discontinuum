@@ -5,12 +5,20 @@ from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 from gpytorch.kernels import (
     MaternKernel,
+    RBFKernel,
+    RQKernel,
     ScaleKernel,
 )
+from gpytorch.priors import (
+    GammaPrior,
+    HalfNormalPrior,
+    NormalPrior,
+)
 
-
+from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
+from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -47,6 +55,7 @@ class RatingGPMarginalGPyTorch(
         """ """
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
+        
 
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
@@ -56,6 +65,9 @@ class RatingGPMarginalGPyTorch(
             noise = y_unc
         else:
             noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
+        # TODO: Fix "GPInputWarning: You have passed data through a 
+        # FixedNoiseGaussianLikelihood that did not match the size of the fixed
+        # noise, *and* you did not specify noise. This is treated as a no-op."
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
             learn_additional_noise=False,
@@ -79,14 +91,32 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.powerlaw = PowerLawTransform()
 
-        # TODO: test different mean and kernel functions.
-        # Currently, we use a linear mean function and a Matern kernel, but we
-        # might try a constant mean with a linear * Matern kernel.
-
-        #self.mean_module = gpytorch.means.ConstantMean()
-        #self.mean_module = gpytorch.means.LinearMean(input_size=1)
+        # self.mean_module = gpytorch.means.ConstantMean()
+        # self.mean_module = gpytorch.means.LinearMean(input_size=1)
         self.mean_module = NoOpMean()
-        self.covar_module = self.cov_kernel()
+
+        # self.covar_module = (
+        #     (self.cov_stage() * self.cov_stagetime())
+        #     + self.cov_residual()
+        # )
+      
+        # Stage * time kernel with large time length
+        # + stage * time kernel only at low stage with smaller time length
+        self.covar_module = (
+            (self.cov_stage()
+             * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)))
+            + (self.cov_stage()
+               * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
+               * SigmoidKernel(
+                   active_dims=self.stage_dim,
+                   # a_prior=NormalPrior(loc=20, scale=1),
+                   b_constraint=gpytorch.constraints.Interval(
+                       train_x[:, self.stage_dim].min(),
+                       train_x[:, self.stage_dim].max()
+                   ),
+               )
+              )
+        )
 
     def forward(self, x):
         x_t = x.clone()
@@ -96,9 +126,51 @@ class ExactGPModel(gpytorch.models.ExactGP):
         covar_x = self.covar_module(x_t)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
-    def cov_kernel(self):
+
+    def cov_stage(self, ls_prior=None):
+        eta = HalfNormalPrior(scale=1)
+
         return ScaleKernel(
-             MaternKernel(
-                nu=2.5,
-                ),
+            MaternKernel(
+                active_dims=self.stage_dim,
+                lengthscale_prior=ls_prior,
+            ),
+            outputscale_prior=eta,
+        )
+
+    def cov_time(self, ls_prior=None):
+        eta = HalfNormalPrior(scale=1)
+
+        return ScaleKernel(
+            MaternKernel(
+                active_dims=self.time_dim,
+                lengthscale_prior=ls_prior,
+            ),
+            outputscale_prior=eta,
+        )
+
+    def cov_stagetime(self):
+        eta = HalfNormalPrior(scale=1)
+        ls = GammaPrior(concentration=2, rate=1)
+
+        return ScaleKernel(
+            StageTimeKernel(
+                active_dims=self.dims,
+                # lengthscale_prior=ls,
+            ),
+            # outputscale_prior=eta,
+        )
+
+    def cov_residual(self):
+        eta = HalfNormalPrior(scale=0.2)
+        ls = GammaPrior(concentration=2, rate=10)
+
+        return ScaleKernel(
+            MaternKernel(
+                ard_num_dims=2,
+                nu=1.5,
+                active_dims=self.dims,
+                lengthscale_prior=ls,
+            ),
+            outputscale_prior=eta,
         )
