@@ -33,7 +33,8 @@ class USGSParameter:
     @property
     def ppcode(self):
         """
-        Return the parameter code with a 'p' prefix, which is used by the QWData service.
+        Return the parameter code with a 'p' prefix, which is used by the QWData
+        service.
 
         """
         return "p" + self.pcode
@@ -189,7 +190,10 @@ def format_nwis_daily(
 
     df = df.copy()
     # rename columns
-    df = df.rename(columns={param.pcode + param.suffix: param.name for param in params})
+    df = df.rename(
+        columns={
+            param.pcode + param.suffix: param.name for param in params}
+    )
     # drop columns
     df = df[[param.name for param in params]]
     # remove timezone for xarray compatibility
@@ -388,7 +392,10 @@ def get_qwdata_samples(
     )
 
     df, _ = nwis.get_qwdata(
-        sites=site, start=start_date, end=end_date, parameterCd=pcode
+        sites=site,
+        start=start_date,
+        end=end_date,
+        parameterCd=pcode,
     )
     attrs = get_parameters({name: pcode})
     ppcode = "p" + pcode
