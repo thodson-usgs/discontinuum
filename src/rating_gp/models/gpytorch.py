@@ -19,11 +19,12 @@ from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
 from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel
 
+import torch.nn.functional as F
 
 class PowerLawTransform(torch.nn.Module):
     """
     """
-    def __init__(self):
+    def __init__(self, nn=None):
         super(PowerLawTransform, self).__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
         self.b = torch.nn.Parameter(torch.rand(1))
@@ -40,6 +41,61 @@ class PowerLawTransform(torch.nn.Module):
         zero_flow_value = 1e-6  # TODO set in config and provider
         output[~m] = np.log(zero_flow_value)  # avoid log(0) error
         return output
+
+
+class PowerLawLayer(torch.nn.Module):
+    def forward(self, a, x):
+        """
+        Parameters
+        ----------
+        a : torch.Tensor
+            Parameters for the power law transformation
+        x : torch.Tensor
+            2D time and stage data
+        """
+        #import pdb; pdb.set_trace()
+        # TESTING clamping has not fixed the nan issue
+        x_min = x[:, 1].min()
+        x_max = x[:, 1].max()
+        a[:, 1].data = torch.clamp(a[:, 1], min=1.5, max=2.5)  # TODO check LeCoz 2014
+        a[:, 2].data = torch.clamp(a[:, 2], max=x_min + (x_max - x_min)/2)
+
+        # TODO init to be less than x.min()
+        mask = x[:, 1] <= a[:, 2]  # mask where stage < c
+        x_t = x[mask]
+        x_f = x[~mask]
+        a_t = a[mask]
+
+        output = torch.empty_like(x[:, 0])
+        # flow state
+        output[mask] = a_t[:, 0]
+        output[mask] += (a_t[:, 1] * torch.log(x_t[:, 0] - a_t[:, 2]))
+        # no-flow state
+        output[~mask] = 1e-6 * torch.ones(x_f.shape[0])
+        return output
+
+        # x[3] = torch.clamp(x[3], max=x[0].min()-1e-6)
+        # return x[1] + (x[2] * torch.log(x[0] - x[3]))
+
+
+class NeuralPowerLaw(torch.nn.Module):
+    def __init__(self):
+        super(NeuralPowerLaw, self).__init__()
+        self.l0 = torch.nn.Linear(1, 500)
+        self.l1 = torch.nn.Linear(500, 50)
+        self.l2 = torch.nn.Linear(50, 3)
+        self.p0 = PowerLawLayer()
+
+    def forward(self, x):
+        t = x[:, 0].view(-1, 1)  # time
+        a = self.l0(t)
+        a = F.relu(a)
+        a = self.l1(a)
+        a = F.relu(a)
+        a = self.l2(a)
+        # TODO the problem is that x is not updated
+        # and powr law is receiving the wrong input
+        return self.p0(a, x)
 
 
 class RatingGPMarginalGPyTorch(
@@ -62,7 +118,7 @@ class RatingGPMarginalGPyTorch(
         """ """
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
-        
+ 
 
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
@@ -96,7 +152,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.time_dim = [self.dims[0]]
         self.stage_dim = [self.dims[1]]
 
-        self.powerlaw = PowerLawTransform()
+        #self.powerlaw = PowerLawTransform()
+        self.powerlaw = NeuralPowerLaw()
 
         # self.mean_module = gpytorch.means.ConstantMean()
         # self.mean_module = gpytorch.means.LinearMean(input_size=1)
@@ -126,11 +183,14 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
 
     def forward(self, x):
-        x_t = x.clone()
-        x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
-
-        mean_x = self.mean_module(x_t[:, self.stage_dim])
-        covar_x = self.covar_module(x_t)
+        #x_t = x.clone()
+        #x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
+        #mean_x = self.mean_module(x_t[:, self.stage_dim])
+        #covar_x = self.covar_module(x_t)
+        x_t = self.powerlaw(x)
+        mean_x = self.mean_module(x_t)
+        # TODO: also try passing x_t to covar but with correct dims
+        covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_stage(self, ls_prior=None):
