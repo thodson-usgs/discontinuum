@@ -20,9 +20,9 @@ END_DATE = "2024-12-31"  # verify end date
 PCODE = "631"  # Nitrate plus nitrite
 CHARACTERISTIC = "Inorganic nitrogen (nitrate and nitrite)"
 FRACTION = "Dissolved"
-DESTINATION_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/loadest-gp-output/"
-SAMPLES_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-samples.parquet/"
-DAILY_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-daily.parquet/"
+DESTINATION_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/loadest-gp-output"
+SAMPLES_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-samples.parquet"
+DAILY_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-streamflow.parquet"
 
 
 @dataclass
@@ -57,9 +57,13 @@ def map_retrieval(record: SiteRecord):
     # read data from s3
     site = record.site_id
 
-    daily = pd.read_parquet(f"{DAILY_BUCKET}/MonitoringLocationIdentifier=USGS-{site}")
+    try:
+        daily = pd.read_parquet(f"{DAILY_BUCKET}/site_no={site}")
+        samples = pd.read_parquet(f"{SAMPLES_BUCKET}/MonitoringLocationIdentifier=USGS-{site}")
+    except:
+        print(f"Site {site} partion does not exist.")
+        return
 
-    samples = pd.read_parquet(f"{SAMPLES_BUCKET}/site_no={site}")
     samples = samples[samples["USGSPCode"] == PCODE]
 
     if samples.empty or daily.empty:
