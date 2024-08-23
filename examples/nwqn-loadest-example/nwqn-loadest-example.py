@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from matplotlib import pyplot as plt
 
 from discontinuum.utils import aggregate_to_daily
-from loadest_gp.providers import usgs
+from loadest_gp.providers.usgs import format_nwis_daily, format_wqp_samples
 from loadest_gp import LoadestGPMarginalGPyTorch as LoadestGP
 
 PROJECT = "National Water Quality Assessment Program (NAWQA)"
@@ -70,7 +70,9 @@ def map_retrieval(record: SiteRecord):
         print(f"Site {site} has no data.")
         return
 
+    samples = format_wqp_samples(samples)
     samples = aggregate_to_daily(samples)
+    daily = format_nwis_daily(daily)
 
     training_data = xr.merge([samples, daily], join="inner")
 
