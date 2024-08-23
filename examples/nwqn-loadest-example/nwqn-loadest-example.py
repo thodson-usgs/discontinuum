@@ -56,6 +56,7 @@ def map_retrieval(record: SiteRecord):
 
     # read data from s3
     site = record.site_id
+    print(f"Processing site {site}")
 
     try:
         daily = pd.read_parquet(f"{DAILY_BUCKET}/site_no={site}")
@@ -70,9 +71,22 @@ def map_retrieval(record: SiteRecord):
         print(f"Site {site} has no data.")
         return
 
+    # convert parquet back to float
+    # TODO: fix this upstream
+    samples.loc[:, "ResultMeasureValue"] = samples["ResultMeasureValue"].astype(float)
+    daily.loc[:, "00060_Mean"] = daily["00060_Mean"].astype(float)
+
+    # check censoring threshold
+    n = samples["ResultMeasureValue"].count()
+    if n/len(samples) < 0.8:
+        print(f"Site {site} has too many censored values.")
+        return
     samples = format_wqp_samples(samples)
     samples = aggregate_to_daily(samples)
+
     daily = format_nwis_daily(daily)
+    # TODO fix this upstream, data from other sites is being appended not updated
+    daily = daily.drop_duplicates('time')
 
     training_data = xr.merge([samples, daily], join="inner")
 
