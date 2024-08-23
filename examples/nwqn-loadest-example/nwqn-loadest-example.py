@@ -17,9 +17,12 @@ from loadest_gp import LoadestGPMarginalGPyTorch as LoadestGP
 PROJECT = "National Water Quality Assessment Program (NAWQA)"
 START_DATE = "1991-01-01"  # verify start date
 END_DATE = "2024-12-31"  # verify end date
-CHARACTERISTIC = "Phosphorus"
-FRACTION = "Total"
-DESTINATION_BUCKET = os.environ.get('DESTINATION_BUCKET')
+PCODE = "631"  # Nitrate plus nitrite
+CHARACTERISTIC = "Inorganic nitrogen (nitrate and nitrite)"
+FRACTION = "Dissolved"
+DESTINATION_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/loadest-gp-output/"
+SAMPLES_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-samples.parquet/"
+DAILY_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-daily.parquet/"
 
 
 @dataclass
@@ -35,21 +38,33 @@ class SiteRecord:
 def map_retrieval(record: SiteRecord):
     """Map function to pull data from NWIS and WQP"""
     # download covariates (daily streamflow)
-    daily = usgs.get_daily(
-        site=record.site_id,
-        start_date=record.start_date,
-        end_date=record.end_date
-        )
+    #daily = usgs.get_daily(
+    #    site=record.site_id,
+    #    start_date=record.start_date,
+    #    end_date=record.end_date
+    #    )
 
     # download target (concentration)
-    samples = usgs.get_samples(
-        site=record.site_id,
-        start_date=record.start_date,
-        end_date=record.end_date,
-        characteristic=record.characteristic,
-        fraction=record.fraction,
-        project=record.project
-        )
+    #samples = usgs.get_samples(
+    #    site=record.site_id,
+    #    start_date=record.start_date,
+    #    end_date=record.end_date,
+    #    characteristic=record.characteristic,
+    #    fraction=record.fraction,
+    #    project=record.project
+    #    )
+
+    # read data from s3
+    site = record.site_id
+
+    daily = pd.read_parquet(f"{DAILY_BUCKET}/MonitoringLocationIdentifier=USGS-{site}")
+
+    samples = pd.read_parquet(f"{SAMPLES_BUCKET}/site_no={site}")
+    samples = samples[samples["USGSPCode"] == PCODE]
+
+    if samples.empty or daily.empty:
+        print(f"Site {site} has no data.")
+        return
 
     samples = aggregate_to_daily(samples)
 
@@ -64,7 +79,7 @@ def map_retrieval(record: SiteRecord):
         )
 
     # plot the result
-    model.plot(daily[['time','flow']], ax=ax)
+    model.plot(daily[["time", "flow"]], ax=ax)
 
     # save the figure to S3
     img_data = io.BytesIO()
@@ -76,7 +91,7 @@ def map_retrieval(record: SiteRecord):
     bucket.put_object(
         Body=img_data,
         ContentType='image/png',
-        Key="nawqa-{site_id}-{characteristic}-{fraction}.png".format(
+        Key="nwqn-{site_id}-{characteristic}-{fraction}.png".format(
             **record.__dict__
             )
     )
