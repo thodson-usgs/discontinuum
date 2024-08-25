@@ -15,7 +15,6 @@ from gpytorch.priors import (
     NormalPrior,
 )
 
-from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
 from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel
@@ -31,8 +30,16 @@ class PowerLawTransform(torch.nn.Module):
         self.c = torch.nn.Parameter(torch.zeros(1))
 
     def forward(self, x):
-        self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
-        return self.a + (self.b * torch.log(x - self.c))
+        # self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
+        # return self.a + (self.b * torch.log(x - self.c))
+        m = x > self.c  # mask flow state: stage > c
+        output = torch.empty_like(x)
+        # flow state
+        output[m] = self.a + (self.b * torch.log(x[m] - self.c))
+        # no-flow state
+        zero_flow_value = 1e-6  # TODO set in config and provider
+        output[~m] = np.log(zero_flow_value)  # avoid log(0) error
+        return output
 
 
 class RatingGPMarginalGPyTorch(
