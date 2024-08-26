@@ -24,7 +24,7 @@ import torch.nn.functional as F
 class PowerLawTransform(torch.nn.Module):
     """
     """
-    def __init__(self, nn=None):
+    def __init__(self):
         super(PowerLawTransform, self).__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
         self.b = torch.nn.Parameter(torch.rand(1))
@@ -43,8 +43,8 @@ class PowerLawTransform(torch.nn.Module):
         return output
 
 
-class PowerLawLayer(torch.nn.Module):
-    def forward(self, a, x):
+class PowerLawLayer(PowerLawTransform):
+     def forward(self, c, x):
         """
         Parameters
         ----------
@@ -53,22 +53,29 @@ class PowerLawLayer(torch.nn.Module):
         x : torch.Tensor
             2D time and stage data
         """
-        #import pdb; pdb.set_trace()
-        # TESTING clamping has not fixed the nan issue
-        #x_min = x[:, 1].min()
-        #x_max = x[:, 1].max()
-        a[:, 1].data = torch.clamp(a[:, 1], min=1.5, max=2.5)  # TODO check LeCoz 2014
-        #a[:, 2].data = torch.clamp(a[:, 2], max=x_min + (x_max - x_min)/2)
-
-        # TODO test init to be less than x.min()
-        m = x[:, 1] > a[:, 2]  # mask the flow state
+        self.b.data = torch.clamp(self.b.data, min=1.5, max=2.5)  #TODO verify LeCoz 2014 range
+        h_max = x[:, 1].max()
+        c = self.c + c.flatten()  # add flatten
+        # TODO clamp is set too high such that the model is not utilizing the
+        # power law but rather behaves like a constant mean model, because the
+        # model too easily adopts the no-flow state, even when during high
+        # flows. Might try setting clamp to the parameter of the sigmoid.
+        # TODO An alternative idea, is that we just need the model to follow the data
+        # at low stages and power-law theory at high stages. This might be achieved
+        # without a neural network by switching the mean function at an
+        # intermediate stage, like that of the sigmoid kernel. At low stages,
+        # apply a constant mean, and at high stages apply the power law.
+        # TODO Another idea, and probably the simplest, but least-physical, is
+        # to add an arbitrary offset in the stage transformation, thereby giving
+        # the model a little more tolerance by keeping c below the data range.
+        c.data = torch.clamp(c.data, min=0, max=h_max)
+        m = x[:, 1] > c  # mask the flow state
         x_t = x[m]
-        a_t = a[m]
 
         output = torch.empty_like(x[:, 1])
         # flow state
-        output[m] = a_t[:, 0]
-        output[m] += (a_t[:, 1] * torch.log(x_t[:, 1] - a_t[:, 2]))
+        output[m] = self.a
+        output[m] += self.b * torch.log(x_t[:, 1] - c[m])
         # no-flow state
         zero_flow_value = 1e-6  # TODO set in config
         output[~m] = np.log(zero_flow_value)  # avoid log(0) error
@@ -78,12 +85,11 @@ class PowerLawLayer(torch.nn.Module):
 class NeuralPowerLaw(torch.nn.Module):
     def __init__(self):
         super(NeuralPowerLaw, self).__init__()
-        # 1st test was 500>50>3
-        # 2nd was 1000>500>50>3
-        self.l0 = torch.nn.Linear(1, 1000)
-        self.l1 = torch.nn.Linear(1000, 500)
-        self.l2 = torch.nn.Linear(500, 50)
-        self.l3 = torch.nn.Linear(50, 3)
+        # 1st test was 500>50>3; ~150 it/s
+        # 2nd was 1000>500>50>3; ~110 it/s
+        self.l0 = torch.nn.Linear(1, 500)
+        self.l1 = torch.nn.Linear(500, 50)
+        self.l2 = torch.nn.Linear(50, 1)
         self.p0 = PowerLawLayer()
 
     def forward(self, x):
@@ -93,10 +99,6 @@ class NeuralPowerLaw(torch.nn.Module):
         a = self.l1(a)
         a = F.relu(a)
         a = self.l2(a)
-        a = F.relu(a)
-        a = self.l3(a)
-        # TODO the problem is that x is not updated
-        # and powr law is receiving the wrong input
         return self.p0(a, x)
 
 
