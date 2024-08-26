@@ -28,11 +28,12 @@ class PowerLawTransform(torch.nn.Module):
         self.a = torch.nn.Parameter(torch.rand(1))
         self.b = torch.nn.Parameter(torch.rand(1))
         self.c = torch.nn.Parameter(torch.zeros(1))
+        self.d = torch.nn.Parameter(torch.zeros(1))
 
     def forward(self, x):
-        # self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
+        self.d.data = torch.clamp(self.d.data, min=self.c, max=x.min() + (x.max() - x.min()) * 0.1)
         # return self.a + (self.b * torch.log(x - self.c))
-        m = x > self.c  # mask flow state: stage > c
+        m = x > self.d  # mask flow state: stage > c
         output = torch.empty_like(x)
         # flow state
         output[m] = self.a + (self.b * torch.log(x[m] - self.c))
