@@ -55,35 +55,35 @@ class PowerLawLayer(torch.nn.Module):
         """
         #import pdb; pdb.set_trace()
         # TESTING clamping has not fixed the nan issue
-        x_min = x[:, 1].min()
-        x_max = x[:, 1].max()
+        #x_min = x[:, 1].min()
+        #x_max = x[:, 1].max()
         a[:, 1].data = torch.clamp(a[:, 1], min=1.5, max=2.5)  # TODO check LeCoz 2014
-        a[:, 2].data = torch.clamp(a[:, 2], max=x_min + (x_max - x_min)/2)
+        #a[:, 2].data = torch.clamp(a[:, 2], max=x_min + (x_max - x_min)/2)
 
-        # TODO init to be less than x.min()
-        mask = x[:, 1] <= a[:, 2]  # mask where stage < c
-        x_t = x[mask]
-        x_f = x[~mask]
-        a_t = a[mask]
+        # TODO test init to be less than x.min()
+        m = x[:, 1] > a[:, 2]  # mask the flow state
+        x_t = x[m]
+        a_t = a[m]
 
-        output = torch.empty_like(x[:, 0])
+        output = torch.empty_like(x[:, 1])
         # flow state
-        output[mask] = a_t[:, 0]
-        output[mask] += (a_t[:, 1] * torch.log(x_t[:, 0] - a_t[:, 2]))
+        output[m] = a_t[:, 0]
+        output[m] += (a_t[:, 1] * torch.log(x_t[:, 1] - a_t[:, 2]))
         # no-flow state
-        output[~mask] = 1e-6 * torch.ones(x_f.shape[0])
+        zero_flow_value = 1e-6  # TODO set in config
+        output[~m] = np.log(zero_flow_value)  # avoid log(0) error
         return output
-
-        # x[3] = torch.clamp(x[3], max=x[0].min()-1e-6)
-        # return x[1] + (x[2] * torch.log(x[0] - x[3]))
 
 
 class NeuralPowerLaw(torch.nn.Module):
     def __init__(self):
         super(NeuralPowerLaw, self).__init__()
-        self.l0 = torch.nn.Linear(1, 500)
-        self.l1 = torch.nn.Linear(500, 50)
-        self.l2 = torch.nn.Linear(50, 3)
+        # 1st test was 500>50>3
+        # 2nd was 1000>500>50>3
+        self.l0 = torch.nn.Linear(1, 1000)
+        self.l1 = torch.nn.Linear(1000, 500)
+        self.l2 = torch.nn.Linear(500, 50)
+        self.l3 = torch.nn.Linear(50, 3)
         self.p0 = PowerLawLayer()
 
     def forward(self, x):
@@ -93,6 +93,8 @@ class NeuralPowerLaw(torch.nn.Module):
         a = self.l1(a)
         a = F.relu(a)
         a = self.l2(a)
+        a = F.relu(a)
+        a = self.l3(a)
         # TODO the problem is that x is not updated
         # and powr law is receiving the wrong input
         return self.p0(a, x)
