@@ -101,13 +101,18 @@ def map_retrieval(record: SiteRecord):
 
     model = LoadestGP()
 
-    fig, ax = plt.subplots()
-    model.fit(
-        target=training_data["concentration"],
-        covariates=training_data[["time", "flow"]]
-        )
+    try:
+        model.fit(
+            target=training_data["concentration"],
+            covariates=training_data[["time", "flow"]]
+            )
+
+    except Exception as e:
+        print(f"Site {site} failed to fit model: {e}")
+        return
 
     # plot the result
+    fig, ax = plt.subplots()
     model.plot(daily[["time", "flow"]], ax=ax)
 
     # save the figure to S3
