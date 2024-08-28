@@ -20,7 +20,8 @@ END_DATE = "2024-12-31"  # verify end date
 PCODE = "631"  # Nitrate plus nitrite
 CHARACTERISTIC = "Inorganic nitrogen (nitrate and nitrite)"
 FRACTION = "Dissolved"
-DESTINATION_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/loadest-gp-output"
+DESTINATION_BUCKET = "wma-uncertainty"
+DESTINATION_PATH = "nwqn-loadest-example/loadest-gp-output"
 SAMPLES_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-samples.parquet"
 DAILY_BUCKET = "s3://wma-uncertainty/nwqn-loadest-example/nwqn-streamflow.parquet"
 
@@ -73,8 +74,8 @@ def map_retrieval(record: SiteRecord):
 
     # convert parquet back to float
     # TODO: fix this upstream
-    samples.loc[:, "ResultMeasureValue"] = samples["ResultMeasureValue"].astype(float)
-    daily.loc[:, "00060_Mean"] = daily["00060_Mean"].astype(float)
+    samples["ResultMeasureValue"] = samples["ResultMeasureValue"].astype(float)
+    daily["00060_Mean"] = daily["00060_Mean"].astype(float)
 
     # check censoring threshold
     n = samples["ResultMeasureValue"].count()
@@ -85,10 +86,18 @@ def map_retrieval(record: SiteRecord):
     samples = aggregate_to_daily(samples)
 
     daily = format_nwis_daily(daily)
+
     # TODO fix this upstream, data from other sites is being appended not updated
     daily = daily.drop_duplicates('time')
+    daily = daily.dropna('time', how='any')
 
     training_data = xr.merge([samples, daily], join="inner")
+    #training_data = training_data.dropna('time', how='any')
+
+    min_obs = 50
+    if len(training_data['time']) <= min_obs:
+        print(f"Site {site} has fewer than {min_obs} observations.")
+        return
 
     model = LoadestGP()
 
@@ -111,8 +120,9 @@ def map_retrieval(record: SiteRecord):
     bucket.put_object(
         Body=img_data,
         ContentType='image/png',
-        Key="nwqn-{site_id}-{characteristic}-{fraction}.png".format(
-            **record.__dict__
+        Key="{path}/nwqn-{site_id}-{characteristic}-{fraction}.png".format(
+            path=DESTINATION_PATH,
+            **record.__dict__,
             )
     )
 
@@ -140,7 +150,7 @@ if __name__ == "__main__":
         for site in site_list
     ]
 
-    sites = sites[:4]  # prune for testing
+    #sites = sites[:4]  # prune for testing
 
     fexec = lithops.FunctionExecutor(config_file="lithops.yaml")
     futures = fexec.map(map_retrieval, sites)
