@@ -126,7 +126,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         covar_x = self.covar_module(x_t)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
-
     def cov_stage(self, ls_prior=None):
         eta = HalfNormalPrior(scale=1)
 
