@@ -282,10 +282,6 @@ class RatingPlotMixin(BasePlotMixin):
         -------
         ax : Axes
             Generated matplotlib axes.
-
-        Examples
-        --------
-        
         """
         ax = self.setup_plot(ax)
         
