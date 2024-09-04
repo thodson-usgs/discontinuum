@@ -119,6 +119,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
 
     def forward(self, x):
+        self.powerlaw.b.data.clamp_(1.5, 2.5)
         x_t = x.clone()
         x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
 
