@@ -74,7 +74,9 @@ class RatingPlotMixin(BasePlotMixin):
     def plot_rating(self,
                     covariates: Dataset,
                     ci: float = 0.95,
-                    ax: Optional[Axes] = None):
+                    ax: Optional[Axes] = None,
+                    **kwargs
+                   ):
         """Plot predicted discharge versus stage.
 
         Parameters
@@ -105,18 +107,18 @@ class RatingPlotMixin(BasePlotMixin):
         # compute confidence bounds
         lower, upper = self.dm.error_pipeline.ci(target, se, ci=ci)
 
-        ax.plot(covariates["stage"], target, lw=1, zorder=2)
+        ax.plot(covariates["stage"], target, lw=1, zorder=2, **kwargs)
 
         ax.fill_between(
             covariates['stage'],
             lower,
             upper,
-            color="b",
             alpha=0.1,
             zorder=1,
+            **kwargs
         )
 
-        self.plot_observed_rating(ax, zorder=3)
+        # self.plot_observed_rating(ax, zorder=3)
 
         return ax
 
@@ -251,15 +253,20 @@ class RatingPlotMixin(BasePlotMixin):
             cmap = None
 
         ticks = (time_ticks - cbar_range[0])/(cbar_range[1] - cbar_range[0])
-        cbar = plt.colorbar(ScalarMappable(cmap=cmap),
-                            ax=ax,
-                            aspect=30,
-                            ticks=ticks,
-                            format=mticker.FixedFormatter(
-                                time_ticks.strftime('%Y-%m-%d')
-                            ),
-                            **kwargs
-                           )
+        if not hasattr(ax, 'cbar'):
+            cbar = plt.colorbar(ScalarMappable(cmap=cmap),
+                                ax=ax,
+                                aspect=30,
+                                ticks=ticks,
+                                format=mticker.FixedFormatter(
+                                    time_ticks.strftime('%Y-%m-%d')
+                                ),
+                                **kwargs
+                               )
+        else:
+            cbar = ax.cbar
+
+        ax.cbar = cbar
 
         return cbar
 
@@ -267,6 +274,7 @@ class RatingPlotMixin(BasePlotMixin):
     @is_fitted
     def plot_ratings_in_time(self,
                              time: Optional[list[Union[str, datetime]]] = None,
+                             ci: Optional[int] = 0,
                              ax: Optional[Axes] = None,
                              **kwargs):
         """Plot predicted discharge versus stage.
@@ -275,6 +283,8 @@ class RatingPlotMixin(BasePlotMixin):
         ----------
         time : list[str, datetime], optional
             List of times at which to plot the rating curve.
+        ci : float, optional
+            Confidence interval. Default is 0 (i.e., no confidence intervals).
         ax : Axes, optional
             Pre-defined matplotlib axes.
 
@@ -299,7 +309,6 @@ class RatingPlotMixin(BasePlotMixin):
         else:
             time = pd.to_datetime(time)
         
-        ax = self.plot_observed_rating(ax, zorder=2, **kwargs)
         cbar = self.add_time_colorbar(ax=ax, time_ticks=time, **kwargs)
         cbar_range = pd.to_datetime(
             [self.dm.data.covariates.time.min().values,
@@ -315,22 +324,13 @@ class RatingPlotMixin(BasePlotMixin):
                     time=np.repeat(datetime, n),
                 ),
             )
-            mu, _ = self.predict(covariates, diag=True, pred_noise=True)
-        
-            target = xr.DataArray(
-                mu,
-                coords=[covariates.time],
-                dims=["time"],
-                attrs=self.dm.data.target.attrs,
-            )
-        
-            ax.plot(covariates["stage"],
-                    target,
-                    lw=1,
-                    zorder=1,
-                    color=cbar.cmap(
-                        (datetime - cbar_range[0])/(cbar_range[1] - cbar_range[0])
-                        )
-                   )
+            self.plot_rating(covariates,
+                             ci=ci,
+                             ax=ax,
+                             color=cbar.cmap(
+                                 ((datetime - cbar_range[0])
+                                  /(cbar_range[1] - cbar_range[0]))
+                             )
+                             )
 
         return ax
