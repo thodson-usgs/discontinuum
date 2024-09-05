@@ -5,7 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
+from matplotlib.cm import ScalarMappable
+import matplotlib.ticker as mticker
 import numpy as np
+import pandas as pd
 from discontinuum.engines.base import is_fitted
 from discontinuum.plot import BasePlotMixin
 from scipy.stats import norm
@@ -14,8 +17,8 @@ from xarray import DataArray
 from xarray.plot.utils import label_from_attrs
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
-
+    from typing import Dict, Optional, Union
+    from datetime import datetime
     from matplotlib.pyplot import Axes
     from xarray import Dataset
 
@@ -212,5 +215,122 @@ class RatingPlotMixin(BasePlotMixin):
             add_legend=False,
             add_colorbar=False,
         )
+
+        return ax
+
+    @is_fitted
+    def add_time_colorbar(self,
+                          ax: Optional[Axes] = None,
+                          time_ticks: Optional[list[Union[str, datetime]]] = None,
+                          **kwargs
+                         ):
+        """Add a colorbar of the data time range to the figure.
+
+        Parameters
+        ----------
+        ax : Axes, optional
+            Pre-defined matplotlib axes.
+        time_ticks : list[str, datetime], optional
+            List of times to place ticks on the colorbar.
+
+        Returns
+        -------
+        cbar : Axes
+            Generated matplotlib colorbar.
+        """
+        cbar_range = pd.to_datetime(
+            [self.dm.data.covariates.time.min().values,
+             self.dm.data.covariates.time.max().values]
+        )
+        if time_ticks is None:
+            time_ticks = pd.date_range(*cbar_range, periods=5)
+
+        if 'cmap' in kwargs:
+            cmap = kwargs['cmap']
+        else:
+            cmap = None
+
+        ticks = (time_ticks - cbar_range[0])/(cbar_range[1] - cbar_range[0])
+        cbar = plt.colorbar(ScalarMappable(cmap=cmap),
+                            ax=ax,
+                            aspect=30,
+                            ticks=ticks,
+                            format=mticker.FixedFormatter(
+                                time_ticks.strftime('%Y-%m-%d')
+                            ),
+                            **kwargs
+                           )
+
+        return cbar
+
+
+    @is_fitted
+    def plot_ratings_in_time(self,
+                             time: Optional[list[Union[str, datetime]]] = None,
+                             ax: Optional[Axes] = None,
+                             **kwargs):
+        """Plot predicted discharge versus stage.
+
+        Parameters
+        ----------
+        time : list[str, datetime], optional
+            List of times at which to plot the rating curve.
+        ax : Axes, optional
+            Pre-defined matplotlib axes.
+
+        Returns
+        -------
+        ax : Axes
+            Generated matplotlib axes.
+        """
+        ax = self.setup_plot(ax)
+        
+        n = 250
+        stage = np.linspace(self.dm.data.covariates['stage'].min()*0.95,
+                            self.dm.data.covariates['stage'].max()*1.5,
+                            n)
+        
+        if time is None:
+            time = pd.date_range(
+                self.dm.data.covariates['time'].min().values,
+                self.dm.data.covariates['time'].max().values,
+                periods=5
+            )
+        else:
+            time = pd.to_datetime(time)
+        
+        ax = self.plot_observed_rating(ax, zorder=2, **kwargs)
+        cbar = self.add_time_colorbar(ax=ax, time_ticks=time, **kwargs)
+        cbar_range = pd.to_datetime(
+            [self.dm.data.covariates.time.min().values,
+             self.dm.data.covariates.time.max().values]
+        )
+
+        for datetime in time:
+            covariates = xr.Dataset(
+                data_vars=dict(
+                    stage=(["time"], stage),
+                ),
+                coords=dict(
+                    time=np.repeat(datetime, n),
+                ),
+            )
+            mu, _ = self.predict(covariates, diag=True, pred_noise=True)
+        
+            target = xr.DataArray(
+                mu,
+                coords=[covariates.time],
+                dims=["time"],
+                attrs=self.dm.data.target.attrs,
+            )
+        
+            ax.plot(covariates["stage"],
+                    target,
+                    lw=1,
+                    zorder=1,
+                    color=cbar.cmap(
+                        (datetime - cbar_range[0])/(cbar_range[1] - cbar_range[0])
+                        )
+                   )
 
         return ax
