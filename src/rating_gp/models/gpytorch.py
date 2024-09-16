@@ -21,7 +21,11 @@ from gpytorch.constraints import Interval
 from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel, PowerLawKernel
+from rating_gp.models.kernels import (
+    StageTimeKernel,
+    SigmoidKernel,
+    PowerLawKernel,
+)
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -112,7 +116,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         #        * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
         #        * SigmoidKernel(
         #            active_dims=self.stage_dim,
-        #            # a_prior=NormalPrior(loc=20, scale=1),
+        #            a=-20,
         #            b_constraint=gpytorch.constraints.Interval(
         #                train_x[:, self.stage_dim].min(),
         #                train_x[:, self.stage_dim].max()
@@ -122,27 +126,57 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # )
 
         self.covar_module = (
-            ScaleKernel(PowerLawKernel(active_dims=self.stage_dim,
-                           b_constraint=Interval(1.2, 2.8),
-                           c_constraint=Interval(0, train_x[:, self.stage_dim].min()-1e-6)))
-            * ScaleKernel(
-                MaternKernel(
-                    lengthscale_prior=GammaPrior(concentration=15, rate=3),
-                    # ard_num_dims=2,
-                    active_dims=self.dims,
-                ),
-            )
+            self.cov_plaw(c_constraint=Interval(0, train_x[:, self.stage_dim].min()-1e-6))
+            # * SigmoidKernel(
+            #      active_dims=self.stage_dim,
+            #      a=20,
+            #      b_constraint=gpytorch.constraints.Interval(
+            #          train_x[:, self.stage_dim].min(),
+            #          train_x[:, self.stage_dim].max()
+            #      ),
+            #  )
+        ) + (self.cov_plaw(c_constraint=Interval(0, train_x[:, self.stage_dim].min()-1e-6))
+            * SigmoidKernel(
+                 active_dims=self.stage_dim,
+                 a=-20,
+                 b_constraint=gpytorch.constraints.Interval(
+                     train_x[:, self.stage_dim].min(),
+                     train_x[:, self.stage_dim].max()
+                 ),
+             )
         ) + ConstantKernel()
 
+        
     def forward(self, x):
         # In log-space, constrain the slope between 1.5 and 2.5 (Le Coz 2014)
-        # self.powerlaw.b.data.clamp_(1.5, 2.5)
+        # self.powerlaw.b.data.clamp_(1.2, 2.8)
+
+        # print(self.covar_module.kernels[0].kernels[2].b, self.covar_module.kernels[1].kernels[2].b)
+            
+        # self.covar_module.kernels[1].kernels[2].b = (
+        #     self.covar_module.kernels[0].kernels[2].b
+        # )
+        
         x_t = x.clone()
         # x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
 
         mean_x = self.mean_module(x_t[:, self.stage_dim])
         covar_x = self.covar_module(x_t)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+
+    def cov_plaw(self, c_constraint=gpytorch.constraints.Positive()):
+        kernel = (PowerLawKernel(active_dims=self.stage_dim,
+               b_constraint=Interval(1.2, 2.8),
+               c_constraint=c_constraint)
+                 * ScaleKernel(
+                    MaternKernel(
+                        ard_num_dims=2,
+                        active_dims=self.dims,
+                    ),
+                     )
+                  )
+        return kernel
+
 
     def cov_stage(self, ls_prior=None):
         eta = HalfNormalPrior(scale=1)

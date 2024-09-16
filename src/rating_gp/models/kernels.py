@@ -231,6 +231,7 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
     """
     def __init__(
         self,
+        a=20,
         # a_prior=None,
         # a_constraint=None,
         b_prior=None,
@@ -248,7 +249,7 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         """
         super().__init__(**kwargs)
 
-        self.a = 20
+        self.a = a
         # self.register_parameter(
         #     name='raw_a',
         #     parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
@@ -312,8 +313,8 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         # `a` is the sharpness of the slope, larger absolute values = sharper slope
         # the sign of `a` determines which side of the curve is 0 and the other is 1
         # `b` is the offset of of the curve at a sigmoid value of 0.5
-        x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
-        x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
+        x1_ = 1/(1 + torch.exp(-1*self.a * (x1 - self.b)))
+        x2_ = 1/(1 + torch.exp(-1*self.a * (x2 - self.b)))
         
         prod = MatmulLinearOperator(x1_, x2_.transpose(-2, -1))
         if diag:
