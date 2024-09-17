@@ -33,8 +33,8 @@ class PowerLawTransform(torch.nn.Module):
 
     def forward(self, x):
         # self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
-        self.d.data = torch.clamp(self.d.data, 
-                                  min=self.c+1e-6, 
+        self.d.data = torch.clamp(self.d.data,
+                                  min=self.c+1e-6,
                                   max=x.min() + (x.max() - x.min()) * 0.2)
         # return self.a + (self.b * torch.log(x - self.c))
         m = x > self.d  # mask flow state: stage > c
@@ -43,10 +43,11 @@ class PowerLawTransform(torch.nn.Module):
         output[m] = self.a + (self.b * torch.log(x[m] - self.c))
         # no-flow state
         # zero_flow_value = 1e-6  # TODO set in config and provider
-        # output[~m] = np.log(zero_flow_value)  # avoid log(0) error
-        flow_at_d =  self.a + (self.b * torch.log(self.d - self.c))
-        output[~m] = flow_at_d / torch.log(self.d) * torch.log(x[~m])
-        # y = (y2-y1)/(log(x2)-log(x1))*(log(x) - log(x1)) + y1
+        # output[~m] = np.log(zero_flow_value)  # avoid log(0) error 
+        q_d = self.a + (self.b * torch.log(self.d - self.c))
+        q_0 = np.log(1e-9)  # TODO set in config and provider
+        output[~m] = (q_d - q_0) / (self.d) * x[~m] + q_0
+        # y = (y2-y1)/(x2-x1)*(x-x1) + y1
         return output
 
 
