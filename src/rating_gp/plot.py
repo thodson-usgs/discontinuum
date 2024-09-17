@@ -298,8 +298,13 @@ class RatingPlotMixin(BasePlotMixin):
         ax = self.setup_plot(ax)
         
         n = 250
+<<<<<<< HEAD
         stage = np.linspace(self.dm.data.covariates['stage'].min().values*0.95,
                             self.dm.data.covariates['stage'].max().values*1.5,
+=======
+        stage = np.linspace(self.dm.data.covariates['stage'].min()*0.95,
+                            self.dm.data.covariates['stage'].max()*1.5,
+>>>>>>> 909f0b9 (Global cutoff parameter d)
                             n)
         
         if time is None:
@@ -335,4 +340,8 @@ class RatingPlotMixin(BasePlotMixin):
                              )
                              )
 
+<<<<<<< HEAD
         return ax
+=======
+        return ax
+>>>>>>> 909f0b9 (Global cutoff parameter d)

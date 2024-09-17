@@ -28,18 +28,25 @@ class PowerLawTransform(torch.nn.Module):
         self.a = torch.nn.Parameter(torch.rand(1))
         self.b = torch.nn.Parameter(torch.rand(1))
         self.c = torch.nn.Parameter(torch.zeros(1))
-        self.d = torch.nn.Parameter(torch.zeros(1))
+        # self.d = torch.nn.Parameter(torch.zeros(1))
+        self.d = torch.zeros(1)
 
     def forward(self, x):
-        self.d.data = torch.clamp(self.d.data, min=self.c, max=x.min() + (x.max() - x.min()) * 0.1)
+        # self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
+        self.d.data = torch.clamp(self.d.data, 
+                                  min=self.c+1e-6, 
+                                  max=x.min() + (x.max() - x.min()) * 0.2)
         # return self.a + (self.b * torch.log(x - self.c))
         m = x > self.d  # mask flow state: stage > c
         output = torch.empty_like(x)
         # flow state
         output[m] = self.a + (self.b * torch.log(x[m] - self.c))
         # no-flow state
-        zero_flow_value = 1e-6  # TODO set in config and provider
-        output[~m] = np.log(zero_flow_value)  # avoid log(0) error
+        # zero_flow_value = 1e-6  # TODO set in config and provider
+        # output[~m] = np.log(zero_flow_value)  # avoid log(0) error
+        flow_at_d =  self.a + (self.b * torch.log(self.d - self.c))
+        output[~m] = flow_at_d / torch.log(self.d) * torch.log(x[~m])
+        # y = (y2-y1)/(log(x2)-log(x1))*(log(x) - log(x1)) + y1
         return output
 
 
@@ -111,51 +118,50 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # Stage * time kernel with large time length
         # + stage * time kernel only at low stage with smaller time length
         self.covar_module = (
-            (self.cov_stage()
-             * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)))
-            + (self.cov_stage()
+            ScaleKernel(self.cov_stage()
+             * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)),
+                        outputscale_prior=HalfNormalPrior(scale=1))
+            + ScaleKernel(self.cov_stage()
                * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
                * SigmoidKernel(
                    active_dims=self.stage_dim,
-                   # a_prior=NormalPrior(loc=20, scale=1),
+                   plaw=self.powerlaw,
+                   # b_prior=NormalPrior(1, 0.001),
                    b_constraint=gpytorch.constraints.Interval(
                        train_x[:, self.stage_dim].min(),
                        train_x[:, self.stage_dim].max()
                    ),
-               )
-              )
+               ),
+                          outputscale_prior=HalfNormalPrior(scale=0.5))
         )
 
     def forward(self, x):
         self.powerlaw.b.data.clamp_(1.5, 2.5)
         x_t = x.clone()
+
+        self.powerlaw.d.data = self.covar_module.kernels[1].base_kernel.kernels[2].b.data.flatten()
         x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
+        self.covar_module.kernels[1].base_kernel.kernels[2].b = self.powerlaw.d.data
 
         mean_x = self.mean_module(x_t[:, self.stage_dim])
         covar_x = self.covar_module(x_t)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_stage(self, ls_prior=None):
-        eta = HalfNormalPrior(scale=1)
+        # eta = HalfNormalPrior(scale=1)
 
-        return ScaleKernel(
-            MaternKernel(
+        return MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=ls_prior,
-            ),
-            outputscale_prior=eta,
-        )
+            )
 
     def cov_time(self, ls_prior=None):
-        eta = HalfNormalPrior(scale=1)
+        # eta = HalfNormalPrior(scale=1)
 
-        return ScaleKernel(
-            MaternKernel(
+        return MaternKernel(
                 active_dims=self.time_dim,
                 lengthscale_prior=ls_prior,
-            ),
-            outputscale_prior=eta,
-        )
+            )
 
     def cov_stagetime(self):
         eta = HalfNormalPrior(scale=1)
