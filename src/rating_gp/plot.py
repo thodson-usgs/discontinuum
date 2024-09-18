@@ -140,6 +140,8 @@ class RatingPlotMixin(BasePlotMixin):
             Generated matplotlib axes.
 
         """
+        ax = self.setup_plot(ax)
+
         self.dm.data.covariates.plot.scatter(
             x='time',
             y='stage',
@@ -237,7 +239,7 @@ class RatingPlotMixin(BasePlotMixin):
 
         Returns
         -------
-        cbar : Axes
+        cbar : Colorbar
             Generated matplotlib colorbar.
         """
         cbar_range = pd.to_datetime(
