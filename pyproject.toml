@@ -35,6 +35,8 @@ dev = [
   "flake8",
   "ruff",
   "pytest-cov[all]",
+  "requests_mock",
+  "dataretrieval",
 ]
 
 doc = [
