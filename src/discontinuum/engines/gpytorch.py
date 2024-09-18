@@ -148,17 +148,25 @@ class MarginalGPyTorch(BaseModel):
         return target, se
 
     @is_fitted
-    def predict_grid(self, covariate: str, index="time", t_step=12):
+    def predict_grid(self,
+                     covariate: str,
+                     coord: str = None,
+                     t_step: int = 12):
         """Predict on a grid of points.
 
         Parameters
         ----------
-        covariate_dim : int, optional
-            Dimension to predict on. The default is 1.
+        covariate : str
+            Covariate dimension to predict on.
+        coord : str, optional
+            Coordinate of the covariate dimension to predict on. The default
+            is the first coordinate of the covariate.
         t_step : int, optional
-            Time steps per year. The default is 12.
+            Number of grid points per step in coord units. The default is 12.
         """
-        time_dim = self.dm.get_dim(index)
+        if coord is None:
+            coord = list(self.dm.data.covariates.coords)[0]
+        coord_dim = self.dm.get_dim(coord)
         covariate_dim = self.dm.get_dim(covariate)
 
         x_max = self.dm.X.max(axis=0)
@@ -166,21 +174,21 @@ class MarginalGPyTorch(BaseModel):
         x_range = x_max - x_min
 
         n_cov = 18
-        n_time = np.round(x_range[time_dim] * t_step).astype(int)
+        n_coord = np.round(x_range[coord_dim] * t_step).astype(int)
 
-        x_time = torch.linspace(x_min[time_dim], x_max[time_dim], n_time)
+        x_coord = torch.linspace(x_min[coord_dim], x_max[coord_dim], n_coord)
         x_cov = torch.linspace(x_min[covariate_dim], x_max[covariate_dim], n_cov)
 
         # expects a 1D vector
-        X_grid = torch.cartesian_prod(x_time, x_cov)
+        X_grid = torch.cartesian_prod(x_coord, x_cov)
 
         mu, var = self.__gpytorch_predict(X_grid)
 
         target = self.dm.y_t(mu)
-        target = target.data.reshape(n_time, n_cov)
+        target = target.data.reshape(n_coord, n_cov)
 
         # TODO handle type conversion in pipeline
-        index = self.dm.covariate_pipelines["time"].inverse_transform(x_time.numpy())
+        index = self.dm.covariate_pipelines[coord].inverse_transform(x_coord.numpy())
         covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.numpy())
 
         return target, index, covariate
@@ -222,8 +230,8 @@ class MarginalGPyTorch(BaseModel):
         attrs = temp.attrs
         da = DataArray(
             data,
-            coords={"time": covariates.time, "draw": np.arange(n)},
-            dims=["draw", "time"],
+            coords=dict(covariates.coords, draw=np.arange(n)),
+            dims=["draw"] + list(covariates.coords),
             attrs=attrs,
         )
 

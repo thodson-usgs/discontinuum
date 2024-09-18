@@ -14,7 +14,6 @@ from xarray import Dataset
 from discontinuum.pipeline import (
     LogErrorPipeline,
     LogStandardPipeline,
-    TimePipeline,
 )
 
 if TYPE_CHECKING:
@@ -73,12 +72,6 @@ class DataManager:
         target_unc : Dataset
             Target uncertainty. Default is None.
         """
-        # ensure time comes first in the dict
-
-        default_pipeline = {"time": TimePipeline}
-        default_pipeline.update(self.covariate_pipelines)
-        self.covariate_pipelines = default_pipeline
-
         self.data = Data(target, covariates, target_unc)
 
         self.target_pipeline = self.target_pipeline().fit(target)
@@ -89,9 +82,12 @@ class DataManager:
 
     def transform_covariates(self, covariates: Dataset) -> ArrayLike:
         """Transform covariates into design matrix"""
-        X = np.empty((len(covariates.time), len(self.covariate_pipelines)))
+        coords_shape = tuple()
+        for coord in covariates.coords:
+            coords_shape += covariates.coords[coord].shape
+        X = np.empty(coords_shape + (len(self.covariate_pipelines), ))
         for i, (key, value) in enumerate(self.covariate_pipelines.items()):
-            X[:, i] = value.transform(covariates[key]).flatten()
+            X[..., i] = value.transform(covariates[key]).flatten()
         return X
 
     # TODO handle reshaping in pipeline
@@ -126,7 +122,7 @@ class DataManager:
         """Convenience function for DataManager.target.untransform"""
         return self.target_pipeline.inverse_transform(y)
 
-    def get_dim(self, dim: str, index="time") -> int:
+    def get_dim(self, dim: str) -> int:
         """Get the dimension of a variable.
 
         In other words, its column in the design matrix.
@@ -141,6 +137,8 @@ class DataManager:
         int
             Dimension (column) in design matrix.
         """
-        cov_list = [index] + list(self.data.covariates)
+        # Coords come first in Pipelines
+        cov_list = (list(self.data.covariates.coords)
+                    + list(self.data.covariates))
 
         return cov_list.index(dim)

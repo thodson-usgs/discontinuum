@@ -78,17 +78,25 @@ class MarginalPyMC(BaseModel):
         return target, se
 
     @is_fitted
-    def predict_grid(self, covariate: str, index="time", t_step=12):
+    def predict_grid(self,
+                     covariate: str,
+                     coord: str = None,
+                     t_step: int = 12):
         """Predict on a grid of points.
 
         Parameters
         ----------
-        covariate_dim : int, optional
-            Dimension to predict on. The default is 1.
+        covariate : str
+            Covariate dimension to predict on.
+        coord : str, optional
+            Coordinate of the covariate dimension to predict on. The default
+            is the first coordinate of the covariate.
         t_step : int, optional
-            Time steps per year. The default is 12.
+            Number of grid points per step in coord units. The default is 12.
         """
-        time_dim = self.dm.get_dim(index)
+        if coord is None:
+            coord = list(self.dm.data.covariates.coords)[0]
+        coord_dim = self.dm.get_dim(coord)
         covariate_dim = self.dm.get_dim(covariate)
 
         x_max = self.dm.X.max(axis=0)
@@ -96,15 +104,15 @@ class MarginalPyMC(BaseModel):
         x_range = x_max - x_min
 
         n_cov = 18
-        n_time = np.round(x_range[time_dim] * t_step).astype(int)
+        n_coord = np.round(x_range[coord_dim] * t_step).astype(int)
 
-        x_time = np.linspace(x_min[time_dim], x_max[time_dim], n_time)
+        x_coord = np.linspace(x_min[coord_dim], x_max[coord_dim], n_coord)
         x_cov = np.linspace(x_min[covariate_dim], x_max[covariate_dim], n_cov)
 
         # TODO check dependency
         # tested with this on WSL with pymc v5.14.0
-        # X_grid = pm.math.cartesian(x_cov[:, None], x_time[None, :])
-        X_grid = pm.math.cartesian(x_time, x_cov)
+        # X_grid = pm.math.cartesian(x_cov[:, None], x_coord[None, :])
+        X_grid = pm.math.cartesian(x_coord, x_cov)
 
         mu, _ = self.gp.predict(
             X_grid,
@@ -116,9 +124,9 @@ class MarginalPyMC(BaseModel):
 
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
-        target = target.data.reshape(n_time, n_cov)
-        t_pipe = self.dm.covariate_pipelines["time"]
-        index = t_pipe.inverse_transform(x_time.reshape(-1, 1))
+        target = target.data.reshape(n_coord, n_cov)
+        t_pipe = self.dm.covariate_pipelines[coord]
+        index = t_pipe.inverse_transform(x_coord.reshape(-1, 1))
 
         c_pipe = self.dm.covariate_pipelines[covariate]
         covariate = c_pipe.inverse_transform(x_cov.reshape(-1, 1))
@@ -167,8 +175,8 @@ class MarginalPyMC(BaseModel):
         attrs = temp.attrs
         da = DataArray(
             data,
-            coords={"time": covariates.time, "draw": np.arange(n)},
-            dims=["draw", "time"],
+            coords=dict(covariates.coords, draw=np.arange(n)),
+            dims=["draw"] + list(covariates.coords),
             attrs=attrs,
         )
 
