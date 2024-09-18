@@ -298,8 +298,8 @@ class RatingPlotMixin(BasePlotMixin):
         ax = self.setup_plot(ax)
         
         n = 250
-        stage = np.linspace(self.dm.data.covariates['stage'].min()*0.95,
-                            self.dm.data.covariates['stage'].max()*1.5,
+        stage = np.linspace(self.dm.data.covariates['stage'].min().values*0.95,
+                            self.dm.data.covariates['stage'].max().values*1.5,
                             n)
         
         if time is None:
