@@ -3,6 +3,8 @@ import json
 import requests_mock
 from xarray import Dataset
 import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.colorbar import Colorbar
 
 from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP
@@ -58,12 +60,14 @@ def test_rating_gp(demo_nwis_query_response):
               covariates=data[['stage']],
               target_unc=data['discharge_unc'],
               iterations=10)
+    assert model.is_fitted
 
-    _ = model.plot_stage()
-    _ = model.plot_discharge()
-    _ = model.plot_observed_rating()
-    _ = model.plot_rating(covariates=data[['stage']])
+    assert isinstance(model.plot_stage(), Axes)
+    assert isinstance(model.plot_discharge(), Axes)
+    assert isinstance(model.plot_observed_rating(), Axes)
+    assert isinstance(model.plot_rating(covariates=data[['stage']]), Axes)
     ax = model.plot_ratings_in_time(
         time=pd.date_range('1990', '2021', freq='5YS-OCT'), ci=0.95
     )
-    _ = model.add_time_colorbar(ax=ax)
+    assert isinstance(ax, Axes)
+    assert isinstance(model.add_time_colorbar(ax=ax), Colorbar)
