@@ -47,7 +47,7 @@ class BasePlotMixin:
 
     @is_fitted
     def plot_observations(self, ax: Optional[Axes] = None, **kwargs):
-        """Plot observations versus time.
+        """Plot observations.
 
         Parameters
         ----------
@@ -58,7 +58,6 @@ class BasePlotMixin:
         -------
         ax : Axes
             Generated matplotlib axes.
-
         """
         # TODO provide easier access to data
         self.dm.data.target.plot.scatter(
@@ -72,8 +71,12 @@ class BasePlotMixin:
         )
 
     @is_fitted
-    def plot(self, covariates: Dataset, ci: float = 0.95, ax: Optional[Axes] = None):
-        """Plot predicted data versus time.
+    def plot(self,
+             covariates: Dataset,
+             ci: float = 0.95,
+             x: Optional[str] = None,
+             ax: Optional[Axes] = None):
+        """Plot predicted data.
 
         Parameters
         ----------
@@ -81,6 +84,8 @@ class BasePlotMixin:
             Covariates.
         ci : float, optional
             Confidence interval. The default is 0.95.
+        x : str, optional
+            The coordinate to plot on the x axis.
         ax : Axes, optional
             Pre-defined matplotlib axes.
 
@@ -89,14 +94,17 @@ class BasePlotMixin:
         ax : Axes
             Generated matplotlib axes.
         """
+        if x is None:
+            x = list(covariates.coords)[0]
+
         ax = self.setup_plot(ax)
 
         mu, se = self.predict(covariates, diag=True, pred_noise=True)
 
         target = DataArray(
             mu,
-            coords=[covariates.time],
-            dims=["time"],
+            coords=covariates.coords,
+            dims=list(covariates.coords),
             attrs=self.dm.data.target.attrs,
         )
 
@@ -106,7 +114,7 @@ class BasePlotMixin:
         target.plot.line(ax=ax, lw=1, zorder=2)
 
         ax.fill_between(
-            target["time"],
+            target[x],
             lower,
             upper,
             color="b",
