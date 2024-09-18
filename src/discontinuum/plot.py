@@ -71,7 +71,11 @@ class BasePlotMixin:
         )
 
     @is_fitted
-    def plot(self, covariates: Dataset, ci: float = 0.95, ax: Optional[Axes] = None):
+    def plot(self,
+             covariates: Dataset,
+             ci: float = 0.95,
+             x: Optional[str] = None,
+             ax: Optional[Axes] = None):
         """Plot predicted data.
 
         Parameters
@@ -80,6 +84,8 @@ class BasePlotMixin:
             Covariates.
         ci : float, optional
             Confidence interval. The default is 0.95.
+        x : str, optional
+            The coordinate to plot on the x axis.
         ax : Axes, optional
             Pre-defined matplotlib axes.
 
@@ -88,6 +94,9 @@ class BasePlotMixin:
         ax : Axes
             Generated matplotlib axes.
         """
+        if x is None:
+            x = list(covariates.coords)[0]
+
         ax = self.setup_plot(ax)
 
         mu, se = self.predict(covariates, diag=True, pred_noise=True)
@@ -105,7 +114,7 @@ class BasePlotMixin:
         target.plot.line(ax=ax, lw=1, zorder=2)
 
         ax.fill_between(
-            target[list(covariates.coords)[0]],
+            target[x],
             lower,
             upper,
             color="b",
