@@ -6,7 +6,7 @@ GP's are a flexible and elegant approach to modeling dynamical systems
 for which we have sparse and uncertain observations.
 In this arena, simple GP models, specified in several lines of math,
 can often achieve state-of-the-art predictive performance.
-However, fitting GP's is numerically intense, $$\mathcal{O}(n^3)$$ complexity.
+However, fitting GP's is numerically intense, $\mathcal{O}(n^3)$ complexity.
 They have several optimizations that take advantage of simplifying assumptions,
 different algorithms, or GPUs, but each has tradeoffs.
 Ideally, we could quickly write mathematical models, then run them on whichever
