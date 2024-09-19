@@ -41,8 +41,10 @@ dev = [
 
 doc = [
   "sphinx",
-  "sphinx-rtd-theme",
-  "nbsphinx",
+  "sphinx-book-theme",
+  "myst-nb",
+  "sphinxcontrib-mermaid",
+  "sphinx-copybutton",
   "ipython",
   "ipykernel",
 ]
