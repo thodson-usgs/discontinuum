@@ -6,8 +6,6 @@
 > Experimental.
 
 ## Overview
-
-## Overview
 `discontinuum` is a middleware for developing Gaussian process (GP) models.
 Why might we want a middleware? 
 GP's are a flexible and elegant approach to modeling dynamical systems
@@ -45,7 +43,7 @@ Try it out in the [loadest-gp demo](https://github.com/thodson-usgs/discontinuum
 
 ### rating-gp
 `rating-gp` is a Gaussian-process model for estimate river flow from stage time series.
-Try it out in the [rating-gp demo](https://github.com/thodson-usgs/discontinuum/blob/main/notebooks/loadest-gp-demo.ipynb).
+Try it out in the [rating-gp demo](https://github.com/thodson-usgs/discontinuum/blob/main/notebooks/rating-gp-demo.ipynb).
 
 ## Engines
 Currently, the only supported engines are the marginal likelihood implementation in `pymc` and `gpytorch`.
