@@ -1,5 +1,5 @@
-"""
-"""
+""" """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -18,15 +18,16 @@ class MetaData:
 
 
 def get_covariates(
-        location: str, start_date: str, end_date: str, variable: str,
-        ) -> Dataset:
+    location: str,
+    start_date: str,
+    end_date: str,
+    variable: str,
+) -> Dataset:
     """Return timeseries of covariate data."""
     raise NotImplementedError
 
 
-def get_target(
-        location: str, start_date: str, end_date: str, variabe: str
-        ) -> Dataset:
+def get_target(location: str, start_date: str, end_date: str, variabe: str) -> Dataset:
     """Return target data."""
     raise NotImplementedError
 

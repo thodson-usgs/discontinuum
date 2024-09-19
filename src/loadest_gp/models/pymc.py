@@ -1,7 +1,7 @@
 import numpy as np
 import pymc as pm
-from discontinuum.engines.pymc import MarginalPyMC
 
+from discontinuum.engines.pymc import MarginalPyMC
 from loadest_gp.models.base import LoadestDataMixin, ModelConfig
 from loadest_gp.plot import LoadestPlotMixin
 

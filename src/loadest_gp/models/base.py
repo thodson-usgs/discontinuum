@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import (
-    LogStandardPipeline,
     LogErrorPipeline,
-    StandardPipeline,
+    LogStandardPipeline,
     StandardErrorPipeline,
+    StandardPipeline,
     TimePipeline,
 )
 

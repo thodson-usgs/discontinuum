@@ -9,14 +9,15 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import xarray as xr
 from dataretrieval import nwis, wqp
+
 from discontinuum.providers.base import MetaData
 
 if TYPE_CHECKING:
     # from pandas import DataFrame
     from typing import Dict, List, Optional, Union
 
-    from xarray import Dataset
     from pandas import DataFrame
+    from xarray import Dataset
 
 CFS_TO_M3 = 0.0283168
 

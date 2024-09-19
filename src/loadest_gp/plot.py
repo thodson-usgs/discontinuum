@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from xarray.plot.utils import label_from_attrs
 
 from discontinuum.engines.base import is_fitted
 from discontinuum.plot import BasePlotMixin
-from xarray.plot.utils import label_from_attrs
 
 if TYPE_CHECKING:
     from typing import Dict, Optional

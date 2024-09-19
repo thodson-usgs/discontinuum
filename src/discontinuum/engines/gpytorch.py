@@ -13,8 +13,8 @@ from xarray import DataArray
 from discontinuum.engines.base import BaseModel, is_fitted
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
     from typing import Dict, Optional, Tuple
+
     from xarray import Dataset
 
 
@@ -44,13 +44,13 @@ class MarginalGPyTorch(BaseModel):
         super(BaseModel, self).__init__(model_config=model_config)
 
     def fit(
-            self,
-            covariates: Dataset,
-            target: Dataset,
-            target_unc: Dataset = None,
-            iterations: int = 100,
-            optimizer: str = "adam",
-            ):
+        self,
+        covariates: Dataset,
+        target: Dataset,
+        target_unc: Dataset = None,
+        iterations: int = 100,
+        optimizer: str = "adam",
+    ):
         """Fit the model to data.
 
         Parameters
@@ -96,7 +96,7 @@ class MarginalGPyTorch(BaseModel):
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
         pbar = tqdm.tqdm(range(iterations), ncols=70)
-        for i in pbar:
+        for _i in pbar:
             # Zero gradients from previous iteration
             optimizer.zero_grad()
             # Output from model
@@ -108,11 +108,12 @@ class MarginalGPyTorch(BaseModel):
             optimizer.step()
 
     @is_fitted
-    def predict(self,
-                covariates: Dataset,
-                diag=True,
-                pred_noise=False,
-                ) -> Tuple[DataArray, DataArray]:
+    def predict(
+        self,
+        covariates: Dataset,
+        diag=True,
+        pred_noise=False,
+    ) -> Tuple[DataArray, DataArray]:
         """Uses the fitted model to make predictions on new data.
 
         The input and output are in the original data space.
@@ -148,10 +149,7 @@ class MarginalGPyTorch(BaseModel):
         return target, se
 
     @is_fitted
-    def predict_grid(self,
-                     covariate: str,
-                     coord: str = None,
-                     t_step: int = 12):
+    def predict_grid(self, covariate: str, coord: str = None, t_step: int = 12):
         """Predict on a grid of points.
 
         Parameters
@@ -194,14 +192,15 @@ class MarginalGPyTorch(BaseModel):
         return target, index, covariate
 
     @is_fitted
-    def sample(self,
-               covariates,
-               n=1000,
-               #diag=False,
-               #pred_noise=False,
-               #method="cholesky",
-               #tol=1e-6,
-               ) -> DataArray:
+    def sample(
+        self,
+        covariates,
+        n=1000,
+        # diag=False,
+        # pred_noise=False,
+        # method="cholesky",
+        # tol=1e-6,
+    ) -> DataArray:
         """Sample from the posterior distribution of the model.
 
         Parameters
@@ -250,15 +249,13 @@ class MarginalGPyTorch(BaseModel):
         """
         self.model = None
 
-        raise NotImplementedError(
-            "This method must be implemented in a subclass"
-            )
+        raise NotImplementedError("This method must be implemented in a subclass")
 
     @is_fitted
     def __gpytorch_predict(
-            self,
-            x: torch.Tensor,
-            ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self,
+        x: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Model-space prediction.
 
         Parameters

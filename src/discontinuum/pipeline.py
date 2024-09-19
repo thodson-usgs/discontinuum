@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
+
 import numpy as np
 import pandas as pd
-
-
-from abc import ABC, abstractmethod
 from numpy.typing import ArrayLike
 from scipy.stats import norm
 from sklearn.base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin
@@ -36,7 +35,7 @@ def datetime_to_decimal_year(x: ArrayLike) -> ArrayLike:
     start_of_year = pd.to_datetime(dt.year, format="%Y").to_julian_date()
     year = dt.year
 
-    decimal_year = year + (julian - start_of_year)/(days_in_year)
+    decimal_year = year + (julian - start_of_year) / (days_in_year)
     return decimal_year.to_numpy()
 
 
@@ -70,6 +69,7 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
 
 class BaseTransformer(TransformerMixin, BaseEstimator):
     """Base class for transformers."""
+
     def __init__(self):
         pass
 
@@ -79,6 +79,7 @@ class BaseTransformer(TransformerMixin, BaseEstimator):
 
 class ClipTransformer(BaseTransformer):
     """Clip a variable."""
+
     def __init__(self, min: float = None, max: float = None):
         """Clip a variable.
 
@@ -102,6 +103,7 @@ class ClipTransformer(BaseTransformer):
 
 class LogTransformer(BaseTransformer):
     """Log-transform a variable."""
+
     def transform(self, X):
         return np.log(X)
 
@@ -114,6 +116,7 @@ class ShapeTransformer(OneToOneFeatureMixin, BaseTransformer):
 
     Reshaping is a persistent issue that is still handled poorly.
     """
+
     def transform(self, X):
         return X.reshape(-1, 1)
 
@@ -123,6 +126,7 @@ class ShapeTransformer(OneToOneFeatureMixin, BaseTransformer):
 
 class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
     """Square a variable."""
+
     def transform(self, X):
         return X**2
 
@@ -136,6 +140,7 @@ class StandardScaler(BaseTransformer):
     Reimplemens the sklearn.preprocessing.StandardScaler but removes the
     requirement of having 2D arrays.
     """
+
     def __init__(self, *, with_mean=True, with_std=True):
         self.with_mean = with_mean
         self.with_std = with_std
@@ -164,6 +169,7 @@ class StandardScaler(BaseTransformer):
 
 class TimeTransformer(BaseTransformer):
     """Convert a datetime to decimal year."""
+
     def transform(self, X):
         return datetime_to_decimal_year(X)
 
@@ -227,8 +233,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
 
 class LogStandardPipeline(Pipeline):
     def __init__(self):
-        """Pipeline for log-distributed data.
-        """
+        """Pipeline for log-distributed data."""
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
@@ -242,8 +247,7 @@ class LogStandardPipeline(Pipeline):
 
 class NoOpPipeline(Pipeline):
     def __init__(self):
-        """Pipeline that does not transform data.
-        """
+        """Pipeline that does not transform data."""
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
@@ -255,8 +259,7 @@ class NoOpPipeline(Pipeline):
 
 class StandardPipeline(Pipeline):
     def __init__(self):
-        """Pipeline for normally distributed data.
-        """
+        """Pipeline for normally distributed data."""
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
@@ -337,9 +340,9 @@ class StandardErrorPipeline(ErrorPipeline):
         lower, upper : Tuple[float, float]
             Lower and upper bound of the confidence interval.
         """
-        alpha = (1 - ci)/2
-        zscore = norm.ppf(1-alpha)
-        cb = se*zscore
+        alpha = (1 - ci) / 2
+        zscore = norm.ppf(1 - alpha)
+        cb = se * zscore
         lower = mean - cb
         upper = mean + cb
         return lower, upper
@@ -381,8 +384,8 @@ class LogErrorPipeline(ErrorPipeline):
         lower, upper : Tuple[float, float]
             Lower and upper bound of the confidence interval.
         """
-        alpha = (1 - ci)/2
-        zscore = norm.ppf(1-alpha)
+        alpha = (1 - ci) / 2
+        zscore = norm.ppf(1 - alpha)
         cb = se**zscore
         lower = mean / cb
         upper = mean * cb

@@ -1,19 +1,16 @@
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
-from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
-from xarray import DataArray
-from discontinuum.pipeline import MetadataManager
 
+from discontinuum.pipeline import MetadataManager
 
 
 class LogPropagation(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
     """Transformer for proper uncertainty propagation of log transforms
-    
+
     Eq: f = ln(A) -> sigma_f = sigma_A / A
     """
 

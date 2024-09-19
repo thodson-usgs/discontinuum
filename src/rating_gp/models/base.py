@@ -1,41 +1,41 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import (
-    LogStandardPipeline,
     LogErrorPipeline,
+    LogStandardPipeline,
     NoOpPipeline,
-    StandardPipeline,
     StandardErrorPipeline,
+    StandardPipeline,
     TimePipeline,
 )
+
 # from rating_gp.pipeline import LogUncertaintyPipeline
 
 if TYPE_CHECKING:
     from typing import Literal
 
+
 @dataclass
 class ModelConfig:
     """ """
+
     transform: Literal["log", "standard"] = "log"
 
 
 class RatingDataMixin:
     """ """
+
     # TODO inheret a BaseModel class with abc methods like build_model
     def build_datamanager(
-            self,
-            model_config: ModelConfig = ModelConfig(),
-            ):
+        self,
+        model_config: ModelConfig = ModelConfig(),
+    ):
         """ """
-        covariate_pipelines = {
-            "time": TimePipeline,
-            "stage": NoOpPipeline
-        }
+        covariate_pipelines = {"time": TimePipeline, "stage": NoOpPipeline}
 
         if model_config.transform == "log":
             target_pipeline = LogStandardPipeline
@@ -44,12 +44,8 @@ class RatingDataMixin:
             target_pipeline = StandardPipeline
             error_pipeline = StandardErrorPipeline
         else:
-            raise ValueError(
-                "Model config transform must be 'log' or 'standard'."
-            )
+            raise ValueError("Model config transform must be 'log' or 'standard'.")
 
         self.dm = DataManager(
-            target_pipeline=target_pipeline,
-            error_pipeline=error_pipeline,
-            covariate_pipelines=covariate_pipelines
+            target_pipeline=target_pipeline, error_pipeline=error_pipeline, covariate_pipelines=covariate_pipelines
         )

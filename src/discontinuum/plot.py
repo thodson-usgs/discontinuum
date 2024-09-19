@@ -5,14 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-import numpy as np
-from discontinuum.engines.base import is_fitted
-from scipy.stats import norm
 from xarray import DataArray
-from xarray.plot.utils import label_from_attrs
+
+from discontinuum.engines.base import is_fitted
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
+    from typing import Optional
 
     from matplotlib.pyplot import Axes
     from xarray import Dataset
@@ -71,11 +69,7 @@ class BasePlotMixin:
         )
 
     @is_fitted
-    def plot(self,
-             covariates: Dataset,
-             ci: float = 0.95,
-             x: Optional[str] = None,
-             ax: Optional[Axes] = None):
+    def plot(self, covariates: Dataset, ci: float = 0.95, x: Optional[str] = None, ax: Optional[Axes] = None):
         """Plot predicted data.
 
         Parameters

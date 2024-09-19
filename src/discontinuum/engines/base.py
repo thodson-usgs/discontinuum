@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import functools
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import StandardErrorPipeline, StandardPipeline
 
 if TYPE_CHECKING:
     from typing import Dict, Optional
+
     from xarray import DataArray, Dataset
 
 
@@ -30,11 +30,12 @@ class BaseModel(ABC):
         self.is_fitted = False
 
     @abstractmethod
-    def fit(self,
-            covariates: Dataset,
-            target: Dataset,
-            **kwargs,
-            ):
+    def fit(
+        self,
+        covariates: Dataset,
+        target: Dataset,
+        **kwargs,
+    ):
         """Fit model to data.
 
         Parameters
@@ -84,9 +85,7 @@ def is_fitted(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
         if not self.is_fitted:
-            raise RuntimeError(
-                "The model hasn't been fitted yet, call .fit()."
-            )
+            raise RuntimeError("The model hasn't been fitted yet, call .fit().")
         return func(self, *args, **kwargs)
 
     return inner

@@ -1,7 +1,6 @@
 import gpytorch
 import numpy as np
 import torch
-from discontinuum.engines.gpytorch import MarginalGPyTorch
 from gpytorch.kernels import (
     MaternKernel,
     PeriodicKernel,
@@ -14,6 +13,7 @@ from gpytorch.priors import (
     NormalPrior,
 )
 
+from discontinuum.engines.gpytorch import MarginalGPyTorch
 from loadest_gp.models.base import LoadestDataMixin, ModelConfig
 from loadest_gp.plot import LoadestPlotMixin
 

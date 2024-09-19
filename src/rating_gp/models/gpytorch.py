@@ -1,29 +1,18 @@
 import gpytorch
 import numpy as np
 import torch
+from gpytorch.kernels import MaternKernel, ScaleKernel
+from gpytorch.priors import GammaPrior, HalfNormalPrior
+
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
-
-from gpytorch.kernels import (
-    MaternKernel,
-    RBFKernel,
-    RQKernel,
-    ScaleKernel,
-)
-from gpytorch.priors import (
-    GammaPrior,
-    HalfNormalPrior,
-    NormalPrior,
-)
-
-from linear_operator.operators import MatmulLinearOperator
-from rating_gp.models.base import RatingDataMixin, ModelConfig
+from rating_gp.models.base import ModelConfig, RatingDataMixin
+from rating_gp.models.kernels import SigmoidKernel, StageTimeKernel
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel
 
 
 class PowerLawTransform(torch.nn.Module):
-    """
-    """
+    """ """
+
     def __init__(self):
         super(PowerLawTransform, self).__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
@@ -31,7 +20,7 @@ class PowerLawTransform(torch.nn.Module):
         self.c = torch.nn.Parameter(torch.zeros(1))
 
     def forward(self, x):
-        self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
+        self.c.data = torch.clamp(self.c.data, max=x.min() - 1e-6)
         return self.a + (self.b * torch.log(x - self.c))
 
 
@@ -48,24 +37,23 @@ class RatingGPMarginalGPyTorch(
     fast but does not account for censored data. Censored data require a slower
     latent variable implementation.
     """
+
     def __init__(
-            self,
-            model_config: ModelConfig = ModelConfig(),
+        self,
+        model_config: ModelConfig = ModelConfig(),
     ):
         """ """
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
-        
 
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
-        """Build marginal likelihood version of RatingGP
-        """
+        """Build marginal likelihood version of RatingGP"""
         # assume a constant measurement error for testing
         if y_unc is not None:
             noise = y_unc
         else:
             noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
-        # TODO: Fix "GPInputWarning: You have passed data through a 
+        # TODO: Fix "GPInputWarning: You have passed data through a
         # FixedNoiseGaussianLikelihood that did not match the size of the fixed
         # noise, *and* you did not specify noise. This is treated as a no-op."
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
@@ -99,23 +87,17 @@ class ExactGPModel(gpytorch.models.ExactGP):
         #     (self.cov_stage() * self.cov_stagetime())
         #     + self.cov_residual()
         # )
-      
+
         # Stage * time kernel with large time length
         # + stage * time kernel only at low stage with smaller time length
-        self.covar_module = (
-            (self.cov_stage()
-             * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)))
-            + (self.cov_stage()
-               * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
-               * SigmoidKernel(
-                   active_dims=self.stage_dim,
-                   # a_prior=NormalPrior(loc=20, scale=1),
-                   b_constraint=gpytorch.constraints.Interval(
-                       train_x[:, self.stage_dim].min(),
-                       train_x[:, self.stage_dim].max()
-                   ),
-               )
-              )
+        self.covar_module = (self.cov_stage() * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5))) + (
+            self.cov_stage()
+            * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
+            * SigmoidKernel(
+                active_dims=self.stage_dim,
+                # a_prior=NormalPrior(loc=20, scale=1),
+                b_constraint=gpytorch.constraints.Interval(train_x[:, self.stage_dim].min(), train_x[:, self.stage_dim].max()),
+            )
         )
 
     def forward(self, x):

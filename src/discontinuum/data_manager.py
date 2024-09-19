@@ -11,10 +11,7 @@ import numpy as np
 from sklearn.pipeline import Pipeline
 from xarray import Dataset
 
-from discontinuum.pipeline import (
-    LogErrorPipeline,
-    LogStandardPipeline,
-)
+from discontinuum.pipeline import LogErrorPipeline, LogStandardPipeline
 
 if TYPE_CHECKING:
     from typing import Dict, Type
@@ -28,10 +25,7 @@ def is_initialized(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
         if not self.is_initialized:
-            raise RuntimeError(
-                "The DataManager has not been initialized,",
-                "call .init(target, covariates)."
-            )
+            raise RuntimeError("The DataManager has not been initialized,", "call .init(target, covariates).")
         return func(self, *args, **kwargs)
 
     return inner
@@ -54,11 +48,7 @@ class DataManager:
     error_pipeline: Type[Pipeline] = LogErrorPipeline
     covariate_pipelines: Dict[str, Pipeline] = None
 
-    def fit(
-            self,
-            target: Dataset,
-            covariates: Dataset,
-            target_unc: Dataset = None):
+    def fit(self, target: Dataset, covariates: Dataset, target_unc: Dataset = None):
         """Initialize DataManager for a given data distribution.
 
         Parameters
@@ -85,7 +75,7 @@ class DataManager:
         coords_shape = tuple()
         for coord in covariates.coords:
             coords_shape += covariates.coords[coord].shape
-        X = np.empty(coords_shape + (len(self.covariate_pipelines), ))
+        X = np.empty(coords_shape + (len(self.covariate_pipelines),))
         for i, (key, value) in enumerate(self.covariate_pipelines.items()):
             X[..., i] = value.transform(covariates[key]).flatten()
         return X
@@ -138,7 +128,6 @@ class DataManager:
             Dimension (column) in design matrix.
         """
         # Coords come first in Pipelines
-        cov_list = (list(self.data.covariates.coords)
-                    + list(self.data.covariates))
+        cov_list = list(self.data.covariates.coords) + list(self.data.covariates)
 
         return cov_list.index(dim)

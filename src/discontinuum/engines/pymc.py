@@ -78,10 +78,7 @@ class MarginalPyMC(BaseModel):
         return target, se
 
     @is_fitted
-    def predict_grid(self,
-                     covariate: str,
-                     coord: str = None,
-                     t_step: int = 12):
+    def predict_grid(self, covariate: str, coord: str = None, t_step: int = 12):
         """Predict on a grid of points.
 
         Parameters
@@ -120,7 +117,7 @@ class MarginalPyMC(BaseModel):
             diag=True,
             pred_noise=True,
             model=self.model,
-            )
+        )
 
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
@@ -134,14 +131,15 @@ class MarginalPyMC(BaseModel):
         return target, index, covariate
 
     @is_fitted
-    def sample(self,
-               covariates,
-               n=1000,
-               diag=False,
-               pred_noise=False,
-               method="cholesky",
-               tol=1e-6,
-               ) -> DataArray:
+    def sample(
+        self,
+        covariates,
+        n=1000,
+        diag=False,
+        pred_noise=False,
+        method="cholesky",
+        tol=1e-6,
+    ) -> DataArray:
         """Sample from the posterior distribution of the model.
 
         Parameters
@@ -198,6 +196,4 @@ class MarginalPyMC(BaseModel):
         self.model = None
         self.gp = None
 
-        raise NotImplementedError(
-            "This method must be implemented in a subclass"
-            )
+        raise NotImplementedError("This method must be implemented in a subclass")

@@ -1,23 +1,23 @@
-import pytest
 import json
-import requests_mock
-from xarray import Dataset
+
 import pandas as pd
+import pytest
+import requests_mock
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
+from xarray import Dataset
 
-from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP
+from rating_gp.providers import usgs
 
-
-site = '10154200'
-start_date = "1988-10-01" 
+site = "10154200"
+start_date = "1988-10-01"
 end_date = "2021-09-30"
 
 
 @pytest.fixture
 def demo_nwis_query_response():
-    with open('tests/data/nwis_responses_rating.json', 'r') as file:
+    with open("tests/data/nwis_responses_rating.json", "r") as file:
         responses = json.load(file)
     return responses
 
@@ -25,16 +25,16 @@ def demo_nwis_query_response():
 def test_get_measurements(demo_nwis_query_response):
     with requests_mock.Mocker() as m:
         m.get(requests_mock.ANY,
-              text=demo_nwis_query_response['get_measurements']['text'])
+              text=demo_nwis_query_response["get_measurements"]["text"])
         data = usgs.get_measurements(site=site,
                                      start_date=start_date,
                                      end_date=end_date)
 
     assert isinstance(data, Dataset)
-    assert hasattr(data, 'stage')
-    assert hasattr(data, 'discharge')
-    assert hasattr(data, 'discharge_unc')
-    assert hasattr(data, 'time')
+    assert hasattr(data, "stage")
+    assert hasattr(data, "discharge")
+    assert hasattr(data, "discharge_unc")
+    assert hasattr(data, "time")
     assert ((data.time.size == data.stage.size)
             & (data.time.size == data.discharge.size)
             & (data.time.size == data.discharge_unc.size))
@@ -50,24 +50,24 @@ def test_get_measurements(demo_nwis_query_response):
 def test_rating_gp(demo_nwis_query_response):
     with requests_mock.Mocker() as m:
         m.get(requests_mock.ANY,
-              text=demo_nwis_query_response['get_measurements']['text'])
+              text=demo_nwis_query_response["get_measurements"]["text"])
         data = usgs.get_measurements(site=site,
                                      start_date=start_date,
                                      end_date=end_date)
 
     model = RatingGP()
-    model.fit(target=data['discharge'],
-              covariates=data[['stage']],
-              target_unc=data['discharge_unc'],
+    model.fit(target=data["discharge"],
+              covariates=data[["stage"]],
+              target_unc=data["discharge_unc"],
               iterations=10)
     assert model.is_fitted
 
     assert isinstance(model.plot_stage(), Axes)
     assert isinstance(model.plot_discharge(), Axes)
     assert isinstance(model.plot_observed_rating(), Axes)
-    assert isinstance(model.plot_rating(covariates=data[['stage']]), Axes)
+    assert isinstance(model.plot_rating(covariates=data[["stage"]]), Axes)
     ax = model.plot_ratings_in_time(
-        time=pd.date_range('1990', '2021', freq='5YS-OCT'), ci=0.95
+        time=pd.date_range("1990", "2021", freq="5YS-OCT"), ci=0.95
     )
     assert isinstance(ax, Axes)
     assert isinstance(model.add_time_colorbar(ax=ax), Colorbar)
