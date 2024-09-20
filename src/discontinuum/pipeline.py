@@ -203,7 +203,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         -------
         Numpy array
         """
-        return X.values
+        return X.values.reshape(-1, 1)
 
     def inverse_transform(self, X):
         """Add xarray metadata to a numpy array.
@@ -217,7 +217,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         DataArray
         """
         return DataArray(
-            X,
+            X.squeeze(),
             attrs=self.attrs,
             name=self.name,
             dims=self.dims,
@@ -231,7 +231,7 @@ class LogStandardPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("reshape", ShapeTransformer()),
+                # ("reshape", ShapeTransformer()),,
                 ("clip", ClipTransformer(min=1e-6)),
                 ("log", LogTransformer()),
                 ("scaler", StandardScaler()),
@@ -246,7 +246,7 @@ class NoOpPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("reshape", ShapeTransformer()),
+                # ("reshape", ShapeTransformer()),,
                 ("clip", ClipTransformer(min=0)),
             ]
         )
@@ -259,7 +259,7 @@ class StandardPipeline(Pipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("reshape", ShapeTransformer()),
+                # ("reshape", ShapeTransformer()),,
                 ("clip", ClipTransformer(min=0)),
                 ("scaler", StandardScaler()),
             ]
@@ -273,7 +273,7 @@ class TimePipeline(Pipeline):
             steps=[
                 ("metadata", MetadataManager()),
                 ("decimal_year", TimeTransformer()),
-                ("reshape", ShapeTransformer()),
+                # ("reshape", ShapeTransformer()),,
                 ("scaler", StandardScaler(with_std=False)),
             ]
         )
@@ -311,7 +311,7 @@ class StandardErrorPipeline(ErrorPipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("reshape", ShapeTransformer()),
+                # ("reshape", ShapeTransformer()),,
                 ("scaler", StandardScaler(with_mean=False)),
                 ("square", SquareTransformer()),
                 # clip formerly used np.abs
@@ -354,7 +354,7 @@ class LogErrorPipeline(ErrorPipeline):
         super().__init__(
             steps=[
                 ("metadata", MetadataManager()),
-                ("reshape", ShapeTransformer()),
+                # ("reshape", ShapeTransformer()),,
                 ("log", LogTransformer()),
                 ("scaler", StandardScaler(with_mean=False)),
                 ("square", SquareTransformer()),
