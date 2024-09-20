@@ -72,8 +72,10 @@ class MarginalPyMC(BaseModel):
         )
 
         target = self.dm.y_t(mu)
+        target = target.assign_coords(covariates.coords)
         # TODO the reshape should be done in the pipeline
         se = self.dm.error_pipeline.inverse_transform(var.reshape(-1, 1))
+        se = se.assign_coords(covariates.coords)
 
         return target, se
 
