@@ -126,14 +126,21 @@ class MarginalPyMC(BaseModel):
 
         target = self.dm.y_t(mu)
         # TODO return a Dataset with the correct shape
-        target = target.data.reshape(n_coord, n_cov)
         t_pipe = self.dm.covariate_pipelines[coord]
         index = t_pipe.inverse_transform(x_coord.reshape(-1, 1))
 
         c_pipe = self.dm.covariate_pipelines[covariate]
-        covariate = c_pipe.inverse_transform(x_cov.reshape(-1, 1))
+        covariates = c_pipe.inverse_transform(x_cov.reshape(-1, 1))
 
-        return target, index, covariate
+        da = DataArray(
+            target.data.reshape(n_coord, n_cov),
+            coords=[index, covariates],
+            dims=[coord, covariate],
+            attrs=target.attrs,
+        )
+
+        return da
+
 
     @is_fitted
     def sample(self,
