@@ -73,8 +73,7 @@ class MarginalPyMC(BaseModel):
 
         target = self.dm.y_t(mu)
         target = target.assign_coords(covariates.coords)
-        # TODO the reshape should be done in the pipeline
-        se = self.dm.error_pipeline.inverse_transform(var.reshape(-1, 1))
+        se = self.dm.error_pipeline.inverse_transform(var)
         se = se.assign_coords(covariates.coords)
 
         return target, se
@@ -125,12 +124,11 @@ class MarginalPyMC(BaseModel):
             )
 
         target = self.dm.y_t(mu)
-        # TODO return a Dataset with the correct shape
         t_pipe = self.dm.covariate_pipelines[coord]
-        index = t_pipe.inverse_transform(x_coord.reshape(-1, 1))
+        index = t_pipe.inverse_transform(x_coord)
 
         c_pipe = self.dm.covariate_pipelines[covariate]
-        covariates = c_pipe.inverse_transform(x_cov.reshape(-1, 1))
+        covariates = c_pipe.inverse_transform(x_cov)
 
         da = DataArray(
             target.data.reshape(n_coord, n_cov),
