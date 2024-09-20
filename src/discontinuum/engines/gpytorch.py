@@ -143,7 +143,9 @@ class MarginalGPyTorch(BaseModel):
         mu, var = self.__gpytorch_predict(Xnew)
 
         target = self.dm.y_t(mu)
+        target = target.assign_coords(covariates.coords)
         se = self.dm.error_pipeline.inverse_transform(var)
+        se = se.assign_coords(covariates.coords)
 
         return target, se
 
@@ -185,13 +187,19 @@ class MarginalGPyTorch(BaseModel):
         mu, var = self.__gpytorch_predict(X_grid)
 
         target = self.dm.y_t(mu)
-        target = target.data.reshape(n_coord, n_cov)
 
         # TODO handle type conversion in pipeline
         index = self.dm.covariate_pipelines[coord].inverse_transform(x_coord.numpy())
-        covariate = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.numpy())
+        covariates = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.numpy())
 
-        return target, index, covariate
+        da = DataArray(
+            target.data.reshape(n_coord, n_cov),
+            coords=[index, covariates],
+            dims=[coord, covariate],
+            attrs=target.attrs,
+        )
+
+        return da
 
     @is_fitted
     def sample(self,

@@ -88,28 +88,16 @@ class LoadestPlotMixin(BasePlotMixin):
         """
         ax = self.setup_plot(ax)
 
-        if cbar_kwargs is None:
-            cbar_kwargs = {}
-
-        cbar_defaults = {"rotation": 270, "labelpad": 25}
-        cbar_defaults.update(cbar_kwargs)
-
-        ax = self.setup_plot(ax)
         ax.set_yscale(y_scale)
 
-        target, time, cov = self.predict_grid(covariate=covariate, t_step=12)
-        X2, X1 = np.meshgrid(cov, time)  # might need to flip these
-        cs = ax.contourf(X1, X2, target, **kwargs)
+        da = self.predict_grid(covariate=covariate, t_step=12)
+        cs = da.plot.contourf(x='time',
+                              y=covariate,
+                              ax=ax,
+                              cbar_kwargs=cbar_kwargs,
+                              **kwargs
+                             )
 
-        ax.set_ylabel(label_from_attrs(self.dm.data.covariates[covariate]))
-        ax.set_xlabel("Year")
-
-        fig = ax.get_figure()
-        cbar = fig.colorbar(cs, ax=ax)
-        cbar.ax.set_ylabel(
-            label_from_attrs(self.dm.data.target),
-            **cbar_defaults,
-        )
         return ax
 
     @is_fitted
