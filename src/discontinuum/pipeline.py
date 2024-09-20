@@ -193,8 +193,7 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         return self
 
     def transform(self, X):
-        """
-        TODO should we use a separate tranformer for reshaping?
+        """Extract values (numpy array) from xarray DataArray
 
         Parameters
         ----------
