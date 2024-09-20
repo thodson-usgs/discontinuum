@@ -7,7 +7,6 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'discontinuum'
-copyright = '2024, Timothy Hodson and Keith Doore'
 author = 'Timothy Hodson and Keith Doore'
 release = 'v0.5'
 
