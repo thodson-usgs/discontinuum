@@ -1,0 +1,12 @@
+gpytorch
+matplotlib
+scikit-learn
+tqdm
+xarray
+sphinx
+sphinx-book-theme
+myst-nb
+sphinxcontrib-mermaid
+sphinx-copybutton
+ipython
+ipykernel
