@@ -69,8 +69,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = (
-            self.cov_trend()
-            + self.cov_seasonal()
+            # may omit trend: wall 1.08s vs 990ms without,
+            # but much faster to compile
+            #self.cov_trend()
+            self.cov_seasonal()
             + self.cov_covariates()
             + self.cov_residual()
         )
@@ -106,8 +108,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
             * MaternKernel(
                 nu=2.5,
                 active_dims=self.time_dim
-                ),
-            outputscale_prior=eta,
+               ),
+           outputscale_prior=eta,
         )
 
     def cov_covariates(self):
@@ -116,6 +118,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         return ScaleKernel(
             RBFKernel(
+                ard_num_dims=self.cov_dims.shape[0],
                 lengthscale_prior=ls,
                 active_dims=self.cov_dims,
             ),
@@ -128,7 +131,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         return ScaleKernel(
             MaternKernel(
-                ard_num_dims=2,
+                ard_num_dims=self.dims.shape[0],
                 nu=1.5,
                 active_dims=self.dims,
                 lengthscale_prior=ls,
