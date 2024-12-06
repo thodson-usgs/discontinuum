@@ -41,9 +41,9 @@ class NWISColumn:
 class USGSParameter:
     pcode: str
     standard_name: str
-    long_name: Optional[str] = None
-    units: Optional[str] = None
-    suffix: Optional[str] = None
+    long_name: Optional[str] = ""
+    units: Optional[str] = ""
+    suffix: Optional[str] = ""
     conversion: Optional[float] = 1.0
 
     @property
