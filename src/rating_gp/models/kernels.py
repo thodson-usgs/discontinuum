@@ -1,7 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import copy
 import gpytorch
 import numpy as np
 import torch
 from linear_operator.operators import MatmulLinearOperator, to_dense
+
+if TYPE_CHECKING:
+    from typing import Union, Optional
 
 
 class StageTimeKernel(gpytorch.kernels.Kernel):
@@ -218,6 +226,22 @@ class PowerLawKernel(gpytorch.kernels.Kernel):
         else:
             return prod
 
+   
+class ConstantKernel(gpytorch.kernels.Kernel):
+    def __init__(
+            self,
+            c: float,
+            **kwargs,
+            ):
+        super(ConstantKernel, self).__init__(**kwargs)
+        self.c = c
+
+    def forward(self, x1, x2, diag=False, **params):
+        if diag:
+            return torch.full_like(x1, self.c)
+        else:
+            return torch.full_like(x1 @ x2.t(), self.c)
+
 
 class SigmoidKernel(gpytorch.kernels.Kernel):
     """Sigmoid Kernel
@@ -231,10 +255,9 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
     """
     def __init__(
         self,
-        # a_prior=None,
-        # a_constraint=None,
         b_prior=None,
         b_constraint=gpytorch.constraints.Positive(),
+        compliment=False,
         **kwargs,
         ):
         """Initialize the kernel
@@ -247,12 +270,8 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
             The constraint to impose on `b`
         """
         super().__init__(**kwargs)
-
+        self.compliment = compliment
         self.a = 20
-        # self.register_parameter(
-        #     name='raw_a',
-        #     parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
-        # )
         self.register_parameter(
             name='raw_b',
             parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
@@ -314,6 +333,10 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         # `b` is the offset of of the curve at a sigmoid value of 0.5
         x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
         x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
+
+        if self.compliment:
+            x1_ = 1 - x1_
+            x2_ = 1 - x2_
         
         prod = MatmulLinearOperator(x1_, x2_.transpose(-2, -1))
         if diag:

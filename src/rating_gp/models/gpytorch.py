@@ -18,7 +18,7 @@ from gpytorch.priors import (
 from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel
+from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel, ConstantKernel
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -99,23 +99,53 @@ class ExactGPModel(gpytorch.models.ExactGP):
         #     (self.cov_stage() * self.cov_stagetime())
         #     + self.cov_residual()
         # )
-      
-        # Stage * time kernel with large time length
-        # + stage * time kernel only at low stage with smaller time length
+
+        # parameterize the change point kernel
+        self.b = torch.nn.Parameter(torch.zeros(1))
+        self.sigmoid = SigmoidKernel(   
+            active_dims=self.stage_dim,
+            b_constraint=gpytorch.constraints.Interval(
+                train_x[:, self.stage_dim].min(),
+                train_x[:, self.stage_dim].max()
+            ),
+        )
+
+        #one = ConstantKernel(c=1)
+        #negative_one = ConstantKernel(c=-1)
+
+        # hack to complement of the sigmoid without subtraction
+        # otherwise, use (1 - sigmoid)
+        #self.sigmoid_c = one + negative_one * self.sigmoid
+        #self.sigmoid_c = self.sigmoid
+
+        # create the compliment
+        self.sigmoid_c = SigmoidKernel(   
+            active_dims=self.stage_dim,
+            b_constraint=gpytorch.constraints.Interval(
+                train_x[:, self.stage_dim].min(),
+                train_x[:, self.stage_dim].max()
+            ),
+            compliment=True,
+        )
+        # set the raw parameters to be the same 
+        self.sigmoid_c.raw_b = self.sigmoid.raw_b
+
+
+
+        # The changepoint kernel consists of a stage * time kernel with
+        # short lengthspan at low stage plus stage * time kernel with a
+        # longer lengthspan at high stage    
         self.covar_module = (
-            (self.cov_stage()
-             * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)))
-            + (self.cov_stage()
-               * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
-               * SigmoidKernel(
-                   active_dims=self.stage_dim,
-                   # a_prior=NormalPrior(loc=20, scale=1),
-                   b_constraint=gpytorch.constraints.Interval(
-                       train_x[:, self.stage_dim].min(),
-                       train_x[:, self.stage_dim].max()
-                   ),
-               )
-              )
+            self.sigmoid
+            #* self.cov_stage(ls_prior=GammaPrior(concentration=5, rate=1))
+            * self.cov_stage(ls_prior=GammaPrior(concentration=20, rate=1))
+            #* self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
+            * self.cov_time(ls_prior=GammaPrior(concentration=1, rate=5))
+            #+ (one - self.sigmoid)
+            + self.sigmoid_c
+            * self.cov_stage(ls_prior=GammaPrior(concentration=10, rate=5))
+            #* self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5))
+            * self.cov_time(ls_prior=GammaPrior(concentration=20, rate=5))
         )
 
     def forward(self, x):
