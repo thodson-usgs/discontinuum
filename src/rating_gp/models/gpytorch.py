@@ -105,7 +105,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # )
          
         # Stage * time kernel with large time length
-        # + stage * time kernel only at low stage with smaller time length
+        # + stage * time kernel only at low stage with smaller time length.
+        # Note that stage gets transformed to q, so the kernel is actually
+        # q * time
         self.covar_module = (
             (self.cov_stage()
              * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)))
@@ -115,19 +117,24 @@ class ExactGPModel(gpytorch.models.ExactGP):
                    active_dims=self.stage_dim,
                    # a_prior=NormalPrior(loc=20, scale=1),
                    b_constraint=gpytorch.constraints.Interval(
-                       train_x[:, self.stage_dim].min(),
-                       train_x[:, self.stage_dim].max()
+                       0,
+                       train_y.max(),
+                   #    #train_x[:, self.stage_dim].min(),
+                   #    #train_x[:, self.stage_dim].max(),
                    ),
                )
               )
         )
 
+
     def forward(self, x):
         self.powerlaw.b.data.clamp_(1.5, 2.5)
-        x = x.clone()
-        q = self.powerlaw(x[:, self.stage_dim])
-        x_t = x.clone()
+        #x = x.clone()
+        #q = self.powerlaw(x[:, self.stage_dim])
         #x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
+        x_t = x.clone()
+        x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
+        q = x_t[:, self.stage_dim]
 
         mean_x = self.mean_module(q)
         covar_x = self.covar_module(x_t)

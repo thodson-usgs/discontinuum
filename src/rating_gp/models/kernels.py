@@ -260,7 +260,8 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         # a_prior=None,
         # a_constraint=None,
         b_prior=None,
-        b_constraint=gpytorch.constraints.Positive(),
+        b_constraint=None,
+        #b_constraint=gpytorch.constraints.Positive(),
         **kwargs,
         ):
         """Initialize the kernel
@@ -279,19 +280,29 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         #     name='raw_a',
         #     parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
         # )
+        self.b = torch.nn.Parameter(torch.randn(*self.batch_shape, 1, 1))
+
         self.register_parameter(
             name='raw_b',
-            # set the b as a rand in the range 1.2 to 1.8
-            parameter=torch.nn.Parameter(
-                1.2 + 0.6 * torch.rand(*self.batch_shape, 1, 1)
-            )
+            # the changepoint is in log-standardized q, so initialize with randn
+            # set the b as a rand in the rand 
+            parameter=self.b
         )
+
+        b_prior = gpytorch.priors.NormalPrior(0, 1)
+
+        #self.register_prior(
+        #    "b_prior",
+        #    gpytorch.priors.NormalPrior(0, 1),
+        #    lambda module: module.b,
+        #)
 
         # register the constraints
         # if a_constraint is None:
         #     a_constraint = gpytorch.constraints.Positive()
         # self.register_constraint("raw_a", a_constraint)
-        self.register_constraint("raw_b", b_constraint)
+        if b_constraint is not None:
+            self.register_constraint("raw_b", b_constraint)
 
         # set the parameter prior
         # if a_prior is not None:
