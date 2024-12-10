@@ -26,9 +26,10 @@ class PowerLawTransform(torch.nn.Module):
     """
     def __init__(self):
         super(PowerLawTransform, self).__init__()
-        self.a = torch.nn.Parameter(torch.rand(1))
-        self.b = torch.nn.Parameter(torch.rand(1))
-        self.c = torch.nn.Parameter(torch.zeros(1))
+        self.a = torch.nn.Parameter(torch.randn(1))
+        self.b = torch.nn.Parameter(torch.randn(1))
+        # stage is scaled to 1-2, so initialize c to 0-1
+        self.c = torch.nn.Parameter(torch.randn(1))
 
     def forward(self, x):
         self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)

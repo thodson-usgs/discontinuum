@@ -255,7 +255,10 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         # )
         self.register_parameter(
             name='raw_b',
-            parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
+            # set the b as a rand in the range 1.2 to 1.8
+            parameter=torch.nn.Parameter(
+                1.2 + 0.6 * torch.rand(*self.batch_shape, 1, 1)
+            )
         )
 
         # register the constraints
