@@ -55,6 +55,7 @@ class RatingGPMarginalGPyTorch(
         """ """
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
+        self.model_config = model_config
         
 
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
@@ -101,7 +102,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # )
 
         # parameterize the change point kernel
-        self.b = torch.nn.Parameter(torch.zeros(1))
+        #self.b = torch.nn.Parameter(torch.zeros(1))
         self.sigmoid = SigmoidKernel(   
             active_dims=self.stage_dim,
             b_constraint=gpytorch.constraints.Interval(
@@ -109,14 +110,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 train_x[:, self.stage_dim].max()
             ),
         )
-
-        #one = ConstantKernel(c=1)
-        #negative_one = ConstantKernel(c=-1)
-
-        # hack to complement of the sigmoid without subtraction
-        # otherwise, use (1 - sigmoid)
-        #self.sigmoid_c = one + negative_one * self.sigmoid
-        #self.sigmoid_c = self.sigmoid
 
         # create the compliment
         self.sigmoid_c = SigmoidKernel(   
@@ -137,7 +130,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # longer lengthspan at high stage    
         self.covar_module = (
             self.sigmoid
-            * self.cov_stage(ls_prior=GammaPrior(concentration=6, rate=6)) # very smooth, peak 0.8
+            * self.cov_stage(ls_prior=GammaPrior(concentration=6, rate=6)) # very smooth
             * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5)) # peak 0.2
             #+ (one - self.sigmoid)
             + self.sigmoid_c

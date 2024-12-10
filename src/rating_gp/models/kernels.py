@@ -272,16 +272,17 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         super().__init__(**kwargs)
         self.compliment = compliment
         self.a = 20
+
         self.register_parameter(
             name='raw_b',
             parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
-        )
+            )
+        self.register_constraint("raw_b", b_constraint)
 
         # register the constraints
         # if a_constraint is None:
         #     a_constraint = gpytorch.constraints.Positive()
         # self.register_constraint("raw_a", a_constraint)
-        self.register_constraint("raw_b", b_constraint)
 
         # set the parameter prior
         # if a_prior is not None:
