@@ -8,10 +8,10 @@ from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import (
     LogStandardPipeline,
     LogErrorPipeline,
-    NoOpPipeline,
     StandardPipeline,
     StandardErrorPipeline,
     TimePipeline,
+    UnitPipeline,
 )
 # from rating_gp.pipeline import LogUncertaintyPipeline
 
@@ -34,7 +34,7 @@ class RatingDataMixin:
         """ """
         covariate_pipelines = {
             "time": TimePipeline,
-            "stage": NoOpPipeline
+            "stage": UnitPipeline,
         }
 
         if model_config.transform == "log":

@@ -117,6 +117,22 @@ class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
     def inverse_transform(self, X):
         return np.sqrt(X)
 
+class UnitScaler(BaseTransformer):
+    """Rescale a variable to have a minimum of 0 and a maximum of 1."""
+    def __init__(self, zero_value=0):
+        self.zero = zero_value    
+
+    def fit(self, X, y=None):
+        self.min_ = X.min()
+        self.max_ = X.max()
+        return self
+    
+    def transform(self, X):
+        return self.zero + (X - self.min_) / (self.max_ - self.min_)
+    
+    def inverse_transform(self, X):
+        return self.min_ + (X - self.zero) * (self.max_ - self.min_)    
+
 
 class StandardScaler(BaseTransformer):
     """Rescale a variable to have a mean of 0 and a standard deviation of 1.
@@ -247,6 +263,19 @@ class StandardPipeline(Pipeline):
                 ("metadata", MetadataManager()),
                 ("clip", ClipTransformer(min=0)),
                 ("scaler", StandardScaler()),
+            ]
+        )
+
+
+class UnitPipeline(Pipeline):
+    def __init__(self):
+        """Pipeline for data that is rescaled to have a minimum of 0 and a maximum of 1.
+        """
+        super().__init__(
+            steps=[
+                ("metadata", MetadataManager()),
+                ("clip", ClipTransformer(min=0)),
+                ("scaler", UnitScaler(zero_value=1)),
             ]
         )
 
