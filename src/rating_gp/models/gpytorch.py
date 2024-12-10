@@ -137,15 +137,12 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # longer lengthspan at high stage    
         self.covar_module = (
             self.sigmoid
-            #* self.cov_stage(ls_prior=GammaPrior(concentration=5, rate=1))
-            * self.cov_stage(ls_prior=GammaPrior(concentration=20, rate=1))
-            #* self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
-            * self.cov_time(ls_prior=GammaPrior(concentration=1, rate=5))
+            * self.cov_stage(ls_prior=GammaPrior(concentration=6, rate=6)) # very smooth, peak 0.8
+            * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5)) # peak 0.2
             #+ (one - self.sigmoid)
             + self.sigmoid_c
-            * self.cov_stage(ls_prior=GammaPrior(concentration=10, rate=5))
-            #* self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5))
-            * self.cov_time(ls_prior=GammaPrior(concentration=20, rate=5))
+            * self.cov_stage(ls_prior=GammaPrior(concentration=6, rate=16)) # less smooth, peak 0.3
+            * self.cov_time(ls_prior=GammaPrior(concentration=20, rate=4)) # peak 5
         )
 
     def forward(self, x):
