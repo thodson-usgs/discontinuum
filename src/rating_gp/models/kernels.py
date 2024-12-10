@@ -2,7 +2,73 @@ import gpytorch
 import numpy as np
 import torch
 
+from torch.distributions.beta import Beta
+
 from linear_operator.operators import MatmulLinearOperator, to_dense
+
+
+class BetaCDFWarp(gpytorch.Module):
+    """Won't work until Beta.cdf is implemented in PyTorch
+    """
+    
+    def __init__(self, a=None, b=None):
+        super(BetaCDFWarp, self).__init__()
+        a = torch.rand(1) if a is None else torch.tensor([a])
+        b = torch.rand(1) if b is None else torch.tensor([b])
+
+        self.register_parameter(name="a_raw", parameter=torch.nn.Parameter(a))
+        self.register_constraint("a_raw", gpytorch.constraints.Positive())
+        a_prior = gpytorch.priors.GammaPrior(1, 1)
+        self.register_prior(
+            "a_prior",
+            a_prior,
+            lambda m: m.a,
+            lambda m, v : m._set_a(v),
+        )
+        
+        self.register_parameter(name="b_raw", parameter=torch.nn.Parameter(b))
+        self.register_constraint("b_raw", gpytorch.constraints.Positive())
+        b_prior = gpytorch.priors.GammaPrior(1, 1)
+        self.register_prior(
+                "b_prior",
+                b_prior,
+                lambda m: m.b,
+                lambda m, v : m._set_b(v),
+            )
+ 
+    @property
+    def a(self):
+        return self.a_raw_constraint.transform(self.a_raw)
+    
+    @a.setter
+    def a(self, value):
+        return self._set_a(value)
+
+    def _set_a(self, value):
+        if not torch.is_tensor(value):
+            value = torch.as_tensor(value).to(self.raw_a)
+        # when setting the paramater, transform the actual value to a raw one by applying the inverse transform
+        self.initialize(raw_a=self.raw_a_constraint.inverse_transform(value))
+    
+    @property
+    def b(self):
+        return self.b_raw_constraint.transform(self.b_raw)
+        
+    @b.setter
+    def b(self, value):
+        return self._set_b(value)
+
+    def _set_b(self, value):
+        if not torch.is_tensor(value):
+            value = torch.as_tensor(value).to(self.raw_b)
+        self.initialize(raw_b=self.raw_b_constraint.inverse_transform(value))
+
+    def forward(self, x):
+        a = self.a.detach()
+        b = self.b.detach()
+        warp_numpy = Beta(a, b).cdf(x)
+        return torch.from_numpy(warp_numpy)
+    
 
 
 class TanhWarp(torch.nn.Module):

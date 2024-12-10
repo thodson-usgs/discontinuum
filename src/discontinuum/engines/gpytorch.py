@@ -103,7 +103,7 @@ class MarginalGPyTorch(BaseModel):
             output = self.model(train_x)
             # Calc loss and backprop gradients
             loss = -mll(output, train_y)
-            loss.backward()
+            loss.backward(retain_graph=True)
             pbar.set_postfix(loss=loss.item())
             optimizer.step()
 

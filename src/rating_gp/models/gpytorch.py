@@ -18,7 +18,7 @@ from gpytorch.priors import (
 from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel, LogWarp, TanhWarp
+from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel, BetaCDFWarp, TanhWarp
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -97,7 +97,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.mean_module = NoOpMean()
 
         self.warp_stage_dim = TanhWarp()
-        #self.warp_stage_dim = LogWarp()
+        #self.warp_stage_dim = BetaCDFWarp()
 
         # self.covar_module = (
         #     (self.cov_stage() * self.cov_stagetime())
@@ -117,8 +117,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
                    active_dims=self.stage_dim,
                    # a_prior=NormalPrior(loc=20, scale=1),
                    b_constraint=gpytorch.constraints.Interval(
-                       0,
-                       train_y.max(),
+                       self.warp_stage_dim(0),  
+                       self.warp_stage_dim(train_y.max()),
+                       #0,
+                       #train_y.max(),
                    ##    #train_x[:, self.stage_dim].min(),
                    ##    #train_x[:, self.stage_dim].max(),
                    ),
