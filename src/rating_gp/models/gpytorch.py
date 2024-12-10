@@ -97,7 +97,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.mean_module = NoOpMean()
 
         #self.warp_stage_dim = TanhWarp()
-        self.warp_stage_dim = LogWarp()
+        #self.warp_stage_dim = LogWarp()
 
         # self.covar_module = (
         #     (self.cov_stage() * self.cov_stagetime())
@@ -127,7 +127,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         x = x.clone()
         q = self.powerlaw(x[:, self.stage_dim])
         x_t = x.clone()
-        x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
+        #x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
 
         mean_x = self.mean_module(q)
         covar_x = self.covar_module(x_t)
