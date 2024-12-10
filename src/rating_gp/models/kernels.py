@@ -2,39 +2,32 @@ import gpytorch
 import numpy as np
 import torch
 
-from torch.distributions import beta
-
 from linear_operator.operators import MatmulLinearOperator, to_dense
 
 
-class BetaCDFWarp(gpytorch.Module):
-    
-    def __init__(self, a=None, b=None):
-        super(BetaCDFWarp, self).__init__()
-        a = torch.rand(1) if a is None else torch.tensor([a])
-        b = torch.rand(1) if b is None else torch.tensor([b])
+class TanhWarp(torch.nn.Module):
 
-        self.register_parameter(name="a_raw", parameter=torch.nn.Parameter(a))
-        self.register_constraint("a_raw", gpytorch.constraints.Positive())
-        self.register_prior("a_prior", gpytorch.priors.GammaPrior(1, 1), lambda: self.a)
-        
-        self.register_parameter(name="b_raw", parameter=torch.nn.Parameter(b))
-        self.register_constraint("b_raw", gpytorch.constraints.Positive())
-        self.register_prior("b_prior", gpytorch.priors.GammaPrior(1, 1), lambda: self.b)
+    def __init__(self):
+        super(TanhWarp, self).__init__()
+        self.a = torch.nn.Parameter(torch.rand(1))
+        self.b = torch.nn.Parameter(torch.rand(1))
+        self.c = torch.nn.Parameter(torch.rand(1))
 
-    @property
-    def a(self):
-        return self.a_raw_constraint.transform(self.a_raw)
-    
-    @property
-    def b(self):
-        return self.b_raw_constraint.transform(self.b_raw)
-        
     def forward(self, x):
-        a = self.a.detach()
-        b = self.b.detach()
-        warp_numpy = beta(a, b).cdf(x)
-        return torch.from_numpy(warp_numpy)
+        return x + (self.a * torch.tanh(self.b * (x - self.c)))
+
+
+class LogWarp(torch.nn.Module):
+    """Logarithmic Warp
+
+    Note: good smoother
+    """
+    def __init__(self):
+        super(LogWarp, self).__init__()
+        self.a = torch.nn.Parameter(torch.rand(1))
+
+    def forward(self, x):
+        return self.a * torch.log(x)
 
 
 class StageTimeKernel(gpytorch.kernels.Kernel):
