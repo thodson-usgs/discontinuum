@@ -18,7 +18,7 @@ from gpytorch.priors import (
 from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel
+from rating_gp.models.kernels import StageTimeKernel, SigmoidKernel, BetaCDFWarp
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -96,6 +96,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # self.mean_module = gpytorch.means.LinearMean(input_size=1)
         self.mean_module = NoOpMean()
 
+        #self.warp_stage_dim = BetaCDFWarp()
+
         # self.covar_module = (
         #     (self.cov_stage() * self.cov_stagetime())
         #     + self.cov_residual()
@@ -121,11 +123,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
     def forward(self, x):
         self.powerlaw.b.data.clamp_(1.5, 2.5)
-        x_t = x.clone()
-        x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
+        x = x.clone()
+        q = self.powerlaw(x[:, self.stage_dim])
 
-        mean_x = self.mean_module(x_t[:, self.stage_dim])
-        covar_x = self.covar_module(x_t)
+        mean_x = self.mean_module(q)
+        covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_stage(self, ls_prior=None):
