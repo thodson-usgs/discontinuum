@@ -280,7 +280,12 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         #     name='raw_a',
         #     parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
         # )
-        self.b = torch.nn.Parameter(torch.randn(*self.batch_shape, 1, 1))
+
+        #self.b = torch.nn.Parameter(torch.randn(*self.batch_shape, 1, 1))
+        # try to keep b within the data range
+        self.b = torch.nn.Parameter(
+            0.5 - torch.rand(*self.batch_shape, 1, 1)
+        )
 
         self.register_parameter(
             name='raw_b',

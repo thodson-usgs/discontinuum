@@ -29,7 +29,7 @@ class PowerLawTransform(torch.nn.Module):
         self.a = torch.nn.Parameter(torch.randn(1))
         self.b = torch.nn.Parameter(torch.randn(1))
         # stage is scaled to 1-2, so initialize c to 0-1
-        self.c = torch.nn.Parameter(torch.randn(1))
+        self.c = torch.nn.Parameter(torch.rand(1))
 
     def forward(self, x):
         self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
@@ -117,10 +117,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
                    active_dims=self.stage_dim,
                    # a_prior=NormalPrior(loc=20, scale=1),
                    b_constraint=gpytorch.constraints.Interval(
-                       0,
+                       train_y.min(),
                        train_y.max(),
-                   #    #train_x[:, self.stage_dim].min(),
-                   #    #train_x[:, self.stage_dim].max(),
                    ),
                )
               )
