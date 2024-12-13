@@ -6,6 +6,7 @@ from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 from gpytorch.kernels import (
     MaternKernel,
     RBFKernel,
+    RBFKernelGrad,
     RQKernel,
     ScaleKernel,
 )
@@ -14,6 +15,10 @@ from gpytorch.priors import (
     HalfNormalPrior,
     NormalPrior,
 )
+
+from gpytorch.means import ConstantMeanGrad
+
+from gpytorch.likelihoods.noise_models import FixedGaussianNoise
 
 from linear_operator.operators import MatmulLinearOperator
 from rating_gp.models.base import RatingDataMixin, ModelConfig
@@ -185,3 +190,100 @@ class ExactGPModel(gpytorch.models.ExactGP):
             ),
             outputscale_prior=eta,
         )
+
+
+class DerivativeRatingGPMarginalGPyTorch(
+    RatingDataMixin,
+    RatingPlotMixin,
+    # comes last b/c it conflics with Mixin
+    MarginalGPyTorch,
+):
+    """
+    """
+    def __init__(
+            self,
+            model_config: ModelConfig = ModelConfig(),
+    ):
+        """ """
+        super(MarginalGPyTorch, self).__init__(model_config=model_config)
+        self.build_datamanager(model_config)
+        
+
+    def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
+        """Build marginal likelihood version of RatingGP
+        """
+        # assume a constant measurement error for testing
+        if y_unc is not None:
+            y_noise = y_unc
+        else:
+            y_noise = 0.1**2 * torch.ones(y.shape[0]) #.reshape(1, -1)
+
+        dy_noise = 0.2 * torch.ones(y.shape[0]) #.reshape(1, -1) # TODO should we square?
+
+        noise = FixedGaussianNoise(
+            torch.stack([y_noise, dy_noise], dim=-1)
+        )
+
+        # stack fixed derivative value to y
+        dy = 2 * torch.zeros_like(y)
+        y = torch.stack([y, dy], dim=-1)
+
+
+        self.likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(
+            num_tasks=2,
+            noise_covar=noise,
+            learn_additional_noise=False, # True might help when nosie is mis-specified
+        )   
+
+        model = ExactGPModelWithDerivatives(X, y, self.likelihood)
+
+        return model
+
+
+class ExactGPModelWithDerivatives(gpytorch.models.ExactGP):
+    def __init__(self, train_x, train_y, likelihood):
+        super(ExactGPModelWithDerivatives, self).__init__(train_x, train_y, likelihood)
+
+        n_d = train_x.shape[1]  # number of dimensions
+        assert n_d == 2, "Only two dimensions supported"
+
+        self.dims = np.arange(n_d)
+        self.time_dim = [self.dims[0]]
+        self.stage_dim = [self.dims[1]]
+
+        #self.mean_module = NoOpMean()
+        #self.powerlaw = PowerLawTransform()
+        self.mean_module = ConstantMeanGrad()   
+
+        self.covar_module = (
+            self.cov_stage()
+             * self.cov_time()
+             )
+    
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return gpytorch.distributions.MultitaskMultivariateNormal(mean_x, covar_x)
+    
+    def cov_stage(self, ls_prior=None):
+        eta = HalfNormalPrior(scale=1)
+
+        return ScaleKernel(
+            RBFKernelGrad(
+                active_dims=self.stage_dim,
+                lengthscale_prior=ls_prior,
+            ),
+            outputscale_prior=eta,
+        )
+
+    def cov_time(self, ls_prior=None):
+        eta = HalfNormalPrior(scale=1)
+
+        return ScaleKernel(
+            MaternKernel(
+                active_dims=self.time_dim,
+                lengthscale_prior=ls_prior,
+            ),
+            outputscale_prior=eta,
+        )
+
