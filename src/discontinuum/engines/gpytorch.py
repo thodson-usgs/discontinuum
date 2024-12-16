@@ -88,7 +88,7 @@ class MarginalGPyTorch(BaseModel):
 
         # Use the adam optimizer
         if optimizer == "adam":
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=0.1)
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=0.05) # default previously lr=0.1
         else:
             raise NotImplementedError("Only Adam optimizer is implemented")
 
