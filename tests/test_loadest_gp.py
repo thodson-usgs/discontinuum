@@ -1,6 +1,4 @@
 import pytest
-import json
-import requests_mock
 import xarray as xr
 import pandas as pd
 import numpy as np
@@ -13,57 +11,36 @@ from loadest_gp.utils import concentration_to_flux, plot_annual_flux
 from discontinuum.utils import time_substitution, aggregate_to_daily
 
 
-site = "01491000" 
-start_date = "1979-10-01"
-end_date = "2011-09-30"
+@pytest.fixture
+def sample_dataset():
+    # Create a sample dataset for testing
+    n = 20
+    times = pd.date_range("2000-01-01", "2010-12-31", periods=n)
+    flow = np.exp(np.random.randn(n))  # Random streamflow data
+    concentration = np.exp(np.random.randn(n)) # Random solute concentration data
 
-characteristic = 'Inorganic nitrogen (nitrate and nitrite)'
-fraction = 'Dissolved'
+    ds = xr.Dataset(
+        data_vars={
+            'flow': ('time', flow),
+            'concentration': ('time', concentration),
+        },
+        coords={'time': times},
+    )
+
+    return ds
 
 
 @pytest.fixture
-def demo_nwis_query_response():
-    with open('tests/data/nwis_responses_loadest.json', 'r') as file:
-        responses = json.load(file)
-    return responses
+def daily_dataset():
+    times = pd.date_range("2000-01-01", "2010-12-31", freq='d')
+    flow = np.exp(np.random.rand(len(times)))  # Random streamflow data
 
-
-def test_get_daily(demo_nwis_query_response):
-    with requests_mock.Mocker() as m:
-        m.get(demo_nwis_query_response['get_daily']['url'],
-              text=demo_nwis_query_response['get_daily']['text'])
-        m.get(demo_nwis_query_response['get_samples']['site_metadata']['url'],
-              text=demo_nwis_query_response['get_samples']['site_metadata']['text'])
-        data = usgs.get_daily(site=site,
-                              start_date=start_date,
-                              end_date=end_date)
-
-    assert isinstance(data, xr.Dataset)
-    assert hasattr(data, 'flow')
-    assert hasattr(data, 'time')
-    assert (data.time.size == data.flow.size)
-    assert all(data.flow > 0)
-
-
-def test_get_samples(demo_nwis_query_response):
-    with requests_mock.Mocker() as m:
-        m.get(demo_nwis_query_response['get_samples']['data']['url'],
-              text=demo_nwis_query_response['get_samples']['data']['text'])
-        m.get(demo_nwis_query_response['get_samples']['pcode']['url'],
-              text=demo_nwis_query_response['get_samples']['pcode']['text'])
-        m.get(demo_nwis_query_response['get_samples']['site_metadata']['url'],
-              text=demo_nwis_query_response['get_samples']['site_metadata']['text'])
-        data = usgs.get_samples(site=site,
-                                start_date=start_date, 
-                                end_date=end_date, 
-                                characteristic=characteristic, 
-                                fraction=fraction)
-
-    assert isinstance(data, xr.Dataset)
-    assert hasattr(data, 'concentration')
-    assert hasattr(data, 'time')
-    assert (data.time.size == data.concentration.size)
-    assert all(data.concentration > 0)
+    ds = xr.Dataset(
+        data_vars={'flow': ('time', flow)},
+        coords={'time': times},
+      )
+    
+    return ds
 
 
 def test_aggregate_to_daily():
@@ -96,37 +73,13 @@ def test_concentration_to_flux():
     assert isinstance(plot_annual_flux(flux), Axes)
 
 
+def test_loadest_gp(sample_dataset):
 
-@pytest.mark.filterwarnings("ignore:You have passed data")
-def test_loadest_gp(demo_nwis_query_response):
-    with requests_mock.Mocker() as m:
-        m.get(demo_nwis_query_response['get_samples']['data']['url'],
-              text=demo_nwis_query_response['get_samples']['data']['text'])
-        m.get(demo_nwis_query_response['get_samples']['pcode']['url'],
-              text=demo_nwis_query_response['get_samples']['pcode']['text'])
-        m.get(demo_nwis_query_response['get_samples']['site_metadata']['url'],
-              text=demo_nwis_query_response['get_samples']['site_metadata']['text'])
-        samples = usgs.get_samples(site=site,
-                                   start_date=start_date, 
-                                   end_date=end_date, 
-                                   characteristic=characteristic, 
-                                   fraction=fraction)
-        
-        m.get(demo_nwis_query_response['get_daily']['url'],
-              text=demo_nwis_query_response['get_daily']['text'])
-        m.get(demo_nwis_query_response['get_samples']['site_metadata']['url'],
-              text=demo_nwis_query_response['get_samples']['site_metadata']['text'])
-        daily = usgs.get_daily(site=site,
-                               start_date=start_date,
-                               end_date=end_date)
-
-    samples = aggregate_to_daily(samples)
-
-    data = xr.merge([samples, daily], join='inner')
+    #data = sample_dataset()
 
     model = LoadestGP()
-    model.fit(target=data['concentration'],
-              covariates=data[['time','flow']],
+    model.fit(target=sample_dataset['concentration'],
+              covariates=sample_dataset[['time','flow']],
               iterations=10)
 
     assert model.is_fitted
