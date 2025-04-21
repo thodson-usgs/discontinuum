@@ -1,22 +1,17 @@
 # discontinuum
 
-`discontinuum` is a middleware for developing Gaussian process (GP) models.
-Why might we want a middleware? 
-GP's are a flexible and elegant approach to modeling dynamical systems
-for which we have sparse and uncertain observations.
-In this arena, simple GP models, specified in several lines of math,
-can often achieve state-of-the-art predictive performance.
-However, fitting GP's is numerically intense, $\mathcal{O}(n^3)$ complexity.
-They have several optimizations that take advantage of simplifying assumptions,
-different algorithms, or GPUs, but each has tradeoffs.
+GP's are a flexible approach to machine learning,
+which are naturally suited for applications with sparse and noisy data
+or for uncertainty analysis.
+However, fitting GP's is numerically expensive,
+which has led to a range of optimizations with different tradeoffs.
 Ideally, we could quickly write mathematical models, then run them on whichever
 "engine" is best suited for a particular problem.
 
-Furthermore, most models include a lot of relatively standard utility functions
-for plotting, managing metadata, data pre-processing, and other "boiler plate."
-`discontinum` packages engines and utilities within a single ecosystem,
-such that creating a new model is just a matter of writing a little math without 
-too much boilerplate.
+Most models applications also include a fair amount of "boiler plate"
+in the form of utility functions for plotting, managing metadata, data pre-processing, etc.
+`discontinum` packages several engines and helper utilities into a single ecosystem
+to simplify the processes of prototyping GP models.
 
 # Site Contents
 

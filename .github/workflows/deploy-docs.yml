@@ -1,10 +1,14 @@
-name: Build and Deploy
+name: Deploy GitHub Pages
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
@@ -21,14 +25,14 @@ jobs:
       - name: Install Dependencies 📦
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[doc]
+          pip install -e .[doc,pymc]
         
       - name: Build Documentation 📖
         run: |
-          sphinx-build -b html docs build
+          sphinx-build -b html docs/source docs/build
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build
+          folder: docs/build
           branch: gh-pages

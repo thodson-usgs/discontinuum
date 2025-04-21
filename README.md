@@ -7,18 +7,16 @@
 
 ## Overview
 `discontinuum` is a middleware for developing Gaussian process (GP) models.
-Why might we want a that?
 
-GP's are a flexible and elegant approach to modeling stochastic processes
-for which we have sparse and noisy observations.
-In this arena, simple GP models, specified in several lines of math,
-can often achieve state-of-the-art predictive performance.
-However, fitting GP's is numerically intense, which has led to a range of optimizations that take advantage of simplifying assumptions,
-different algorithms, or GPUs, but each has tradeoffs.
+GP's are a flexible approach to machine learning,
+which are naturally suited for applications with sparse and noisy data
+or for uncertainty analysis.
+However, fitting GP's is numerically expensive,
+which has led to a range of optimizations with different tradeoffs.
 Ideally, we could quickly write mathematical models, then run them on whichever
 "engine" is best suited for a particular problem.
 
-Most models applications also include a fair amount of "boiler plate" 
+Most models applications also include a fair amount of "boiler plate"
 in the form of utility functions for plotting, managing metadata, data pre-processing, etc.
 `discontinum` packages several engines and helper utilities into a single ecosystem
 to simplify the processes of prototyping GP models.
@@ -51,7 +49,7 @@ In general, the `gpytorch` implementation is faster and provides a lot a powerfu
 like GPU support, whereas `pymc` is a more complete probabilistic-programming framework,
 which can be "friendlier" for certain use cases.
 
-Porting a model from one engine to another ususally involves completely rewriting the guts of the GP.
+Porting a model from one engine to another usually involves completely rewriting the guts of the GP.
 but any other boiler-plate functions should be unaffected.
 
 
