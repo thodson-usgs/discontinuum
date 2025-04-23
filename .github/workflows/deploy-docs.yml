@@ -25,7 +25,7 @@ jobs:
       - name: Install Dependencies 📦
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[doc,pymc]
+          pip install -e .[doc,pymc,rating_gp,loadest_gp]
         
       - name: Build Documentation 📖
         run: |
