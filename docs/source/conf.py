@@ -20,6 +20,7 @@ extensions = [
     "sphinxcontrib.mermaid",
     'sphinx.ext.autodoc',
     "sphinx.ext.autosummary",
+    "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
     ]
