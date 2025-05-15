@@ -357,7 +357,7 @@ class StandardErrorPipeline(ErrorPipeline):
 
 
 class LogErrorPipeline(ErrorPipeline):
-    """Pipelin to transform error
+    """Pipeline to transform error
 
     inverse_transform converts variance (in log space) to a GSE
     """
