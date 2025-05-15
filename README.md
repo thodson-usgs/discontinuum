@@ -16,7 +16,7 @@ which has led to a range of optimizations with different tradeoffs.
 Ideally, we could quickly write mathematical models, then run them on whichever
 "engine" is best suited for a particular problem.
 
-Most models applications also include a fair amount of "boiler plate"
+Most model applications also include a fair amount of "boiler plate"
 in the form of utility functions for plotting, managing metadata, data pre-processing, etc.
 `discontinum` packages several engines and helper utilities into a single ecosystem
 to simplify the processes of prototyping GP models.
@@ -39,7 +39,7 @@ which allows the relation between target and covariate to vary through time.
 Try it out in the [loadest-gp demo](https://code.usgs.gov/wma/uncertainty/discontinuum/-/blob/main/docs/source/notebooks/loadest-gp-demo.ipynb).
 
 ### rating-gp
-`rating-gp` is a Gaussian-process model for estimate river flow from stage time series.
+`rating-gp` is a Gaussian-process model for estimating river flow from stage time series.
 Try it out in the [rating-gp demo](https://code.usgs.gov/wma/uncertainty/discontinuum/-/blob/main/docs/source/notebooks/rating-gp-demo.ipynb).
 
 ## Engines
