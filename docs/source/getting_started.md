@@ -25,14 +25,14 @@ which allows the relation between target and covariate to vary through time.
 Try it out in the [loadest-gp demo](notebooks/loadest-gp-demo.ipynb).
 
 ### rating-gp
-`rating-gp` is a Gaussian-process model for estimate river flow from stage time series.
+`rating-gp` is a Gaussian-process model for estimating river flow from stage time series.
 Try it out in the [rating-gp demo](notebooks/rating-gp-demo.ipynb).
 
 
 ## Engines
 Currently, the only supported engines are the marginal likelihood implementation in `pymc` and `gpytorch`.
 Latent GP implementations could be added in the future.
-In general, the `gpytorch` implementation is faster and provides a lot a powerful features,
+In general, the `gpytorch` implementation is faster and provides a lot of powerful features,
 like GPU support, whereas `pymc` is a more complete probabilistic-programming framework,
 which can be "friendlier" for certain use cases.
 
