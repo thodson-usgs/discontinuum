@@ -11,7 +11,7 @@ Ideally, we could quickly write mathematical models, then run them on whichever
 Most models applications also include a fair amount of "boiler plate"
 in the form of utility functions for plotting, managing metadata, data pre-processing, etc.
 `discontinum` packages several engines and helper utilities into a single ecosystem
-to simplify the processes of prototyping GP models.
+to simplify the process of prototyping GP models.
 
 # Site Contents
 
