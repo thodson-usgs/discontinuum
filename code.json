@@ -3,7 +3,7 @@
     "name": "discontinuum",
     "organization": "U.S. Geological Survey",
     "description": "A Python package for prototyping Gaussian process models.",
-    "version": "main",
+    "version": "v1.0.0",
     "status": "Development",
 
     "permissions": {
