@@ -11,14 +11,14 @@
       "licenses": [
         {
           "name": "Public Domain, CC0-1.0",
-          "URL": "https://code.usgs.gov/wma/uncertainty/discontinuum/-/raw/main/LICENSE.md"
+          "URL": "https://code.usgs.gov/wma/uncertainty/discontinuum/-/raw/v1.0.0/LICENSE.md"
         }
       ]
     },
 
     "homepageURL": "https://code.usgs.gov/wma/uncertainty/discontinuum",
-    "downloadURL": "https://code.usgs.gov/wma/uncertainty/discontinuum/-/archive/main/discontinuum-main.zip",
-    "disclaimerURL": "https://code.usgs.gov/wma/uncertainty/discontinuum/-/raw/main/DISCLAIMER.md",
+    "downloadURL": "https://code.usgs.gov/wma/uncertainty/discontinuum/-/archive/v1.0.0/discontinuum-v1.0.0.zip",
+    "disclaimerURL": "https://code.usgs.gov/wma/uncertainty/discontinuum/-/raw/v1.0.0/DISCLAIMER.md",
     "repositoryURL": "https://code.usgs.gov/wma/uncertainty/discontinuum.git",
     "vcs": "git",
 
