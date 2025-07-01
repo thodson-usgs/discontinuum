@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Index &#8212; discontinuum v0.5 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=51182d00"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">discontinuum v0.5 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="index.html">discontinuum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/loadest-gp-demo.html">loadest-gp (prototype)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/rating-gp-demo.html">rating-gp (prototype)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api_reference.html">API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/discontinuum.html">discontinuum</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/discontinuum.data_manager.html">discontinuum.data_manager</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/discontinuum.engines.html">discontinuum.engines</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/discontinuum.engines.base.html">discontinuum.engines.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/discontinuum.engines.gpytorch.html">discontinuum.engines.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/discontinuum.engines.pymc.html">discontinuum.engines.pymc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/discontinuum.pipeline.html">discontinuum.pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/discontinuum.plot.html">discontinuum.plot</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/discontinuum.providers.html">discontinuum.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/discontinuum.providers.base.html">discontinuum.providers.base</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/discontinuum.utils.html">discontinuum.utils</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/loadest_gp.html">loadest_gp</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/loadest_gp.models.html">loadest_gp.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/loadest_gp.models.base.html">loadest_gp.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/loadest_gp.models.gpytorch.html">loadest_gp.models.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/loadest_gp.models.pymc.html">loadest_gp.models.pymc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/loadest_gp.plot.html">loadest_gp.plot</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/loadest_gp.providers.html">loadest_gp.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/loadest_gp.providers.usgs.html">loadest_gp.providers.usgs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/loadest_gp.utils.html">loadest_gp.utils</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="_autosummary/rating_gp.html">rating_gp</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/rating_gp.models.html">rating_gp.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/rating_gp.models.base.html">rating_gp.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/rating_gp.models.gpytorch.html">rating_gp.models.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/rating_gp.models.kernels.html">rating_gp.models.kernels</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/rating_gp.pipeline.html">rating_gp.pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/rating_gp.plot.html">rating_gp.plot</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/rating_gp.providers.html">rating_gp.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/rating_gp.providers.usgs.html">rating_gp.providers.usgs</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin.add_time_colorbar">add_time_colorbar() (rating_gp.plot.RatingPlotMixin method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.utils.html#discontinuum.utils.aggregate_to_daily">aggregate_to_daily() (in module discontinuum.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.engines.base.html#discontinuum.engines.base.BaseModel">BaseModel (class in discontinuum.engines.base)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.plot.html#discontinuum.plot.BasePlotMixin">BasePlotMixin (class in discontinuum.plot)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.BaseTransformer">BaseTransformer (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.engines.base.html#discontinuum.engines.base.BaseModel.build_datamanager">build_datamanager() (discontinuum.engines.base.BaseModel method)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.engines.base.html#discontinuum.engines.base.BaseModel.build_model">build_model() (discontinuum.engines.base.BaseModel method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.MarginalGPyTorch.build_model">(discontinuum.engines.gpytorch.MarginalGPyTorch method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.MarginalPyMC.build_model">(discontinuum.engines.pymc.MarginalPyMC method)</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.html#loadest_gp.LoadestGPMarginalGPyTorch.build_model">(loadest_gp.LoadestGPMarginalGPyTorch method)</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.html#loadest_gp.LoadestGPMarginalPyMC.build_model">(loadest_gp.LoadestGPMarginalPyMC method)</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.models.gpytorch.html#loadest_gp.models.gpytorch.LoadestGPMarginalGPyTorch.build_model">(loadest_gp.models.gpytorch.LoadestGPMarginalGPyTorch method)</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.models.pymc.html#loadest_gp.models.pymc.LoadestGPMarginalPyMC.build_model">(loadest_gp.models.pymc.LoadestGPMarginalPyMC method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.gpytorch.html#rating_gp.models.gpytorch.RatingGPMarginalGPyTorch.build_model">(rating_gp.models.gpytorch.RatingGPMarginalGPyTorch method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.ErrorPipeline.ci">ci() (discontinuum.pipeline.ErrorPipeline method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.LogErrorPipeline.ci">(discontinuum.pipeline.LogErrorPipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.StandardErrorPipeline.ci">(discontinuum.pipeline.StandardErrorPipeline method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.ClipTransformer">ClipTransformer (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.utils.html#loadest_gp.utils.concentration_to_flux">concentration_to_flux() (in module loadest_gp.utils)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.plot.html#loadest_gp.plot.LoadestPlotMixin.contourf">contourf() (loadest_gp.plot.LoadestPlotMixin method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.Data">Data (class in discontinuum.data_manager)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager">DataManager (class in discontinuum.data_manager)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.datetime_to_decimal_year">datetime_to_decimal_year() (in module discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.decimal_year_to_datetime">decimal_year_to_datetime() (in module discontinuum.pipeline)</a>
+</li>
+      <li>
+    discontinuum
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.html#module-discontinuum">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.data_manager
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.data_manager.html#module-discontinuum.data_manager">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.engines
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.html#module-discontinuum.engines">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.engines.base
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.base.html#module-discontinuum.engines.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.engines.gpytorch
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.gpytorch.html#module-discontinuum.engines.gpytorch">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    discontinuum.engines.pymc
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#module-discontinuum.engines.pymc">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.pipeline
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.pipeline.html#module-discontinuum.pipeline">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.plot
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.plot.html#module-discontinuum.plot">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.providers
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.providers.html#module-discontinuum.providers">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.providers.base
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.providers.base.html#module-discontinuum.providers.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    discontinuum.utils
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.utils.html#module-discontinuum.utils">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.error_pipeline">error_pipeline (discontinuum.data_manager.DataManager attribute)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.ErrorPipeline">ErrorPipeline (class in discontinuum.pipeline)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/loadest_gp.models.gpytorch.html#loadest_gp.models.gpytorch.ExactGPModel">ExactGPModel (class in loadest_gp.models.gpytorch)</a>
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.models.gpytorch.html#rating_gp.models.gpytorch.ExactGPModel">(class in rating_gp.models.gpytorch)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.fit">fit() (discontinuum.data_manager.DataManager method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.base.html#discontinuum.engines.base.BaseModel.fit">(discontinuum.engines.base.BaseModel method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.LatentGPyTorch.fit">(discontinuum.engines.gpytorch.LatentGPyTorch method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.MarginalGPyTorch.fit">(discontinuum.engines.gpytorch.MarginalGPyTorch method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.LatentPyMC.fit">(discontinuum.engines.pymc.LatentPyMC method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.MarginalPyMC.fit">(discontinuum.engines.pymc.MarginalPyMC method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.MetadataManager.fit">(discontinuum.pipeline.MetadataManager method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.pipeline.html#rating_gp.pipeline.LogPropagation.fit">(rating_gp.pipeline.LogPropagation method)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.format_nwis_daily">format_nwis_daily() (in module loadest_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.format_wqp_date">format_wqp_date() (in module loadest_gp.providers.usgs)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.format_wqp_samples">format_wqp_samples() (in module loadest_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.NoOpMean.forward">forward() (discontinuum.engines.gpytorch.NoOpMean method)</a>
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.gpytorch.html#loadest_gp.models.gpytorch.ExactGPModel.forward">(loadest_gp.models.gpytorch.ExactGPModel method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.gpytorch.html#rating_gp.models.gpytorch.ExactGPModel.forward">(rating_gp.models.gpytorch.ExactGPModel method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.gpytorch.html#rating_gp.models.gpytorch.PowerLawTransform.forward">(rating_gp.models.gpytorch.PowerLawTransform method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.LogWarp.forward">(rating_gp.models.kernels.LogWarp method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.PowerLawKernel.forward">(rating_gp.models.kernels.PowerLawKernel method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.SigmoidKernel.forward">(rating_gp.models.kernels.SigmoidKernel method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.StageTimeKernel.forward">(rating_gp.models.kernels.StageTimeKernel method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.TanhWarp.forward">(rating_gp.models.kernels.TanhWarp method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.providers.base.html#discontinuum.providers.base.get_covariates">get_covariates() (in module discontinuum.providers.base)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.get_daily">get_daily() (in module loadest_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.get_daily_stage">get_daily_stage() (in module rating_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.get_dim">get_dim() (discontinuum.data_manager.DataManager method)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.get_measurements">get_measurements() (in module rating_gp.providers.usgs)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.providers.base.html#discontinuum.providers.base.get_metadata">get_metadata() (in module discontinuum.providers.base)</a>
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.get_metadata">(in module loadest_gp.providers.usgs)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.get_parameters">get_parameters() (in module loadest_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.get_qwdata_samples">get_qwdata_samples() (in module loadest_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.get_samples">get_samples() (in module loadest_gp.providers.usgs)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.providers.base.html#discontinuum.providers.base.get_target">get_target() (in module discontinuum.providers.base)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.MetadataManager.inverse_transform">inverse_transform() (discontinuum.pipeline.MetadataManager method)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.inverse_transform_covariates">inverse_transform_covariates() (discontinuum.data_manager.DataManager method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.engines.base.html#discontinuum.engines.base.is_fitted">is_fitted() (in module discontinuum.engines.base)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.is_initialized">is_initialized() (in module discontinuum.data_manager)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.LatentGPyTorch">LatentGPyTorch (class in discontinuum.engines.gpytorch)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.LatentPyMC">LatentPyMC (class in discontinuum.engines.pymc)</a>
+</li>
+      <li>
+    loadest_gp
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.html#module-loadest_gp">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.models
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.html#module-loadest_gp.models">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.models.base
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.base.html#module-loadest_gp.models.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.models.gpytorch
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.gpytorch.html#module-loadest_gp.models.gpytorch">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.models.pymc
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.pymc.html#module-loadest_gp.models.pymc">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.plot
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.plot.html#module-loadest_gp.plot">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.providers
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.providers.html#module-loadest_gp.providers">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    loadest_gp.providers.usgs
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.providers.usgs.html#module-loadest_gp.providers.usgs">module</a>
+</li>
+      </ul></li>
+      <li>
+    loadest_gp.utils
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.utils.html#module-loadest_gp.utils">module</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/loadest_gp.html#loadest_gp.LoadestGPMarginalGPyTorch">LoadestGPMarginalGPyTorch (class in loadest_gp)</a>
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.gpytorch.html#loadest_gp.models.gpytorch.LoadestGPMarginalGPyTorch">(class in loadest_gp.models.gpytorch)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/loadest_gp.html#loadest_gp.LoadestGPMarginalPyMC">LoadestGPMarginalPyMC (class in loadest_gp)</a>
+
+      <ul>
+        <li><a href="_autosummary/loadest_gp.models.pymc.html#loadest_gp.models.pymc.LoadestGPMarginalPyMC">(class in loadest_gp.models.pymc)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/loadest_gp.plot.html#loadest_gp.plot.LoadestPlotMixin">LoadestPlotMixin (class in loadest_gp.plot)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.LogErrorPipeline">LogErrorPipeline (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.pipeline.html#rating_gp.pipeline.LogPropagation">LogPropagation (class in rating_gp.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.LogStandardPipeline">LogStandardPipeline (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.LogTransformer">LogTransformer (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.pipeline.html#rating_gp.pipeline.LogUncertaintyPipeline">LogUncertaintyPipeline (class in rating_gp.pipeline)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.LogWarp">LogWarp (class in rating_gp.models.kernels)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.MarginalGPyTorch">MarginalGPyTorch (class in discontinuum.engines.gpytorch)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.MarginalPyMC">MarginalPyMC (class in discontinuum.engines.pymc)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.providers.base.html#discontinuum.providers.base.MetaData">MetaData (class in discontinuum.providers.base)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.MetadataManager">MetadataManager (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.models.base.html#loadest_gp.models.base.ModelConfig">ModelConfig (class in loadest_gp.models.base)</a>
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.models.base.html#rating_gp.models.base.ModelConfig">(class in rating_gp.models.base)</a>
+</li>
+      </ul></li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.html#module-discontinuum">discontinuum</a>
+</li>
+        <li><a href="_autosummary/discontinuum.data_manager.html#module-discontinuum.data_manager">discontinuum.data_manager</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.html#module-discontinuum.engines">discontinuum.engines</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.base.html#module-discontinuum.engines.base">discontinuum.engines.base</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.gpytorch.html#module-discontinuum.engines.gpytorch">discontinuum.engines.gpytorch</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#module-discontinuum.engines.pymc">discontinuum.engines.pymc</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#module-discontinuum.pipeline">discontinuum.pipeline</a>
+</li>
+        <li><a href="_autosummary/discontinuum.plot.html#module-discontinuum.plot">discontinuum.plot</a>
+</li>
+        <li><a href="_autosummary/discontinuum.providers.html#module-discontinuum.providers">discontinuum.providers</a>
+</li>
+        <li><a href="_autosummary/discontinuum.providers.base.html#module-discontinuum.providers.base">discontinuum.providers.base</a>
+</li>
+        <li><a href="_autosummary/discontinuum.utils.html#module-discontinuum.utils">discontinuum.utils</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.html#module-loadest_gp">loadest_gp</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.models.html#module-loadest_gp.models">loadest_gp.models</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.models.base.html#module-loadest_gp.models.base">loadest_gp.models.base</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.models.gpytorch.html#module-loadest_gp.models.gpytorch">loadest_gp.models.gpytorch</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.models.pymc.html#module-loadest_gp.models.pymc">loadest_gp.models.pymc</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.plot.html#module-loadest_gp.plot">loadest_gp.plot</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.providers.html#module-loadest_gp.providers">loadest_gp.providers</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.providers.usgs.html#module-loadest_gp.providers.usgs">loadest_gp.providers.usgs</a>
+</li>
+        <li><a href="_autosummary/loadest_gp.utils.html#module-loadest_gp.utils">loadest_gp.utils</a>
+</li>
+        <li><a href="_autosummary/rating_gp.html#module-rating_gp">rating_gp</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.html#module-rating_gp.models">rating_gp.models</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.base.html#module-rating_gp.models.base">rating_gp.models.base</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.gpytorch.html#module-rating_gp.models.gpytorch">rating_gp.models.gpytorch</a>
+</li>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#module-rating_gp.models.kernels">rating_gp.models.kernels</a>
+</li>
+        <li><a href="_autosummary/rating_gp.pipeline.html#module-rating_gp.pipeline">rating_gp.pipeline</a>
+</li>
+        <li><a href="_autosummary/rating_gp.plot.html#module-rating_gp.plot">rating_gp.plot</a>
+</li>
+        <li><a href="_autosummary/rating_gp.providers.html#module-rating_gp.providers">rating_gp.providers</a>
+</li>
+        <li><a href="_autosummary/rating_gp.providers.usgs.html#module-rating_gp.providers.usgs">rating_gp.providers.usgs</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.USGSParameter.name">name (loadest_gp.providers.usgs.USGSParameter property)</a>
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.NWISColumn.name">(rating_gp.providers.usgs.NWISColumn property)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.USGSParameter.name">(rating_gp.providers.usgs.USGSParameter property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.NoOpMean">NoOpMean (class in discontinuum.engines.gpytorch)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.NoOpPipeline">NoOpPipeline (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.NWISColumn">NWISColumn (class in rating_gp.providers.usgs)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.plot.html#discontinuum.plot.BasePlotMixin.plot">plot() (discontinuum.plot.BasePlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.utils.html#loadest_gp.utils.plot_annual_flux">plot_annual_flux() (in module loadest_gp.utils)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin.plot_discharge">plot_discharge() (rating_gp.plot.RatingPlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.plot.html#loadest_gp.plot.LoadestPlotMixin.plot_flux">plot_flux() (loadest_gp.plot.LoadestPlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.plot.html#discontinuum.plot.BasePlotMixin.plot_observations">plot_observations() (discontinuum.plot.BasePlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin.plot_observed_rating">plot_observed_rating() (rating_gp.plot.RatingPlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin.plot_rating">plot_rating() (rating_gp.plot.RatingPlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin.plot_ratings_in_time">plot_ratings_in_time() (rating_gp.plot.RatingPlotMixin method)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin.plot_stage">plot_stage() (rating_gp.plot.RatingPlotMixin method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.PowerLawKernel">PowerLawKernel (class in rating_gp.models.kernels)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.models.gpytorch.html#rating_gp.models.gpytorch.PowerLawTransform">PowerLawTransform (class in rating_gp.models.gpytorch)</a>
+</li>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.USGSParameter.ppcode">ppcode (loadest_gp.providers.usgs.USGSParameter property)</a>
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.USGSParameter.ppcode">(rating_gp.providers.usgs.USGSParameter property)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/discontinuum.engines.base.html#discontinuum.engines.base.BaseModel.predict">predict() (discontinuum.engines.base.BaseModel method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.MarginalGPyTorch.predict">(discontinuum.engines.gpytorch.MarginalGPyTorch method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.MarginalPyMC.predict">(discontinuum.engines.pymc.MarginalPyMC method)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.MarginalGPyTorch.predict_grid">predict_grid() (discontinuum.engines.gpytorch.MarginalGPyTorch method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.MarginalPyMC.predict_grid">(discontinuum.engines.pymc.MarginalPyMC method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    rating_gp
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.html#module-rating_gp">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.models
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.models.html#module-rating_gp.models">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.models.base
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.models.base.html#module-rating_gp.models.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.models.gpytorch
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.models.gpytorch.html#module-rating_gp.models.gpytorch">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.models.kernels
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.models.kernels.html#module-rating_gp.models.kernels">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    rating_gp.pipeline
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.pipeline.html#module-rating_gp.pipeline">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.plot
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.plot.html#module-rating_gp.plot">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.providers
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.providers.html#module-rating_gp.providers">module</a>
+</li>
+      </ul></li>
+      <li>
+    rating_gp.providers.usgs
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.providers.usgs.html#module-rating_gp.providers.usgs">module</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/rating_gp.models.gpytorch.html#rating_gp.models.gpytorch.RatingGPMarginalGPyTorch">RatingGPMarginalGPyTorch (class in rating_gp.models.gpytorch)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.plot.html#rating_gp.plot.RatingPlotMixin">RatingPlotMixin (class in rating_gp.plot)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.engines.gpytorch.html#discontinuum.engines.gpytorch.MarginalGPyTorch.sample">sample() (discontinuum.engines.gpytorch.MarginalGPyTorch method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.engines.pymc.html#discontinuum.engines.pymc.MarginalPyMC.sample">(discontinuum.engines.pymc.MarginalPyMC method)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/rating_gp.pipeline.html#rating_gp.pipeline.LogPropagation.set_fit_request">set_fit_request() (rating_gp.pipeline.LogPropagation method)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.ErrorPipeline.set_score_request">set_score_request() (discontinuum.pipeline.ErrorPipeline method)</a>
+
+      <ul>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.LogErrorPipeline.set_score_request">(discontinuum.pipeline.LogErrorPipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.LogStandardPipeline.set_score_request">(discontinuum.pipeline.LogStandardPipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.NoOpPipeline.set_score_request">(discontinuum.pipeline.NoOpPipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.StandardErrorPipeline.set_score_request">(discontinuum.pipeline.StandardErrorPipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.StandardPipeline.set_score_request">(discontinuum.pipeline.StandardPipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.TimePipeline.set_score_request">(discontinuum.pipeline.TimePipeline method)</a>
+</li>
+        <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.UnitPipeline.set_score_request">(discontinuum.pipeline.UnitPipeline method)</a>
+</li>
+        <li><a href="_autosummary/rating_gp.pipeline.html#rating_gp.pipeline.LogUncertaintyPipeline.set_score_request">(rating_gp.pipeline.LogUncertaintyPipeline method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.plot.html#discontinuum.plot.BasePlotMixin.setup_plot">setup_plot() (discontinuum.plot.BasePlotMixin static method)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.SigmoidKernel">SigmoidKernel (class in rating_gp.models.kernels)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.SquareTransformer">SquareTransformer (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.StageTimeKernel">StageTimeKernel (class in rating_gp.models.kernels)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.StandardErrorPipeline">StandardErrorPipeline (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.StandardPipeline">StandardPipeline (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.StandardScaler">StandardScaler (class in discontinuum.pipeline)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/rating_gp.models.kernels.html#rating_gp.models.kernels.TanhWarp">TanhWarp (class in rating_gp.models.kernels)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.target_pipeline">target_pipeline (discontinuum.data_manager.DataManager attribute)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.utils.html#discontinuum.utils.time_substitution">time_substitution() (in module discontinuum.utils)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.TimePipeline">TimePipeline (class in discontinuum.pipeline)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.TimeTransformer">TimeTransformer (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.MetadataManager.transform">transform() (discontinuum.pipeline.MetadataManager method)</a>
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.pipeline.html#rating_gp.pipeline.LogPropagation.transform">(rating_gp.pipeline.LogPropagation method)</a>
+</li>
+      </ul></li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.transform_covariates">transform_covariates() (discontinuum.data_manager.DataManager method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.UnitPipeline">UnitPipeline (class in discontinuum.pipeline)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.pipeline.html#discontinuum.pipeline.UnitScaler">UnitScaler (class in discontinuum.pipeline)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/loadest_gp.providers.usgs.html#loadest_gp.providers.usgs.USGSParameter">USGSParameter (class in loadest_gp.providers.usgs)</a>
+
+      <ul>
+        <li><a href="_autosummary/rating_gp.providers.usgs.html#rating_gp.providers.usgs.USGSParameter">(class in rating_gp.providers.usgs)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.X">X (discontinuum.data_manager.DataManager property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.Xnew">Xnew() (discontinuum.data_manager.DataManager method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.y">y (discontinuum.data_manager.DataManager property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.y_t">y_t() (discontinuum.data_manager.DataManager method)</a>
+</li>
+      <li><a href="_autosummary/discontinuum.data_manager.html#discontinuum.data_manager.DataManager.y_unc">y_unc (discontinuum.data_manager.DataManager property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Timothy Hodson and Keith Doore
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
