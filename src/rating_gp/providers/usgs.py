@@ -195,20 +195,27 @@ def get_measurements(
             NWISDischarge.column_name: NWISDischarge.standard_name,
             }
         )
-    # parse uncertainty from measured "measured_rating_diff"
-    qualitycode_to_uncertainty_fraction = {
+    # Quantitative values of "measured_rating_diff"
+    quality_codes = {
         'Excellent': '0.02',
         'Good': '0.05',
         'Fair': '0.08',
         'Poor': '0.12',
         'Unspecified': '0.12',
     }
+    # Replace other values with 'Unspecified'
+    df['measured_rating_diff'] = df['measured_rating_diff'].where(
+        df['measured_rating_diff'].isin(quality_codes),
+        'Unspecified'
+    )
+
     df['discharge_unc_frac'] = (df['measured_rating_diff']
-                                .replace(qualitycode_to_uncertainty_fraction)
+                                .replace(quality_codes)
                                 .astype(float))
-    # set indirect measurements as 20% uncertain regardless of quality code
+    # Set indirect measurements as 20% uncertain regardless of quality code
     df.loc[df['streamflow_method'] == 'QIDIR', 'discharge_unc_frac'] = 0.2
-    # convert fractional uncertainty to uncertainty assuming the uncertainty
+
+    # Convert fractional uncertainty to uncertainty assuming the uncertainty
     # fraction is a 2 sigma gse interval. (GSE = frac + 1)
     # (GSE -> exp(sigma_ln(Q)))
     df['discharge_unc'] = df['discharge_unc_frac'] / 2 + 1
