@@ -195,6 +195,28 @@ def get_measurements(
             NWISDischarge.column_name: NWISDischarge.standard_name,
             }
         )
+    
+    # Process the control_type_cd column
+    df["control_type_cd"] = (
+        df["control_type_cd"]
+        .fillna("Unspecified")
+        .astype("category")
+        )
+    
+    # Filter any measurements that are not used in the rating
+    mask = df["q_meas_used_fg"].str.lower().isin(['yes', 'y'])
+    df = df[mask]
+
+    num_not_used = (~mask).sum()
+    if num_not_used > 0:
+        warnings.warn(
+            f"{num_not_used} measurements were not used in the rating and "
+            "will be dropped from the dataset.",
+            UserWarning,
+        )
+
+    
+
     # Quantitative values of "measured_rating_diff"
     quality_codes = {
         'Excellent': '0.02',
@@ -208,6 +230,7 @@ def get_measurements(
         df['measured_rating_diff'].isin(quality_codes),
         'Unspecified'
     )
+
 
     df['discharge_unc_frac'] = (df['measured_rating_diff']
                                 .replace(quality_codes)
@@ -223,7 +246,14 @@ def get_measurements(
     # drop data that is <= 0 as we need all positive data
     df = df[(df['stage'] > 0) & (df['discharge'] > 0)]
 
-    ds = xr.Dataset.from_dataframe(df[["stage", "discharge", "discharge_unc"]])
+    ds = xr.Dataset.from_dataframe(
+        df[[
+            "stage",
+            "discharge",
+            "discharge_unc",
+            "control_type_cd",
+        ]]
+        )
 
     for param in [NWISStage, NWISDischarge]:
         ds[param.name] = ds[param.name] * param.conversion
