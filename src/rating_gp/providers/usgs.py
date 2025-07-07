@@ -21,6 +21,16 @@ if TYPE_CHECKING:
 FT_TO_M = 0.3048
 FT3_TO_M3 = 0.0283168
 
+    # Quantitative values of "measured_rating_diff"
+USGS_QUALITY_CODES = {
+    'Excellent': '0.02',
+    'Good': '0.05',
+    'Fair': '0.08',
+    'Poor': '0.12',
+    'Unspecified': '0.12',
+}
+
+
 @dataclass
 class NWISColumn:
     column_name: str
@@ -182,6 +192,53 @@ def get_measurements(
     )
     df = nwis._read_rdb(response.text)
 
+    return read_measurements_df(df)    
+
+
+def read_measurements_df(df: pd.DataFrame) -> xr.Dataset:
+    """Read a DataFrame of USGS discharge measurements and convert to xarray Dataset.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe from `dataretrieval.nwis.get_discharge_measurements()`
+
+    Returns
+    -------
+    xr.Dataset
+    
+    Example
+    -------
+    >>> from dataretrieval import nwis
+    >>> from rating_gp.providers.usgs import read_measurements_df
+    >>> df, _ = nwis.get_discharge_measurements(
+        sites='03339000',
+        start='2020-01-01',
+        end='2020-12-31',
+        format='rdb_expanded',
+        )
+    >>> ds = read_measurements_df(df)
+    """
+
+    # assert the correct columns are present
+    required_columns = [
+        "measurement_dt",
+        "gage_height_va",
+        "discharge_va",
+        "q_meas_used_fg",
+        "control_type_cd",
+        "measured_rating_diff",
+        "streamflow_method",
+        NWISStage.column_name,
+        NWISDischarge.column_name,
+    ]
+
+    missing_columns = set(required_columns) - set(df.columns)
+    if missing_columns:
+        raise ValueError(
+            f"Missing required columns in the DataFrame: {missing_columns}"
+        )
+
     # covert timezone to UTC? ignore for now
     df.index = pd.to_datetime(
         df["measurement_dt"],
@@ -215,26 +272,16 @@ def get_measurements(
             UserWarning,
         )
 
-    
-
-    # Quantitative values of "measured_rating_diff"
-    quality_codes = {
-        'Excellent': '0.02',
-        'Good': '0.05',
-        'Fair': '0.08',
-        'Poor': '0.12',
-        'Unspecified': '0.12',
-    }
     # Replace other values with 'Unspecified'
     df['measured_rating_diff'] = df['measured_rating_diff'].where(
-        df['measured_rating_diff'].isin(quality_codes),
+        df['measured_rating_diff'].isin(USGS_QUALITY_CODES.keys()),
         'Unspecified'
     )
 
-
     df['discharge_unc_frac'] = (df['measured_rating_diff']
-                                .replace(quality_codes)
+                                .replace(USGS_QUALITY_CODES)
                                 .astype(float))
+
     # Set indirect measurements as 20% uncertain regardless of quality code
     df.loc[df['streamflow_method'] == 'QIDIR', 'discharge_unc_frac'] = 0.2
 
