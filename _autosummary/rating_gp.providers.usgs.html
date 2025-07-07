@@ -365,6 +365,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.providers.usgs.get_daily_stage"><code class="docutils literal notranslate"><span class="pre">get_daily_stage()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.providers.usgs.get_measurements"><code class="docutils literal notranslate"><span class="pre">get_measurements()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.providers.usgs.read_measurements_df"><code class="docutils literal notranslate"><span class="pre">read_measurements_df()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -387,6 +388,9 @@ document.write(`
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.providers.usgs.get_measurements" title="rating_gp.providers.usgs.get_measurements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_measurements</span></code></a>(site, start_date, end_date)</p></td>
 <td><p>Get discharge measurements from the USGS NWIS API.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.providers.usgs.read_measurements_df" title="rating_gp.providers.usgs.read_measurements_df"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_measurements_df</span></code></a>(df)</p></td>
+<td><p>Read a DataFrame of USGS discharge measurements and convert to xarray Dataset.</p></td>
 </tr>
 </tbody>
 </table>
@@ -468,6 +472,32 @@ document.write(`
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="rating_gp.providers.usgs.read_measurements_df">
+<span class="sig-prename descclassname"><span class="pre">rating_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">read_measurements_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#rating_gp.providers.usgs.read_measurements_df" title="Link to this definition">#</a></dt>
+<dd><p>Read a DataFrame of USGS discharge measurements and convert to xarray Dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe from <cite>dataretrieval.nwis.get_discharge_measurements()</cite></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>xr.Dataset</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dataretrieval</span><span class="w"> </span><span class="kn">import</span> <span class="n">nwis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">rating_gp.providers.usgs</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_measurements_df</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">nwis</span><span class="o">.</span><span class="n">get_discharge_measurements</span><span class="p">(</span>
+<span class="go">    sites=&#39;03339000&#39;,</span>
+<span class="go">    start=&#39;2020-01-01&#39;,</span>
+<span class="go">    end=&#39;2020-12-31&#39;,</span>
+<span class="go">    format=&#39;rdb_expanded&#39;,</span>
+<span class="go">    )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">read_measurements_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 
 
@@ -517,6 +547,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.providers.usgs.get_daily_stage"><code class="docutils literal notranslate"><span class="pre">get_daily_stage()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.providers.usgs.get_measurements"><code class="docutils literal notranslate"><span class="pre">get_measurements()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.providers.usgs.read_measurements_df"><code class="docutils literal notranslate"><span class="pre">read_measurements_df()</span></code></a></li>
 </ul>
   </nav></div>
 

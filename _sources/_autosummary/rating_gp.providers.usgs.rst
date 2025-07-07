@@ -10,6 +10,7 @@ rating\_gp.providers.usgs
    
       get_daily_stage
       get_measurements
+      read_measurements_df
    
    .. rubric:: Classes
 
