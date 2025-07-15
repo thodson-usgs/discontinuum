@@ -71,7 +71,8 @@ class RatingGPMarginalGPyTorch(
         # noise, *and* you did not specify noise. This is treated as a no-op."
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
-            learn_additional_noise=False,
+            learn_additional_noise=True,
+            noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.01),
         )
 
         model = ExactGPModel(X, y, self.likelihood)
@@ -110,8 +111,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # q * time
         self.covar_module = (
             (self.cov_stage()
-             * self.cov_time(ls_prior=GammaPrior(concentration=10, rate=5)))
-            + (self.cov_stage()
+             * self.cov_time(ls_prior=GammaPrior(concentration=1,  rate=1)))
+             + (self.cov_stage(ls_prior=GammaPrior(concentration=1, rate=2))
                * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
                * SigmoidKernel(
                    active_dims=self.stage_dim,
