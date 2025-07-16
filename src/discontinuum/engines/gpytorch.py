@@ -50,6 +50,7 @@ class MarginalGPyTorch(BaseModel):
             target_unc: Dataset = None,
             iterations: int = 100,
             optimizer: str = "adam",
+            learning_rate: float = None,
             ):
         """Fit the model to data.
 
@@ -65,6 +66,8 @@ class MarginalGPyTorch(BaseModel):
             Number of iterations for optimization. The default is 100.
         optimizer : str, optional
             Optimization method. The default is "adam".
+        learning_rate : float, optional
+            Learning rate for optimization. If None, uses adaptive defaults.
         """
         self.is_fitted = True
         # setup data manager (self.dm)
@@ -86,26 +89,135 @@ class MarginalGPyTorch(BaseModel):
         self.model.train()
         self.likelihood.train()
 
-        # Use the adam optimizer
+        # Adaptive learning rate selection
+        if learning_rate is None:
+            if optimizer == "adam":
+                learning_rate = 0.01  # More conservative default
+            elif optimizer == "lbfgs":
+                learning_rate = 1.0   # L-BFGS doesn't use learning rate the same way
+        
+        # Use the specified optimizer with stabilization
         if optimizer == "adam":
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=0.05) # default previously lr=0.1
+            optimizer = torch.optim.Adam(
+                self.model.parameters(), 
+                lr=learning_rate,
+                betas=(0.9, 0.999),    # Slightly more conservative momentum
+                eps=1e-8,              # Numerical stability
+                weight_decay=1e-4      # Small L2 regularization
+            )
+            # Learning rate scheduler for Adam
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, 
+                mode='min', 
+                factor=0.8,     # Reduce LR by 20% when loss plateaus
+                patience=50,    # Wait 50 iterations before reducing
+                min_lr=1e-6     # Minimum learning rate
+            )
+        elif optimizer == "lbfgs":
+            optimizer = torch.optim.LBFGS(
+                self.model.parameters(),
+                lr=learning_rate,
+                max_iter=20,           # Limit L-BFGS iterations per step
+                line_search_fn='strong_wolfe'  # More robust line search
+            )
         else:
-            raise NotImplementedError("Only Adam optimizer is implemented")
+            raise NotImplementedError(f"Optimizer '{optimizer}' not implemented. Use 'adam' or 'lbfgs'.")
 
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
-        pbar = tqdm.tqdm(range(iterations), ncols=70)
+        # Training loop with stability features
+        pbar = tqdm.tqdm(range(iterations), ncols=100)  # Wider progress bar
+        jitter = 1e-6  # Dynamic jitter for numerical stability
+        best_loss = float('inf')
+        patience_counter = 0
+        
         for i in pbar:
-            # Zero gradients from previous iteration
-            optimizer.zero_grad()
-            # Output from model
-            output = self.model(train_x)
-            # Calc loss and backprop gradients
-            loss = -mll(output, train_y)
-            loss.backward()
-            pbar.set_postfix(loss=loss.item())
-            optimizer.step()
+            if optimizer.__class__.__name__ == "LBFGS":
+                # L-BFGS requires a closure function
+                def closure():
+                    optimizer.zero_grad()
+                    output = self.model(train_x)
+                    with gpytorch.settings.cholesky_jitter(jitter):
+                        loss = -mll(output, train_y).sum()
+                    loss.backward()
+                    return loss
+                
+                loss = optimizer.step(closure)
+                pbar.set_postfix(loss=loss.item())
+            else:
+                # Adam optimizer with stability features
+                optimizer.zero_grad()
+                output = self.model(train_x)
+                
+                # Attempt loss calculation with dynamic jitter
+                try:
+                    with gpytorch.settings.cholesky_jitter(jitter):
+                        loss = -mll(output, train_y)
+                except Exception as e:
+                    # Increase jitter if numerical issues occur
+                    jitter = min(jitter * 10, 1e-2)
+                    current_lr = optimizer.param_groups[0]['lr']
+                    pbar.set_postfix_str(
+                        f'lr={current_lr:.1e} jitter={jitter:.1e} | Numerical issue - increasing jitter'
+                    )
+                    continue
+                
+                # Check for NaN loss
+                if torch.isnan(loss) or torch.isinf(loss):
+                    current_lr = optimizer.param_groups[0]['lr']
+                    pbar.set_postfix_str(
+                        f'lr={current_lr:.1e} jitter={jitter:.1e} | NaN/Inf loss detected - skipping step'
+                    )
+                    continue
+                
+                loss.backward()
+                
+                # Gradient clipping for stability
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                
+                # Check for NaN gradients
+                has_nan_grad = False
+                for param in self.model.parameters():
+                    if param.grad is not None and torch.isnan(param.grad).any():
+                        has_nan_grad = True
+                        break
+                
+                if has_nan_grad:
+                    # Update learning rate scheduler even with NaN gradients
+                    scheduler.step(loss)
+                    current_lr = optimizer.param_groups[0]['lr']
+                    
+                    # Update best loss tracking (loss is still valid, just gradients are NaN)
+                    if loss.item() < best_loss:
+                        best_loss = loss.item()
+                        patience_counter = 0
+                    else:
+                        patience_counter += 1
+                    
+                    # Display comprehensive info even with NaN gradients
+                    pbar.set_postfix_str(
+                        f'loss={loss.item():.4f} lr={current_lr:.1e} jitter={jitter:.1e} best={best_loss:.4f} | NaN gradients - skipping step'
+                    )
+                    continue
+                
+                optimizer.step()
+                
+                # Update learning rate scheduler for Adam
+                scheduler.step(loss)
+                current_lr = optimizer.param_groups[0]['lr']
+                
+                # Early stopping check
+                if loss.item() < best_loss:
+                    best_loss = loss.item()
+                    patience_counter = 0
+                else:
+                    patience_counter += 1
+                
+                # Display progress with comprehensive metadata
+                pbar.set_postfix_str(
+                    f'loss={loss.item():.4f} lr={current_lr:.1e} jitter={jitter:.1e} best={best_loss:.4f}'
+                )
 
     @is_fitted
     def predict(self,

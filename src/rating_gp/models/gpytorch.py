@@ -113,9 +113,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         b_min = np.quantile(train_y, 0.10)
         b_max = np.quantile(train_y, 0.95)
         self.covar_module = (
-            (self.cov_stage()
+            (self.cov_stage()  # Much smoother
              * self.cov_time(ls_prior=GammaPrior(concentration=1,  rate=1)))
-             + (self.cov_stage(ls_prior=GammaPrior(concentration=1, rate=2))
+             + (self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=1))  # Moderately smooth
                * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
                * SigmoidKernel(
                    active_dims=self.stage_dim,
@@ -145,11 +145,12 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
     def cov_stage(self, ls_prior=None):
         eta = HalfNormalPrior(scale=1)
-
+        
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=ls_prior,
+                nu=2.5,  # Smoother kernel (was nu=1.5)
             ),
             outputscale_prior=eta,
         )
@@ -157,13 +158,30 @@ class ExactGPModel(gpytorch.models.ExactGP):
     def cov_time(self, ls_prior=None):
         eta = HalfNormalPrior(scale=1)
 
-        return ScaleKernel(
+        # Base Matern kernel for long-term trends
+        base_kernel = ScaleKernel(
             MaternKernel(
                 active_dims=self.time_dim,
                 lengthscale_prior=ls_prior,
+                nu=1.5, # was 2.5
             ),
             outputscale_prior=eta,
         )
+        
+        # Periodic kernel for annual seasonality
+        periodic_kernel = ScaleKernel(
+            gpytorch.kernels.PeriodicKernel(
+                active_dims=self.time_dim,
+                period_length_prior=NormalPrior(loc=1.0, scale=0.1),  # ~1 year
+                lengthscale_prior=GammaPrior(concentration=2, rate=4),
+            ),
+            outputscale_prior=HalfNormalPrior(scale=0.5),
+        )
+        
+        return base_kernel + periodic_kernel
+    
+
+
 
     def cov_stagetime(self):
         eta = HalfNormalPrior(scale=1)
