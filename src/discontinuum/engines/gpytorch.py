@@ -51,6 +51,8 @@ class MarginalGPyTorch(BaseModel):
             iterations: int = 100,
             optimizer: str = "adam",
             learning_rate: float = None,
+            early_stopping: bool = False,
+            early_stopping_patience: int = 100,
             ):
         """Fit the model to data.
 
@@ -68,6 +70,10 @@ class MarginalGPyTorch(BaseModel):
             Optimization method. The default is "adam".
         learning_rate : float, optional
             Learning rate for optimization. If None, uses adaptive defaults.
+        early_stopping : bool, optional
+            Whether to use early stopping. The default is False.
+        early_stopping_patience : int, optional
+            Number of iterations to wait without improvement before stopping. The default is 100.
         """
         self.is_fitted = True
         # setup data manager (self.dm)
@@ -89,10 +95,10 @@ class MarginalGPyTorch(BaseModel):
         self.model.train()
         self.likelihood.train()
 
-        # Adaptive learning rate selection
+        # Adaptive learning rate selection for faster convergence
         if learning_rate is None:
             if optimizer == "adam":
-                learning_rate = 0.01  # More conservative default
+                learning_rate = 0.05  # More aggressive default for faster convergence
             elif optimizer == "lbfgs":
                 learning_rate = 1.0   # L-BFGS doesn't use learning rate the same way
         
@@ -105,13 +111,14 @@ class MarginalGPyTorch(BaseModel):
                 eps=1e-8,              # Numerical stability
                 weight_decay=1e-4      # Small L2 regularization
             )
-            # Learning rate scheduler for Adam
+            # More responsive learning rate scheduler for faster adaptation
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer, 
                 mode='min', 
-                factor=0.8,     # Reduce LR by 20% when loss plateaus
-                patience=50,    # Wait 50 iterations before reducing
-                min_lr=1e-6     # Minimum learning rate
+                factor=0.75,    # Reduce LR by 25% when loss plateaus (slightly more aggressive)
+                patience=60,    # Wait a bit less before reducing (faster adaptation)
+                min_lr=1e-5,    # Higher minimum learning rate
+                threshold=1e-4  # Less sensitive to plateaus
             )
         elif optimizer == "lbfgs":
             optimizer = torch.optim.LBFGS(
@@ -184,8 +191,8 @@ class MarginalGPyTorch(BaseModel):
                         break
                 
                 if has_nan_grad:
-                    # Update learning rate scheduler even with NaN gradients
-                    scheduler.step(loss)
+                    # Don't update scheduler on NaN gradients - this prevents rapid LR decay
+                    # The scheduler should only respond to actual optimization progress
                     current_lr = optimizer.param_groups[0]['lr']
                     
                     # Update best loss tracking (loss is still valid, just gradients are NaN)
@@ -215,9 +222,16 @@ class MarginalGPyTorch(BaseModel):
                     patience_counter += 1
                 
                 # Display progress with comprehensive metadata
-                pbar.set_postfix_str(
-                    f'loss={loss.item():.4f} lr={current_lr:.1e} jitter={jitter:.1e} best={best_loss:.4f}'
-                )
+                progress_info = f'loss={loss.item():.4f} lr={current_lr:.1e} jitter={jitter:.1e} best={best_loss:.4f}'
+                if early_stopping:
+                    progress_info += f' patience={patience_counter}/{early_stopping_patience}'
+                pbar.set_postfix_str(progress_info)
+                
+                # Check early stopping criteria
+                if early_stopping and patience_counter >= early_stopping_patience:
+                    print(f"\nEarly stopping triggered after {i+1} iterations")
+                    print(f"Best loss: {best_loss:.6f}")
+                    break
 
     @is_fitted
     def predict(self,
