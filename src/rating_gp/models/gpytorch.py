@@ -111,11 +111,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # Note that stage gets transformed to q, so the kernel is actually
         # q * time
         b_min = np.quantile(train_y, 0.10)
-        b_max = np.quantile(train_y, 0.95)
+        b_max = np.quantile(train_y, 0.90)
         self.covar_module = (
-            (self.cov_stage()  # Much smoother
+            (self.cov_stage(ls_prior=GammaPrior(concentration=1,  rate=1))
              * self.cov_time(ls_prior=GammaPrior(concentration=1,  rate=1)))
-             + (self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=1))  # Moderately smooth
+             + (self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=1))
                * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
                * SigmoidKernel(
                    active_dims=self.stage_dim,
