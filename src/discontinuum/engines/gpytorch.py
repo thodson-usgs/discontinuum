@@ -98,7 +98,7 @@ class MarginalGPyTorch(BaseModel):
         # Adaptive learning rate selection for faster convergence
         if learning_rate is None:
             if optimizer == "adam":
-                learning_rate = 0.05  # More aggressive default for faster convergence
+                learning_rate = 0.1  # More aggressive default for faster convergence
             elif optimizer == "lbfgs":
                 learning_rate = 1.0   # L-BFGS doesn't use learning rate the same way
         
@@ -112,14 +112,14 @@ class MarginalGPyTorch(BaseModel):
                 weight_decay=1e-4      # Small L2 regularization
             )
             # More responsive learning rate scheduler for faster adaptation
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-                optimizer, 
-                mode='min', 
-                factor=0.75,    # Reduce LR by 25% when loss plateaus (slightly more aggressive)
-                patience=60,    # Wait a bit less before reducing (faster adaptation)
-                min_lr=1e-5,    # Higher minimum learning rate
-                threshold=1e-4  # Less sensitive to plateaus
-            )
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode='min',
+            factor=0.6,    # Reduce LR by 40% when loss plateaus (more aggressive)
+            patience=40,   # Reduce sooner for faster adaptation
+            min_lr=1e-5,   # Higher minimum learning rate
+            threshold=1e-4 # Less sensitive to plateaus
+        )
         elif optimizer == "lbfgs":
             optimizer = torch.optim.LBFGS(
                 self.model.parameters(),
