@@ -162,6 +162,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/discontinuum.data_manager.html">discontinuum.data_manager</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/discontinuum.engines.html">discontinuum.engines</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/discontinuum.engines.base.html">discontinuum.engines.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/discontinuum.engines.gpytorch.html">discontinuum.engines.gpytorch</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/discontinuum.engines.pymc.html">discontinuum.engines.pymc</a></li>
 </ul>
 </details></li>
@@ -174,15 +175,34 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/discontinuum.utils.html">discontinuum.utils</a></li>
 </ul>
 </details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/loadest_gp.html">loadest_gp</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/loadest_gp.models.html">loadest_gp.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/loadest_gp.models.base.html">loadest_gp.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/loadest_gp.models.gpytorch.html">loadest_gp.models.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/loadest_gp.models.pymc.html">loadest_gp.models.pymc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/loadest_gp.plot.html">loadest_gp.plot</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/loadest_gp.providers.html">loadest_gp.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/loadest_gp.providers.usgs.html">loadest_gp.providers.usgs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/loadest_gp.utils.html">loadest_gp.utils</a></li>
+</ul>
+</details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../_autosummary/rating_gp.html">rating_gp</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/rating_gp.models.html">rating_gp.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/rating_gp.models.base.html">rating_gp.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/rating_gp.models.gpytorch.html">rating_gp.models.gpytorch</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/rating_gp.models.kernels.html">rating_gp.models.kernels</a></li>
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/rating_gp.pipeline.html">rating_gp.pipeline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/rating_gp.plot.html">rating_gp.plot</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../_autosummary/rating_gp.providers.html">rating_gp.providers</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/rating_gp.providers.html">rating_gp.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/rating_gp.providers.usgs.html">rating_gp.providers.usgs</a></li>
+</ul>
+</details></li>
 </ul>
 </details></li>
 </ul>
@@ -401,32 +421,589 @@ This model seeks to expand the typical rating curve fitting process to include s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
 
-  <span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.13.5</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.13</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">IPython</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">interactiveshell</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">3699</span> <span class="ow">in</span> <span class="n">run_code</span>
-    <span class="n">exec</span><span class="p">(</span><span class="n">code_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_global_ns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_ns</span><span class="p">)</span>
+:root {
+  --xr-font-color0: var(
+    --jp-content-font-color0,
+    var(--pst-color-text-base rgba(0, 0, 0, 1))
+  );
+  --xr-font-color2: var(
+    --jp-content-font-color2,
+    var(--pst-color-text-base, rgba(0, 0, 0, 0.54))
+  );
+  --xr-font-color3: var(
+    --jp-content-font-color3,
+    var(--pst-color-text-base, rgba(0, 0, 0, 0.38))
+  );
+  --xr-border-color: var(
+    --jp-border-color2,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 10))
+  );
+  --xr-disabled-color: var(
+    --jp-layout-color3,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 40))
+  );
+  --xr-background-color: var(
+    --jp-layout-color0,
+    var(--pst-color-on-background, white)
+  );
+  --xr-background-color-row-even: var(
+    --jp-layout-color1,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 5))
+  );
+  --xr-background-color-row-odd: var(
+    --jp-layout-color2,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 15))
+  );
+}
 
-  <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">rating_gp.providers</span><span class="w"> </span><span class="kn">import</span> <span class="n">usgs</span>
+html[theme="dark"],
+html[data-theme="dark"],
+body[data-theme="dark"],
+body.vscode-dark {
+  --xr-font-color0: var(
+    --jp-content-font-color0,
+    var(--pst-color-text-base, rgba(255, 255, 255, 1))
+  );
+  --xr-font-color2: var(
+    --jp-content-font-color2,
+    var(--pst-color-text-base, rgba(255, 255, 255, 0.54))
+  );
+  --xr-font-color3: var(
+    --jp-content-font-color3,
+    var(--pst-color-text-base, rgba(255, 255, 255, 0.38))
+  );
+  --xr-border-color: var(
+    --jp-border-color2,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 10))
+  );
+  --xr-disabled-color: var(
+    --jp-layout-color3,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 40))
+  );
+  --xr-background-color: var(
+    --jp-layout-color0,
+    var(--pst-color-on-background, #111111)
+  );
+  --xr-background-color-row-even: var(
+    --jp-layout-color1,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 5))
+  );
+  --xr-background-color-row-odd: var(
+    --jp-layout-color2,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 15))
+  );
+}
 
-  <span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">rating_gp</span><span class="o">/</span><span class="n">providers</span><span class="o">/</span><span class="n">usgs</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">13</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">loadest_gp.providers.usgs</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_metadata</span>
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
 
-  <span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">loadest_gp</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">15</span>
-    <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;from .models.gpytorch import </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
 
-  <span class="n">File</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">:</span><span class="mi">1</span>
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
 
-  <span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">loadest_gp</span><span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">gpytorch</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">4</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">discontinuum.engines.gpytorch</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarginalGPyTorch</span>
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
-  <span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">discontinuum</span><span class="o">/</span><span class="n">engines</span><span class="o">/</span><span class="n">gpytorch</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">123</span>
-    <span class="k">elif</span> <span class="n">optimizer</span> <span class="o">==</span> <span class="s2">&quot;lbfgs&quot;</span><span class="p">:</span>
-    <span class="o">^</span>
-<span class="ne">SyntaxError</span>: invalid syntax
-</pre></div>
-</div>
-</div>
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: inline-block;
+  opacity: 0;
+  height: 0;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+  border: 2px solid transparent !important;
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:focus + label {
+  border: 2px solid var(--xr-font-color0) !important;
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: "►";
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: "▼";
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: "(";
+}
+
+.xr-dim-list:after {
+  content: ")";
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ",";
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  border-color: var(--xr-background-color-row-odd);
+  margin-bottom: 0;
+  padding-top: 2px;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+  border-color: var(--xr-background-color-row-even);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  border-top: 2px dotted var(--xr-background-color);
+  padding-bottom: 20px !important;
+  padding-top: 10px !important;
+}
+
+.xr-var-attrs-in + label,
+.xr-var-data-in + label,
+.xr-index-data-in + label {
+  padding: 0 1px;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-data > pre,
+.xr-index-data > pre,
+.xr-var-data > table > tbody > tr {
+  background-color: transparent !important;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+.xr-var-attrs-in:checked + label > .xr-icon-file-text2,
+.xr-var-data-in:checked + label > .xr-icon-database,
+.xr-index-data-in:checked + label > .xr-icon-database {
+  color: var(--xr-font-color0);
+  filter: drop-shadow(1px 1px 5px var(--xr-font-color2));
+  stroke-width: 0.8px;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 11kB
+Dimensions:          (time: 319)
+Coordinates:
+  * time             (time) datetime64[ns] 3kB 1988-10-04T08:35:00 ... 2021-0...
+Data variables:
+    stage            (time) float64 3kB 0.4694 0.4938 0.5243 ... 0.765 0.6706
+    discharge        (time) float64 3kB 1.07 1.116 1.54 ... 17.98 1.682 0.7447
+    discharge_unc    (time) float64 3kB 1.025 1.025 1.025 ... 1.04 1.025 1.04
+    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-162a0231-fdb9-4e4d-8f37-619cf869ac1e' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-162a0231-fdb9-4e4d-8f37-619cf869ac1e' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-a25c80c9-da23-45c9-96be-b54bfda8132f' class='xr-section-summary-in' type='checkbox'  checked><label for='section-a25c80c9-da23-45c9-96be-b54bfda8132f' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>1988-10-04T08:35:00 ... 2021-08-...</div><input id='attrs-cfd6f0ec-b42f-49ea-b8c4-6e7a2466a185' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-cfd6f0ec-b42f-49ea-b8c4-6e7a2466a185' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5c3b7728-d741-43e9-bf62-9fda60aaee6b' class='xr-var-data-in' type='checkbox'><label for='data-5c3b7728-d741-43e9-bf62-9fda60aaee6b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T08:35:00.000000000&#x27;, &#x27;1988-11-16T11:50:00.000000000&#x27;,
+       &#x27;1989-01-03T14:15:00.000000000&#x27;, ..., &#x27;2021-05-19T11:11:07.000000000&#x27;,
+       &#x27;2021-07-02T08:12:50.000000000&#x27;, &#x27;2021-08-17T13:45:31.000000000&#x27;],
+      shape=(319,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ae433a18-5787-440a-9db9-167dd1dbc567' class='xr-section-summary-in' type='checkbox'  checked><label for='section-ae433a18-5787-440a-9db9-167dd1dbc567' class='xr-section-summary' >Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-d2ae2df1-2ab6-4f57-b0c4-2f816add8561' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d2ae2df1-2ab6-4f57-b0c4-2f816add8561' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1798f94b-3b05-4a6b-93ec-327412e4993c' class='xr-var-data-in' type='checkbox'><label for='data-1798f94b-3b05-4a6b-93ec-327412e4993c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>gage_height_va</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
+       1.057656, 0.646176, 0.505968, 0.521208, 0.493776, 0.530352,
+       0.524256, 0.530352, 0.896112, 1.335024, 1.338072, 1.55448 ,
+       1.030224, 0.536448, 0.466344, 0.554736, 0.505968, 0.499872,
+       0.463296, 0.664464, 1.380744, 1.359408, 1.578864, 0.73152 ,
+       0.56388 , 0.59436 , 0.646176, 0.530352, 0.512064, 0.557784,
+       0.762   , 0.972312, 0.77724 , 0.512064, 0.414528, 0.493776,
+       0.499872, 0.50292 , 0.545592, 0.697992, 1.542288, 1.682496,
+       1.938528, 1.740408, 1.685544, 0.841248, 0.667512, 0.551688,
+       0.585216, 0.469392, 0.4572  , 0.48768 , 0.829056, 1.40208 ,
+       0.783336, 0.51816 , 0.47244 , 0.478536, 0.44196 , 0.50292 ,
+       0.566928, 0.865632, 1.450848, 1.49352 , 1.761744, 0.789432,
+       0.51816 , 0.5334  , 0.490728, 0.539496, 0.780288, 1.734312,
+       1.301496, 0.603504, 0.539496, 0.481584, 0.5334  , 0.499872,
+       0.469392, 0.618744, 1.185672, 1.792224, 0.893064, 0.682752,
+       0.600456, 0.591312, 0.545592, 0.521208, 0.5334  , 0.56388 ,
+       0.832104, 1.15824 , 0.85344 , 0.637032, 0.603504, 0.560832,
+       0.50292 , 0.505968, 0.573024, 1.667256, 0.786384, 0.59436 ,
+       0.588264, 0.5334  , 0.521208, 0.505968, 0.765048, 1.578864,
+       0.560832, 0.515112, 0.521208, 0.505968, 0.475488, 0.512064,
+...
+       0.664464, 0.713232, 0.667512, 0.615696, 0.67056 , 0.859536,
+       1.435608, 1.673352, 1.85928 , 1.08204 , 0.841248, 0.8382  ,
+       0.73152 , 0.6858  , 0.673608, 0.704088, 1.20396 , 1.331976,
+       0.880872, 0.728472, 0.630936, 0.652272, 0.652272, 0.630936,
+       0.630936, 0.679704, 1.456944, 0.74676 , 0.743712, 0.6858  ,
+       0.643128, 0.688848, 0.627888, 0.652272, 0.643128, 0.664464,
+       0.88392 , 1.383792, 1.847088, 1.057656, 0.740664, 0.737616,
+       0.780288, 0.886968, 0.740664, 0.722376, 0.707136, 0.841248,
+       1.34112 , 0.862584, 0.752856, 0.682752, 0.667512, 0.658368,
+       0.646176, 0.65532 , 0.755904, 1.487424, 1.64592 , 0.886968,
+       0.749808, 0.749808, 0.6858  , 0.71628 , 0.707136, 0.713232,
+       0.694944, 0.70104 , 0.8382  , 1.216152, 1.901952, 0.905256,
+       0.743712, 0.80772 , 0.80772 , 0.771144, 0.728472, 0.743712,
+       0.752856, 1.045464, 1.581912, 1.109472, 0.771144, 0.679704,
+       0.740664, 0.713232, 0.71628 , 0.713232, 0.713232, 0.795528,
+       1.274064, 1.868424, 0.954024, 0.819912, 0.810768, 0.758952,
+       0.728472, 0.740664, 0.765048, 0.771144, 1.594104, 1.344168,
+       0.969264, 0.813816, 0.783336, 0.694944, 0.6858  , 0.691896,
+       0.710184, 0.688848, 0.865632, 0.862584, 1.32588 , 0.765048,
+       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-bf6ef9f8-d78d-47eb-8b7b-9f08770b7296' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-bf6ef9f8-d78d-47eb-8b7b-9f08770b7296' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3d226b36-7494-454d-b830-bcdb0556323b' class='xr-var-data-in' type='checkbox'><label for='data-3d226b36-7494-454d-b830-bcdb0556323b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge_va</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
+       17.0467136 , 14.299984  ,  3.0298976 ,  1.3025728 ,  1.4016816 ,
+        1.10718688,  1.46114688,  1.3167312 ,  1.6140576 ,  8.1835552 ,
+       27.6938304 , 26.6461088 , 40.209856  , 12.600976  ,  1.80378016,
+        1.10718688,  1.74431488,  1.46681024,  1.36770144,  1.23461248,
+        3.4546496 , 30.015808  , 28.175216  , 41.342528  ,  4.7005888 ,
+        1.90855232,  2.406928  ,  3.114848  ,  1.52061216,  1.22894912,
+        1.9538592 ,  4.9837568 , 10.760384  ,  5.3518752 ,  1.49512704,
+        0.67677152,  1.31389952,  1.25443424,  1.27991936,  1.79528512,
+        4.4740544 , 38.794016  , 55.21776   , 71.924672  , 62.29696   ,
+       54.368256  ,  8.6932576 ,  3.4546496 ,  2.08694816,  1.70750304,
+        1.3592064 ,  1.44698848,  1.71599808,  8.5233568 , 34.829664  ,
+        6.6827648 ,  2.05013632,  1.9680176 ,  1.90572064,  1.24027584,
+        2.0954432 ,  2.8599968 ,  8.1552384 , 38.22768   , 39.360352  ,
+       64.562304  ,  6.229696  ,  2.09827488,  2.1520768 ,  1.7698    ,
+        2.2795024 ,  6.4562304 , 56.350432  , 27.8354144 ,  3.5679168 ,
+        2.45223488,  1.80378016,  2.4352448 ,  2.06429472,  1.71033472,
+        3.7095008 , 22.6817568 , 60.88112   ,  9.4011776 ,  4.813856  ,
+        3.4546496 ,  3.398016  ,  2.5060368 ,  2.25401728,  2.22853216,
+        2.47205664,  8.2685056 , 20.0199776 ,  8.9481088 ,  4.2758368 ,
+...
+       16.2538432 , 22.0021536 ,  5.6067264 ,  2.26817568,  1.21479072,
+        1.29407776,  1.46397856,  1.16665216,  1.16948384,  1.60273088,
+       28.3168    ,  2.548512  ,  2.5060368 ,  1.5998992 ,  1.35637472,
+        1.7556416 ,  1.08453344,  1.50645376,  1.34787968,  1.63671104,
+        5.6067264 , 24.210864  , 53.235584  , 11.2700864 ,  2.22003712,
+        2.0954432 ,  2.78637312,  5.3518752 ,  2.20304704,  1.9680176 ,
+        1.840592  ,  4.0209856 , 22.511856  ,  4.672272  ,  2.406928  ,
+        1.48380032,  1.22894912,  1.15249376,  1.06471168,  1.12984032,
+        2.54568032, 30.298976  , 42.4752    ,  5.0687072 ,  2.1803936 ,
+        2.24835392,  1.36486976,  1.74997824,  1.75847328,  1.8122752 ,
+        1.74997824,  1.74431488,  4.3041536 , 16.9334464 , 60.88112   ,
+        5.66336   ,  2.2795024 ,  2.8883136 ,  2.8599968 ,  2.26817568,
+        1.61688928,  1.78112672,  1.9963344 ,  9.0047424 , 33.696992  ,
+       10.9302848 ,  2.13508672,  1.03922656,  1.76413664,  1.43283008,
+        1.46681024,  1.4016816 ,  1.37902816,  2.63063072, 17.4431488 ,
+       53.80192   ,  5.5784096 ,  2.6051456 ,  2.45223488,  1.56591904,
+        0.95144448,  1.05338496,  1.46681024,  1.76130496, 33.413824  ,
+       18.122752  ,  5.4651424 ,  2.22853216,  1.77829504,  0.91463264,
+        0.83817728,  0.91180096,  1.1185136 ,  0.94011776,  3.114848  ,
+        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-ecc9050a-136f-40ef-a2bb-4602fac2cda8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ecc9050a-136f-40ef-a2bb-4602fac2cda8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4eeb5856-773c-496a-b145-632b372ab072' class='xr-var-data-in' type='checkbox'><label for='data-4eeb5856-773c-496a-b145-632b372ab072' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measured_rating_diff</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
+       1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025,
+       1.025, 1.025, 1.025, 1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.04 ,
+       1.025, 1.025, 1.025, 1.025, 1.04 , 1.025, 1.04 , 1.025, 1.025,
+       1.025, 1.06 , 1.04 , 1.06 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.06 , 1.04 ,
+       1.025, 1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.025, 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.025, 1.04 , 1.025, 1.04 , 1.025, 1.025, 1.025,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.025, 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.025, 1.025, 1.04 , 1.04 , 1.025, 1.04 , 1.025, 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.025, 1.025, 1.025, 1.04 ,
+       1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025,
+       1.025, 1.025, 1.04 , 1.04 , 1.04 , 1.025, 1.025, 1.04 , 1.025,
+       1.025, 1.04 , 1.025, 1.04 , 1.025, 1.025, 1.04 , 1.025, 1.04 ,
+       1.025, 1.025, 1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025,
+       1.025, 1.025, 1.025, 1.04 , 1.025, 1.025, 1.025, 1.025, 1.04 ,
+       1.025, 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.025, 1.025, 1.04 , 1.04 , 1.04 , 1.025, 1.025, 1.04 , 1.04 ,
+       1.025, 1.025, 1.04 , 1.025, 1.04 , 1.04 , 1.025, 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.025,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.025, 1.025, 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.025, 1.04 ,
+       1.025, 1.025, 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.025, 1.025,
+       1.04 , 1.025, 1.025, 1.04 , 1.04 , 1.025, 1.025, 1.04 , 1.025,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.06 , 1.06 , 1.06 , 1.04 , 1.04 , 1.025, 1.04 ,
+       1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
+       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-1a3003d7-449d-4a29-9b3e-81a141d18d74' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-1a3003d7-449d-4a29-9b3e-81a141d18d74' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a51787cc-c756-4e68-8208-c717e4be2f8d' class='xr-var-data-in' type='checkbox'><label for='data-a51787cc-c756-4e68-8208-c717e4be2f8d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
+Length: 319
+Categories (7, object): [&#x27;Clear&#x27;, &#x27;DebrisHeavy&#x27;, &#x27;DebrisLight&#x27;, &#x27;IceShore&#x27;, &#x27;Unspecifed&#x27;, &#x27;Unspecified&#x27;, &#x27;VegetationLight&#x27;]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-d9882e43-06d6-4b59-b43c-be0e7530912c' class='xr-section-summary-in' type='checkbox'  ><label for='section-d9882e43-06d6-4b59-b43c-be0e7530912c' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-aa1c40f1-6ed7-4d13-b62f-0876f4b63599' class='xr-index-data-in' type='checkbox'/><label for='index-aa1c40f1-6ed7-4d13-b62f-0876f4b63599' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;1988-10-04 08:35:00&#x27;, &#x27;1988-11-16 11:50:00&#x27;,
+               &#x27;1989-01-03 14:15:00&#x27;, &#x27;1989-02-17 10:50:00&#x27;,
+               &#x27;1989-03-31 09:30:00&#x27;, &#x27;1989-04-25 13:20:00&#x27;,
+               &#x27;1989-06-08 13:30:00&#x27;, &#x27;1989-07-12 10:30:00&#x27;,
+               &#x27;1989-08-25 09:45:00&#x27;, &#x27;1989-10-04 09:00:00&#x27;,
+               ...
+               &#x27;2020-09-29 11:29:00&#x27;, &#x27;2020-11-13 09:15:00&#x27;,
+               &#x27;2020-12-30 12:23:30&#x27;, &#x27;2021-02-08 11:07:30&#x27;,
+               &#x27;2021-03-22 11:41:00&#x27;, &#x27;2021-04-29 11:32:36&#x27;,
+               &#x27;2021-04-29 12:39:11&#x27;, &#x27;2021-05-19 11:11:07&#x27;,
+               &#x27;2021-07-02 08:12:50&#x27;, &#x27;2021-08-17 13:45:31&#x27;],
+              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=319, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-1a45861e-8701-42ea-9fe6-18d1fec20581' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-1a45861e-8701-42ea-9fe6-18d1fec20581' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div></div></div>
 </div>
 <p>With the training data, we’re now ready to fit a model to the site. Depending on your hardware, this should take about 10s.</p>
 <div class="cell docutils container">
@@ -440,7 +1017,18 @@ This model seeks to expand the typical rating curve fitting process to include s
           <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s1">&#39;stage&#39;</span><span class="p">]],</span>
           <span class="n">target_unc</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;discharge_unc&#39;</span><span class="p">],</span>
           <span class="n">iterations</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+          <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/sklearn/pipeline.py:61: FutureWarning: This Pipeline instance is not fitted yet. Call &#39;fit&#39; with appropriate arguments before using other methods such as transform, predict, etc. This will raise an error in 1.8 instead of the current warning.
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 2min 4s, sys: 786 ms, total: 2min 4s
+Wall time: 1min 3s
 </pre></div>
 </div>
 </div>
@@ -457,6 +1045,9 @@ This model seeks to expand the typical rating curve fitting process to include s
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<img alt="../_images/df0130fc0cd89a4fdfa987a11e77c6441b09edae353394cd2140d839f4ffddac.png" src="../_images/df0130fc0cd89a4fdfa987a11e77c6441b09edae353394cd2140d839f4ffddac.png" />
+</div>
 </div>
 <p>One major advantage of <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> is that the resulting model can be used to make predictions of a rating curve at any moment in time. To see how well our model can predict a rating curve across time, let’s plot the rating curves at an interval of every 5 years at the start of a water year (i.e., October 1st). This way we can see how well the model accounts for any shift in the rating with time.</p>
 <div class="cell docutils container">
@@ -472,6 +1063,9 @@ This model seeks to expand the typical rating curve fitting process to include s
 <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/a1a8895efb5e8cc78eba706527b23611fdc23975a1e7c20ff9762d0217d13d66.png" src="../_images/a1a8895efb5e8cc78eba706527b23611fdc23975a1e7c20ff9762d0217d13d66.png" />
 </div>
 </div>
 <p>Nice! The shifts with time are clearly predicted by the model. These results are are promising for <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> to be able to model shift in rating curves effectively.</p>
@@ -511,7 +1105,14 @@ This model seeks to expand the typical rating curve fitting process to include s
                     <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s1">&#39;stage&#39;</span><span class="p">]],</span>
                     <span class="n">target_unc</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;discharge_unc&#39;</span><span class="p">],</span>
                     <span class="n">iterations</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+                    <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 8min 2s, sys: 2.44 s, total: 8min 4s
+Wall time: 4min 2s
 </pre></div>
 </div>
 </div>
@@ -531,6 +1132,9 @@ This model seeks to expand the typical rating curve fitting process to include s
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/aa7bb298922bad5cb7cdf31d108d52b480f390432289b08ff9c4dc7f71843177.png" src="../_images/aa7bb298922bad5cb7cdf31d108d52b480f390432289b08ff9c4dc7f71843177.png" />
 </div>
 </div>
 </section>

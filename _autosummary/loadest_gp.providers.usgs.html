@@ -1,0 +1,691 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>loadest_gp.providers.usgs &#8212; discontinuum v0.5 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=51182d00"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/loadest_gp.providers.usgs';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="loadest_gp.utils" href="loadest_gp.utils.html" />
+    <link rel="prev" title="loadest_gp.providers" href="loadest_gp.providers.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">discontinuum v0.5 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">discontinuum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/loadest-gp-demo.html">loadest-gp (prototype)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/rating-gp-demo.html">rating-gp (prototype)</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api_reference.html">API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="discontinuum.html">discontinuum</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="discontinuum.data_manager.html">discontinuum.data_manager</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="discontinuum.engines.html">discontinuum.engines</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="discontinuum.engines.base.html">discontinuum.engines.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="discontinuum.engines.gpytorch.html">discontinuum.engines.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="discontinuum.engines.pymc.html">discontinuum.engines.pymc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="discontinuum.pipeline.html">discontinuum.pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="discontinuum.plot.html">discontinuum.plot</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="discontinuum.providers.html">discontinuum.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="discontinuum.providers.base.html">discontinuum.providers.base</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="discontinuum.utils.html">discontinuum.utils</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="loadest_gp.html">loadest_gp</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="loadest_gp.models.html">loadest_gp.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="loadest_gp.models.base.html">loadest_gp.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="loadest_gp.models.gpytorch.html">loadest_gp.models.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="loadest_gp.models.pymc.html">loadest_gp.models.pymc</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="loadest_gp.plot.html">loadest_gp.plot</a></li>
+<li class="toctree-l3 current active has-children"><a class="reference internal" href="loadest_gp.providers.html">loadest_gp.providers</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l4 current active"><a class="current reference internal" href="#">loadest_gp.providers.usgs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="loadest_gp.utils.html">loadest_gp.utils</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="rating_gp.html">rating_gp</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="rating_gp.models.html">rating_gp.models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="rating_gp.models.base.html">rating_gp.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rating_gp.models.gpytorch.html">rating_gp.models.gpytorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="rating_gp.models.kernels.html">rating_gp.models.kernels</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="rating_gp.pipeline.html">rating_gp.pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rating_gp.plot.html">rating_gp.plot</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="rating_gp.providers.html">rating_gp.providers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="rating_gp.providers.usgs.html">rating_gp.providers.usgs</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/_autosummary/loadest_gp.providers.usgs.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>loadest_gp.providers.usgs</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.USGSParameter"><code class="docutils literal notranslate"><span class="pre">USGSParameter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.USGSParameter.name"><code class="docutils literal notranslate"><span class="pre">USGSParameter.name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.USGSParameter.ppcode"><code class="docutils literal notranslate"><span class="pre">USGSParameter.ppcode</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.format_nwis_daily"><code class="docutils literal notranslate"><span class="pre">format_nwis_daily()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.format_wqp_date"><code class="docutils literal notranslate"><span class="pre">format_wqp_date()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.format_wqp_samples"><code class="docutils literal notranslate"><span class="pre">format_wqp_samples()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_daily"><code class="docutils literal notranslate"><span class="pre">get_daily()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_metadata"><code class="docutils literal notranslate"><span class="pre">get_metadata()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_parameters"><code class="docutils literal notranslate"><span class="pre">get_parameters()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_qwdata_samples"><code class="docutils literal notranslate"><span class="pre">get_qwdata_samples()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_samples"><code class="docutils literal notranslate"><span class="pre">get_samples()</span></code></a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-loadest_gp.providers.usgs">
+<span id="loadest-gp-providers-usgs"></span><h1>loadest_gp.providers.usgs<a class="headerlink" href="#module-loadest_gp.providers.usgs" title="Link to this heading">#</a></h1>
+<p>Helper functions for pulling USGS data.</p>
+<p class="rubric">Functions</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.format_nwis_daily" title="loadest_gp.providers.usgs.format_nwis_daily"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_nwis_daily</span></code></a>(df[, site_id, params])</p></td>
+<td><p>Format results of dataretrieval.nwis.get_dv.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.format_wqp_date" title="loadest_gp.providers.usgs.format_wqp_date"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_wqp_date</span></code></a>(date)</p></td>
+<td><p>Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.format_wqp_samples" title="loadest_gp.providers.usgs.format_wqp_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_wqp_samples</span></code></a>(df[, name, pcode])</p></td>
+<td><p>Format results of dataretrieval.wqp.get_results.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.get_daily" title="loadest_gp.providers.usgs.get_daily"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_daily</span></code></a>(site, start_date, end_date[, params])</p></td>
+<td><p>Get daily data from the USGS NWIS API.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.get_metadata" title="loadest_gp.providers.usgs.get_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata</span></code></a>(site)</p></td>
+<td><p>Get site metadata from the USGS NWIS API.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.get_parameters" title="loadest_gp.providers.usgs.get_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parameters</span></code></a>(pcodes)</p></td>
+<td><p>Get USGS parameters from a list of parameter codes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.get_qwdata_samples" title="loadest_gp.providers.usgs.get_qwdata_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_qwdata_samples</span></code></a>(site, start_date, ...[, name])</p></td>
+<td><p>Get sample data from the USGS NWIS API.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.get_samples" title="loadest_gp.providers.usgs.get_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_samples</span></code></a>(site, start_date, end_date, ...)</p></td>
+<td><p>Get sample data from the Water Quality Portal API.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">USGSParameter</span></code></a>(pcode, standard_name[, ...])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.USGSParameter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">USGSParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pcode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[str]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[str]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[str]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'Optional[float]'</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#loadest_gp.providers.usgs.USGSParameter" title="Link to this definition">#</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.USGSParameter.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#loadest_gp.providers.usgs.USGSParameter.name" title="Link to this definition">#</a></dt>
+<dd><p>Alias for standard_name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.USGSParameter.ppcode">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ppcode</span></span><a class="headerlink" href="#loadest_gp.providers.usgs.USGSParameter.ppcode" title="Link to this definition">#</a></dt>
+<dd><p>Return the parameter code with a ‘p’ prefix, which is used by the QWData
+service.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.format_nwis_daily">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">format_nwis_daily</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><span class="pre">USGSParameter</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><span class="pre">USGSParameter</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[USGSParameter(pcode='00060',</span> <span class="pre">standard_name='flow',</span> <span class="pre">long_name='Streamflow',</span> <span class="pre">units='cubic</span> <span class="pre">meters</span> <span class="pre">per</span> <span class="pre">second',</span> <span class="pre">suffix='_Mean',</span> <span class="pre">conversion=0.0283168)]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.format_nwis_daily" title="Link to this definition">#</a></dt>
+<dd><p>Format results of dataretrieval.nwis.get_dv.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – Dataframe returned from dataretrieval.nwis.get_dv.</p></li>
+<li><p><strong>site_id</strong> (<em>str</em><em>, </em><em>optional</em>) – USGS site number for populating metadata. The default is None.</p></li>
+<li><p><strong>params</strong> (<em>List</em><em>[</em><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><em>USGSParameter</em></a><em>]</em><em>, </em><em>optional</em>) – List of parameters to retrieve. The default is flow only <cite>[USGSFlow]</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.format_wqp_date">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">format_wqp_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.format_wqp_date" title="Link to this definition">#</a></dt>
+<dd><p>Reformat date from ‘YYYY-MM-DD’ to ‘MM-DD-YYYY’.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.format_wqp_samples">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">format_wqp_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'concentration'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pcode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.format_wqp_samples" title="Link to this definition">#</a></dt>
+<dd><p>Format results of dataretrieval.wqp.get_results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – Dataframe returned from dataretrieval.wqp.get_results.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Short name for the parameter. Default is ‘concentration’.</p></li>
+<li><p><strong>pcode</strong> (<em>str</em>) – USGS parameter code for populating metadata.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.get_daily">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">get_daily</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><span class="pre">USGSParameter</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><span class="pre">USGSParameter</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">USGSParameter(pcode='00060',</span> <span class="pre">standard_name='flow',</span> <span class="pre">long_name='Streamflow',</span> <span class="pre">units='cubic</span> <span class="pre">meters</span> <span class="pre">per</span> <span class="pre">second',</span> <span class="pre">suffix='_Mean',</span> <span class="pre">conversion=0.0283168)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.get_daily" title="Link to this definition">#</a></dt>
+<dd><p>Get daily data from the USGS NWIS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<em>str</em>) – USGS site number.</p></li>
+<li><p><strong>start_date</strong> (<em>str</em>) – Start date in the format ‘yyyy-mm-dd’.</p></li>
+<li><p><strong>end_date</strong> (<em>str</em>) – End date in the format ‘yyyy-mm-dd’.</p></li>
+<li><p><strong>params</strong> (<em>List</em><em>[</em><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><em>USGSParameter</em></a><em>]</em><em>, </em><em>optional</em>) – List of parameters to retrieve. The default is flow only <cite>[USGSFlow]</cite>.</p></li>
+<li><p><strong>kwargs</strong> (<em>Dict</em>) – Additional keyword arguments to pass to the NWIS API.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataset with the requested data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.get_metadata">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="discontinuum.providers.base.html#discontinuum.providers.base.MetaData" title="discontinuum.providers.base.MetaData"><span class="pre">MetaData</span></a></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.get_metadata" title="Link to this definition">#</a></dt>
+<dd><p>Get site metadata from the USGS NWIS API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>site</strong> (<em>str</em>) – USGS site number.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe with the site information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.get_parameters">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">get_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pcodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><span class="pre">USGSParameter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter"><span class="pre">USGSParameter</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.get_parameters" title="Link to this definition">#</a></dt>
+<dd><p>Get USGS parameters from a list of parameter codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pcodes</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of USGS parameter codes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of USGS parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#loadest_gp.providers.usgs.USGSParameter" title="loadest_gp.providers.usgs.USGSParameter">USGSParameter</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.get_qwdata_samples">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">get_qwdata_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pcode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'concentration'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.get_qwdata_samples" title="Link to this definition">#</a></dt>
+<dd><p>Get sample data from the USGS NWIS API.</p>
+<p>WARNING: The QWData service is deprecated and no longer receives data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<em>str</em>) – USGS site number.</p></li>
+<li><p><strong>start_date</strong> (<em>str</em>) – Start date in the format ‘yyyy-mm-dd’.</p></li>
+<li><p><strong>end_date</strong> (<em>str</em>) – End date in the format ‘yyyy-mm-dd’.</p></li>
+<li><p><strong>pcode</strong> (<em>str</em>) – USGS parameter to retrieve.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Short name for the parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataframe with the requested sample data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="loadest_gp.providers.usgs.get_samples">
+<span class="sig-prename descclassname"><span class="pre">loadest_gp.providers.usgs.</span></span><span class="sig-name descname"><span class="pre">get_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">characteristic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NWIS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'concentration'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_pcodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#loadest_gp.providers.usgs.get_samples" title="Link to this definition">#</a></dt>
+<dd><p>Get sample data from the Water Quality Portal API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<em>str</em>) – Water Quality Portal site id; e.g., ‘USGS-12345678’.</p></li>
+<li><p><strong>start_date</strong> (<em>str</em>) – Start date in the format ‘YYYY-MM-DD’.</p></li>
+<li><p><strong>end_date</strong> (<em>str</em>) – End date in the format ‘YYYY-MM-DD’.</p></li>
+<li><p><strong>characteristic</strong> (<em>str</em>) – The name of the parameter to retrieve.</p></li>
+<li><p><strong>fraction</strong> (<em>str</em>) – The fraction of the parameter to retrieve. Options are ‘Total’,
+‘Dissolved’, ‘Suspended’.</p></li>
+<li><p><strong>provider</strong> (<em>str</em>) – The data provider. Options are ‘NWIS’ or ‘STORET’.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Short name for the parameter. Default is ‘concentration’.</p></li>
+<li><p><strong>filter_pcodes</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of parameter codes to filter the dataset.</p></li>
+<li><p><strong>kwargs</strong> (<em>Dict</em>) – Additional keyword arguments to pass to the WQP API.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="loadest_gp.providers.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">loadest_gp.providers</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="loadest_gp.utils.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">loadest_gp.utils</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.USGSParameter"><code class="docutils literal notranslate"><span class="pre">USGSParameter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.USGSParameter.name"><code class="docutils literal notranslate"><span class="pre">USGSParameter.name</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.USGSParameter.ppcode"><code class="docutils literal notranslate"><span class="pre">USGSParameter.ppcode</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.format_nwis_daily"><code class="docutils literal notranslate"><span class="pre">format_nwis_daily()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.format_wqp_date"><code class="docutils literal notranslate"><span class="pre">format_wqp_date()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.format_wqp_samples"><code class="docutils literal notranslate"><span class="pre">format_wqp_samples()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_daily"><code class="docutils literal notranslate"><span class="pre">get_daily()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_metadata"><code class="docutils literal notranslate"><span class="pre">get_metadata()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_parameters"><code class="docutils literal notranslate"><span class="pre">get_parameters()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_qwdata_samples"><code class="docutils literal notranslate"><span class="pre">get_qwdata_samples()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loadest_gp.providers.usgs.get_samples"><code class="docutils literal notranslate"><span class="pre">get_samples()</span></code></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Timothy Hodson and Keith Doore
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
