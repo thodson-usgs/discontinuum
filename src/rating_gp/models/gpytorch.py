@@ -113,9 +113,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         b_min = np.quantile(train_y, 0.10)
         b_max = np.quantile(train_y, 0.90)
         self.covar_module = (
-            (self.cov_stage(ls_prior=GammaPrior(concentration=1,  rate=1))
+            (self.cov_stage(ls_prior=GammaPrior(concentration=2,  rate=1))
              * self.cov_time(ls_prior=GammaPrior(concentration=1,  rate=1)))
-             + (self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=1))
+             + (self.cov_stage(ls_prior=GammaPrior(concentration=5, rate=1))
                * self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
                * SigmoidKernel(
                    active_dims=self.stage_dim,
@@ -169,13 +169,18 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
         
         # Periodic kernel for annual seasonality
+        # Locally periodic kernel: Periodic * Matern
         periodic_kernel = ScaleKernel(
             gpytorch.kernels.PeriodicKernel(
                 active_dims=self.time_dim,
-                period_length_prior=NormalPrior(loc=1.0, scale=0.1),  # ~1 year
-                lengthscale_prior=GammaPrior(concentration=2, rate=4),
+                period_length_prior=NormalPrior(loc=1.0, scale=0.05),  # ~1 year
+                lengthscale_prior=GammaPrior(concentration=6, rate=1),
+            ) * MaternKernel(
+                active_dims=self.time_dim,
+                nu=2.5,
+                lengthscale_prior=GammaPrior(concentration=4, rate=3),
             ),
-            outputscale_prior=HalfNormalPrior(scale=0.5),
+            outputscale_prior=HalfNormalPrior(scale=0.2),
         )
         
         return base_kernel + periodic_kernel
