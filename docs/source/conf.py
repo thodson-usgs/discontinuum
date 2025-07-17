@@ -8,7 +8,8 @@
 
 project = 'discontinuum'
 author = 'Timothy Hodson and Keith Doore'
-release = 'v0.5'
+from discontinuum._version import __version__  # noqa: E402
+version = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
