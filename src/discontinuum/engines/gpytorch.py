@@ -103,32 +103,24 @@ class MarginalGPyTorch(BaseModel):
                 learning_rate = 1.0   # L-BFGS doesn't use learning rate the same way
         
         # Use the specified optimizer with stabilization
-        if optimizer == "adam":
-            optimizer = torch.optim.Adam(
-                self.model.parameters(), 
-                lr=learning_rate,
-                betas=(0.9, 0.999),    # Slightly more conservative momentum
-                eps=1e-8,              # Numerical stability
-                weight_decay=1e-4      # Small L2 regularization
-            )
-            # More responsive learning rate scheduler for faster adaptation
+        if optimizer != "adam":
+            raise NotImplementedError(f"Only 'adam' optimizer is supported. Got '{optimizer}'.")
+        optimizer = torch.optim.Adam(
+            self.model.parameters(), 
+            lr=learning_rate,
+            betas=(0.9, 0.999),    # Slightly more conservative momentum
+            eps=1e-8,              # Numerical stability
+            weight_decay=1e-4      # Small L2 regularization
+        )
+        # More responsive learning rate scheduler for faster adaptation
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            mode='min',
+            optimizer, 
+            mode='min', 
             factor=0.6,    # Reduce LR by 40% when loss plateaus (more aggressive)
             patience=40,   # Reduce sooner for faster adaptation
             min_lr=1e-5,   # Higher minimum learning rate
             threshold=1e-4 # Less sensitive to plateaus
         )
-        elif optimizer == "lbfgs":
-            optimizer = torch.optim.LBFGS(
-                self.model.parameters(),
-                lr=learning_rate,
-                max_iter=20,           # Limit L-BFGS iterations per step
-                line_search_fn='strong_wolfe'  # More robust line search
-            )
-        else:
-            raise NotImplementedError(f"Optimizer '{optimizer}' not implemented. Use 'adam' or 'lbfgs'.")
 
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
@@ -138,6 +130,7 @@ class MarginalGPyTorch(BaseModel):
         jitter = 1e-6  # Dynamic jitter for numerical stability
         best_loss = float('inf')
         patience_counter = 0
+        min_lr_for_early_stop = 2e-5  # Stop if patience is exceeded and LR is below this
         
         for i in pbar:
             if optimizer.__class__.__name__ == "LBFGS":
@@ -214,22 +207,22 @@ class MarginalGPyTorch(BaseModel):
                 scheduler.step(loss)
                 current_lr = optimizer.param_groups[0]['lr']
                 
-                # Early stopping check
+                # Early stopping check (more aggressive)
                 if loss.item() < best_loss:
                     best_loss = loss.item()
                     patience_counter = 0
                 else:
                     patience_counter += 1
-                
+
                 # Display progress with comprehensive metadata
                 progress_info = f'loss={loss.item():.4f} lr={current_lr:.1e} jitter={jitter:.1e} best={best_loss:.4f}'
                 if early_stopping:
-                    progress_info += f' patience={patience_counter}/{early_stopping_patience}'
+                    progress_info += f' patience={patience_counter}/25'
                 pbar.set_postfix_str(progress_info)
-                
-                # Check early stopping criteria
-                if early_stopping and patience_counter >= early_stopping_patience:
-                    print(f"\nEarly stopping triggered after {i+1} iterations")
+
+                # More aggressive early stopping: patience=25 and require LR to be low
+                if early_stopping and patience_counter >= 25 and current_lr <= min_lr_for_early_stop:
+                    print(f"\nEarly stopping triggered after {i+1} iterations (patience exceeded and LR low)")
                     print(f"Best loss: {best_loss:.6f}")
                     break
 
