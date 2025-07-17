@@ -36,11 +36,12 @@ However, LOADEST has several serious limitations
 the more flexible Weighted Regression on Time Discharge and Season (WRTDS),
 which allows the relation between target and covariate to vary through time.
 `loadest-gp` takes the WRTDS idea and reimplements it as a GP.
-Try it out in the [loadest-gp demo](https://code.usgs.gov/wma/uncertainty/discontinuum/-/blob/main/docs/source/notebooks/loadest-gp-demo.ipynb).
+github/thodson-usgs/discontinuum/blob/main/docs/source/notebooks/loadest-gp-demo.ipynb
+Try it out in the [loadest-gp demo](https://github.com/thodson-usgs/discontinuum/blob/main/docs/source/notebooks/loadest-gp-demo.ipynb).
 
 ### rating-gp
 `rating-gp` is a Gaussian-process model for estimating river flow from stage time series.
-Try it out in the [rating-gp demo](https://code.usgs.gov/wma/uncertainty/discontinuum/-/blob/main/docs/source/notebooks/rating-gp-demo.ipynb).
+Try it out in the [rating-gp demo](https://github.com/thodson-usgs/discontinuum/blob/main/docs/source/notebooks/rating-gp-demo.ipynb).
 
 ## Engines
 Currently, the only supported engines are the marginal likelihood implementation in `pymc` and `gpytorch`.
