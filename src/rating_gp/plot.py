@@ -12,6 +12,7 @@ import pandas as pd
 from discontinuum.engines.base import is_fitted
 from discontinuum.plot import BasePlotMixin
 from scipy.stats import norm
+from rating_gp.models.kernels import SigmoidKernel
 import xarray as xr
 from xarray import DataArray
 from xarray.plot.utils import label_from_attrs
@@ -117,6 +118,28 @@ class RatingPlotMixin(BasePlotMixin):
             zorder=1,
             **kwargs
         )
+        # Plot switch point if sigmoid kernel is in model
+        try:
+            # find first SigmoidKernel in covar_module
+            sig_kernels = [m for m in self.model.covar_module.modules() if isinstance(m, SigmoidKernel)]
+            if sig_kernels:
+                sig = sig_kernels[0]
+                # b_sig is in normalized stage space: inverse-transform to original stage units
+                b_sig = sig.b.item()
+                # use scaler step directly to inverse-transform normalized stage
+                pipeline = self.dm.covariate_pipelines['stage']
+                scaler = pipeline.named_steps['scaler']
+                stage_switch = float(scaler.inverse_transform(b_sig))
+                # Draw switch point on every call; label only once
+                if not getattr(ax, 'switch_point_plotted', False):
+                    ax.axvline(stage_switch, linestyle='--', color='gray', label='switch point')
+                    ax.switch_point_plotted = True
+                    ax.legend()
+                else:
+                    # subsequent calls, draw without label
+                    ax.axvline(stage_switch, linestyle='--', color='gray')
+        except Exception:
+            pass
 
         # self.plot_observed_rating(ax, zorder=3)
 
