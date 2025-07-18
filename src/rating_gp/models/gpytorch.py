@@ -5,9 +5,9 @@ from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 from gpytorch.kernels import (
     MaternKernel,
-    RBFKernel,
     RQKernel,
     ScaleKernel,
+    PeriodicKernel,
 )
 from gpytorch.priors import (
     GammaPrior,
@@ -100,16 +100,23 @@ class ExactGPModel(gpytorch.models.ExactGP):
         b_min = np.quantile(stage, 0.10)
         b_max = np.quantile(stage, 0.90)
         self.covar_module = (
-            # self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=0.2)) +
             # core time kernel
             (
-                self.cov_time(ls_prior=GammaPrior(concentration=2, rate=1)) 
-                *
-                self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=2))
-            )
-            # gated shift component
-            + (
-                self.cov_time(ls_prior=GammaPrior(concentration=2, rate=5))
+                 self.cov_time(
+                     #ls_prior=GammaPrior(concentration=2, rate=1),
+                     ls_prior=GammaPrior(concentration=3, rate=1),
+                     eta_prior=HalfNormalPrior(scale=0.3),
+                 ) 
+                 *
+                 self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=2))
+                 #self.cov_stage(ls_prior=GammaPrior(concentration=2, rate=1))
+             )
+             # gated shift component
+             + (
+                self.cov_time(
+                    ls_prior=GammaPrior(concentration=2, rate=5),
+                    eta_prior=HalfNormalPrior(scale=1),
+                    )
                 * SigmoidKernel(
                     active_dims=self.stage_dim,
                     # b_prior=NormalPrior(loc=0.7, scale=0.001),
@@ -120,7 +127,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 )
             )
             # additive periodic component for seasonal effects
-            # + self.cov_periodic()
+            + self.cov_periodic()
         )
 
 
@@ -149,35 +156,48 @@ class ExactGPModel(gpytorch.models.ExactGP):
             outputscale_prior=eta,
         )
 
-    def cov_time(self, ls_prior=None):
-        eta = HalfNormalPrior(scale=1)
+    def cov_time(self, ls_prior=None, eta_prior=None):
+        if eta_prior is None:
+            eta_prior = HalfNormalPrior(scale=1)
 
         # Base Matern kernel for long-term trends
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.time_dim,
                 lengthscale_prior=ls_prior,
-                nu=1.5, # was 2.5
+                nu=1.5, # was 1.5 XXX
             ),
-            outputscale_prior=eta,
+            outputscale_prior=eta_prior,
         )
     
-    def cov_periodic(self):
-        # Periodic performs beter than a locally periodic kernel
-        periodic_kernel = ScaleKernel(
-            gpytorch.kernels.PeriodicKernel(
+    def cov_periodic(self, ls_prior=None, eta_prior=None):
+        """
+        Smooth, time-dependent periodic kernel for seasonal effects.
+        """
+        if eta_prior is None:
+            eta_prior = HalfNormalPrior(scale=0.5) 
+
+        if ls_prior is None:
+            ls_prior = GammaPrior(concentration=3, rate=1)
+
+        return ScaleKernel(
+            PeriodicKernel(
                 active_dims=self.time_dim,
                 period_length_prior=NormalPrior(loc=1.0, scale=0.1),  # ~1 year
-                lengthscale_prior=GammaPrior(concentration=2, rate=4),
+                # lengthscale_prior=GammaPrior(concentration=2, rate=4),
             ),
+            # *
+            # MaternKernel(
+            #     active_dims=self.stage_dim,
+            #     lengthscale_prior=ls_prior,
+            #     nu=2.5,  # Smoother kernel (was nu=1.5)
+            # ),
             outputscale_prior=HalfNormalPrior(scale=0.5),
         )
-        
-        return periodic_kernel
     
     def cov_base(self):
         """
-        Smooth, time-independent base rating curve using an RBF kernel on stage.
+        Smooth, time-independent base rating curve using a Matern kernel on stage.
         """
         # Base should capture most variation
         eta = HalfNormalPrior(scale=1)

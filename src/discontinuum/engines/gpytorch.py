@@ -52,7 +52,7 @@ class MarginalGPyTorch(BaseModel):
             optimizer: str = "adamw",
             learning_rate: float = None,
             early_stopping: bool = False,
-            patience: int = 60,
+            patience: int = 30,
             gradient_noise: bool = False,
             ):
         """Fit the model to data.
@@ -99,10 +99,8 @@ class MarginalGPyTorch(BaseModel):
         self.likelihood.train()
 
         if learning_rate is None:
-            if optimizer == "adam":
-                learning_rate = 0.1  # Aggressive default for faster convergence
-            elif optimizer == "adamw":
-                learning_rate = 0.1
+            # More conservative starting LR
+            learning_rate = 0.05
         
         if optimizer == "adamw":
             optimizer_obj = torch.optim.AdamW(
@@ -129,7 +127,8 @@ class MarginalGPyTorch(BaseModel):
             mode='min',
             factor=0.5,                      # Reduce LR by half
             patience=max(2, patience),
-            threshold=1e-5,                  # More aggressive plateau detection
+            threshold=5e-1,                  # Aggressive plateau detection
+            #threshold_mode='rel',            # Use relative threshold
             min_lr=1e-5
         )
 
