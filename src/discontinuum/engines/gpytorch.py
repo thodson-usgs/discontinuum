@@ -129,7 +129,7 @@ class MarginalGPyTorch(BaseModel):
             mode='min',
             factor=0.5,                      # Reduce LR by half
             patience=max(2, patience),
-            threshold=1e-4,
+            threshold=1e-5,                  # More aggressive plateau detection
             min_lr=1e-5
         )
 
