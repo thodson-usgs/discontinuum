@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
+
 from gpytorch.kernels import (
     MaternKernel,
     RQKernel,
@@ -99,6 +100,35 @@ class ExactGPModel(gpytorch.models.ExactGP):
         stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
         b_min = np.quantile(stage, 0.10)
         b_max = np.quantile(stage, 0.90)
+        
+
+        # Create sigmoid kernel for gating (shared switchpoint)
+        sigmoid_shift = SigmoidKernel(
+            active_dims=self.stage_dim,
+            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
+        )
+
+        # Inverted sigmoid kernel as a proper GPyTorch kernel
+        class InvertedSigmoidKernel(SigmoidKernel):
+            def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
+                # Use the same b parameter as sigmoid_shift
+                self.raw_b = sigmoid_shift.raw_b
+                # Standard sigmoid
+                x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
+                x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
+                # Invert: use 1 - sigmoid
+                x1_inv = 1.0 - x1_
+                x2_inv = 1.0 - x2_
+                if diag:
+                    return (x1_inv * x2_inv).squeeze(-1)
+                else:
+                    return torch.matmul(x1_inv, x2_inv.transpose(-2, -1))
+
+        sigmoid_base_inverted = InvertedSigmoidKernel(
+            active_dims=self.stage_dim,
+            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
+        )
+        
         self.covar_module = (
             # core time kernel
             (
@@ -110,24 +140,19 @@ class ExactGPModel(gpytorch.models.ExactGP):
                  *
                  self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=2))
                  #self.cov_stage(ls_prior=GammaPrior(concentration=2, rate=1))
-             )
-             # gated shift component
+             ) * sigmoid_base_inverted
+             # shift component gated by sigmoid (active below switchpoint)
              + (
                 self.cov_time(
                     ls_prior=GammaPrior(concentration=2, rate=5),
                     eta_prior=HalfNormalPrior(scale=1),
-                    )
-                * SigmoidKernel(
-                    active_dims=self.stage_dim,
-                    # b_prior=NormalPrior(loc=0.7, scale=0.001),
-                    b_constraint=gpytorch.constraints.Interval(
-                        b_min,
-                        b_max,
-                    ),
                 )
-            )
+            ) * sigmoid_shift
+            # base curve component gated by inverted sigmoid (active above switchpoint)
+            + (
+                (self.cov_base() + self.cov_periodic())
+            ) * sigmoid_base_inverted
             # additive periodic component for seasonal effects
-            + self.cov_periodic()
         )
 
 
@@ -201,7 +226,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         """
         # Base should capture most variation
         eta = HalfNormalPrior(scale=1)
-        ls = GammaPrior(concentration=3, rate=1)
+        ls = GammaPrior(concentration=10, rate=1)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
