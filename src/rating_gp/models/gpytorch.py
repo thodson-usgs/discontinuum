@@ -18,7 +18,7 @@ from gpytorch.priors import (
 
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import SigmoidKernel
+from rating_gp.models.kernels import SigmoidKernel, InvertedSigmoidKernel
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -101,31 +101,14 @@ class ExactGPModel(gpytorch.models.ExactGP):
         b_min = np.quantile(stage, 0.10)
         b_max = np.quantile(stage, 0.90)
  
-
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
             active_dims=self.stage_dim,
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
-        # TODO SigmoidKernel returns upper and lower 
-
-        # Inverted sigmoid kernel as a proper GPyTorch kernel
-        class InvertedSigmoidKernel(SigmoidKernel):
-            def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
-                # Use the same b parameter as sigmoid_shift
-                self.raw_b = sigmoid_lower.raw_b
-                # Standard sigmoid
-                x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
-                x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
-                # Invert: use 1 - sigmoid
-                x1_inv = 1.0 - x1_
-                x2_inv = 1.0 - x2_
-                if diag:
-                    return (x1_inv * x2_inv).squeeze(-1)
-                else:
-                    return torch.matmul(x1_inv, x2_inv.transpose(-2, -1))
-
+ 
         sigmoid_upper = InvertedSigmoidKernel(
+            sigmoid_kernel=sigmoid_lower,
             active_dims=self.stage_dim,
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
@@ -227,10 +210,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
         """
         # Base should capture most variation
         eta = HalfNormalPrior(scale=2)
-        #ls = GammaPrior(concentration=4, rate=1) # amazing!
+        #ls = GammaPrior(concentration=7, rate=1) # amazing!
         # BEST I THINK, BUT NEED TO FIX LOW FLOW CASE 1
         # eta = HalfNormalPrior(scale=2)
-        ls = GammaPrior(concentration=7, rate=1) # better on otner set
+        ls = GammaPrior(concentration=4, rate=1)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
