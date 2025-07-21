@@ -114,28 +114,17 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
  
         self.covar_module = (
-            # core time kernel
-            (
-                 self.cov_time(
-                     #ls_prior=GammaPrior(concentration=2, rate=1),
-                     ls_prior=GammaPrior(concentration=3, rate=1),
-                     eta_prior=HalfNormalPrior(scale=0.3),
-                 ) 
-                 *
-                 self.cov_stage(ls_prior=GammaPrior(concentration=3, rate=2))
-                 # +
-                 # self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.3))
-             )
-             # shift component gated by sigmoid (active below switchpoint)
-             + sigmoid_lower * (
-                self.cov_time(
-                    ls_prior=GammaPrior(concentration=2, rate=5),
-                    eta_prior=HalfNormalPrior(scale=2),
+            sigmoid_lower * (
+                self.cov_shift(
+                    eta_prior=HalfNormalPrior(scale=2.0),
                 )
             )
-            # base curve component gated by inverted sigmoid (active above switchpoint)
             + sigmoid_upper * (
-                self.cov_base()
+                self.cov_base(eta_prior=HalfNormalPrior(scale=4.0))
+                +
+                self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
+                +
+                self.cov_bend(eta_prior=HalfNormalPrior(scale=0.2))
             )
         )
 
@@ -149,6 +138,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
         q = x_t[:, self.stage_dim]
         mean_x = self.mean_module(q)
+
         #covar_x = self.covar_module(x_t)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
@@ -179,6 +169,46 @@ class ExactGPModel(gpytorch.models.ExactGP):
             outputscale_prior=eta_prior,
         )
     
+    def cov_shift(self, eta_prior=None):
+        if eta_prior is None:
+            eta_prior = HalfNormalPrior(scale=2.0) 
+
+        return ScaleKernel(
+            # MaternKernel(
+            #     active_dims=self.stage_dim,
+            #     lengthscale_prior=GammaPrior(concentration=4, rate=1),
+            # ) *
+            MaternKernel(
+                active_dims=self.time_dim,
+                lengthscale_prior=GammaPrior(concentration=1, rate=1),
+                # lengthscale_prior=GammaPrior(concentration=2, rate=5),
+                nu=1.5,
+            ),
+            outputscale_prior=eta_prior,
+        )
+ 
+    
+    def cov_bend(self, eta_prior=None):
+        """
+        Smooth, time-dependent bending kernel for switchpoint.
+        """
+        if eta_prior is None:
+            eta_prior = HalfNormalPrior(scale=0.2) 
+
+        return ScaleKernel(
+            MaternKernel(
+                active_dims=self.stage_dim,
+                lengthscale_prior=GammaPrior(concentration=2, rate=1),
+                # lengthscale_prior=GammaPrior(concentration=3, rate=1),
+            ) *
+            MaternKernel(
+                active_dims=self.time_dim,
+                # lengthscale_prior=GammaPrior(concentration=2, rate=4),
+                lengthscale_prior=GammaPrior(concentration=2, rate=1),
+            ),
+            outputscale_prior=eta_prior,
+        )
+    
     def cov_periodic(self, ls_prior=None, eta_prior=None):
         """
         Smooth, time-dependent periodic kernel for seasonal effects.
@@ -187,13 +217,13 @@ class ExactGPModel(gpytorch.models.ExactGP):
             eta_prior = HalfNormalPrior(scale=0.5) 
 
         if ls_prior is None:
-            ls_prior = GammaPrior(concentration=3, rate=1)
+            ls_prior = GammaPrior(concentration=2, rate=4)
 
         return ScaleKernel(
             PeriodicKernel(
                 active_dims=self.time_dim,
                 period_length_prior=NormalPrior(loc=1.0, scale=0.1),  # ~1 year
-                # lengthscale_prior=GammaPrior(concentration=2, rate=4),
+                lengthscale_prior=ls_prior,
             ),
             # *
             # MaternKernel(
@@ -201,24 +231,26 @@ class ExactGPModel(gpytorch.models.ExactGP):
             #     lengthscale_prior=ls_prior,
             #     nu=2.5,  # Smoother kernel (was nu=1.5)
             # ),
-            outputscale_prior=HalfNormalPrior(scale=0.5),
+            outputscale_prior=eta_prior,
         )
     
-    def cov_base(self):
+    def cov_base(self, eta_prior=None):
         """
         Smooth, time-independent base rating curve using a Matern kernel on stage.
         """
         # Base should capture most variation
-        eta = HalfNormalPrior(scale=2)
-        #ls = GammaPrior(concentration=7, rate=1) # amazing!
-        # BEST I THINK, BUT NEED TO FIX LOW FLOW CASE 1
-        # eta = HalfNormalPrior(scale=2)
-        ls = GammaPrior(concentration=4, rate=1)
+        if eta_prior is None:
+            eta = HalfNormalPrior(scale=1.0)
+        else:
+            eta = eta_prior
+
+        ls = GammaPrior(concentration=5, rate=1) # amazing!
+        # ls = GammaPrior(concentration=6, rate=1)
         return ScaleKernel(
+            #RBFKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=ls,
             ),
             outputscale_prior=eta,
         )
- 

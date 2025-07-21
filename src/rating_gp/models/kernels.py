@@ -369,19 +369,29 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 # Inverted sigmoid kernel as a proper GPyTorch kernel
 class InvertedSigmoidKernel(SigmoidKernel):
     def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
+        # Initialize without its own raw_b; will share b parameter via sigmoid_kernel
         super().__init__(active_dims=active_dims, b_constraint=b_constraint)
         self.sigmoid_kernel = sigmoid_kernel
 
+    @property
+    def b(self):
+        """Delegate b parameter to the original SigmoidKernel."""
+        return self.sigmoid_kernel.b
+
+    @b.setter
+    def b(self, value):
+        self.sigmoid_kernel.b = value
+
     def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
-        # Use the same b parameter as sigmoid_shift
-        self.raw_b = self.sigmoid_kernel.raw_b
-        # Standard sigmoid
+        # Compute standard sigmoid using shared b
         x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
         x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
-        # Invert: use 1 - sigmoid
+        # Invert: 1 - sigmoid
         x1_inv = 1.0 - x1_
         x2_inv = 1.0 - x2_
+        # Outer product for kernel matrix
+        prod = MatmulLinearOperator(x1_inv, x2_inv.transpose(-2, -1))
         if diag:
-            return (x1_inv * x2_inv).squeeze(-1)
+            return prod.diagonal(dim1=-1, dim2=-2)
         else:
-            return torch.matmul(x1_inv, x2_inv.transpose(-2, -1))
+            return prod
