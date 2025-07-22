@@ -139,76 +139,82 @@ class MarginalGPyTorch(BaseModel):
         
 
         nan_loss_counter = 0
-        for i in pbar:
-            optimizer_obj.zero_grad()
-            output = self.model(train_x)
-            
-            try:
-                loss = -mll(output, train_y)
-            except Exception as e:
-                nan_loss_counter += 1
-                if nan_loss_counter > 10:
-                    raise e
-                continue
-            
-            # Check for NaN/Inf loss after successful computation
-            if torch.isnan(loss) or torch.isinf(loss):
-                nan_loss_counter += 1
-                if nan_loss_counter > 10:
-                    raise RuntimeError(f"Encountered more than 10 consecutive NaN/Inf losses at iteration {i+1}")
-                continue
+        try:
+            for i in pbar:
+                optimizer_obj.zero_grad()
+                output = self.model(train_x)
                 
-            nan_loss_counter = 0
+                try:
+                    loss = -mll(output, train_y)
+                except Exception as e:
+                    nan_loss_counter += 1
+                    if nan_loss_counter > 10:
+                        raise e
+                    continue
+                
+                # Check for NaN/Inf loss after successful computation
+                if torch.isnan(loss) or torch.isinf(loss):
+                    nan_loss_counter += 1
+                    if nan_loss_counter > 10:
+                        raise RuntimeError(f"Encountered more than 10 consecutive NaN/Inf losses at iteration {i+1}")
+                    continue
+                    
+                nan_loss_counter = 0
 
-            loss.backward()
+                loss.backward()
 
-            # Gradient clipping for stability
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                # Gradient clipping for stability
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
 
-            # Check for NaN gradients
-            has_nan_grad = any(
-                param.grad is not None and torch.isnan(param.grad).any()
-                for param in self.model.parameters()
-            )
+                # Check for NaN gradients
+                has_nan_grad = any(
+                    param.grad is not None and torch.isnan(param.grad).any()
+                    for param in self.model.parameters()
+                )
 
-            if has_nan_grad:
-                # Update best loss tracking (loss is still valid, just gradients are NaN)
+                if has_nan_grad:
+                    # Update best loss tracking (loss is still valid, just gradients are NaN)
+                    if loss.item() < best_loss - min_improvement:
+                        best_loss = loss.item()
+                        patience_counter = 0
+                    else:
+                        patience_counter += 1
+
+                    current_lr = optimizer_obj.param_groups[0]['lr']
+                    pbar.set_postfix_str(
+                        f'loss={loss.item():.4f} lr={current_lr:.1e} | NaN gradients - skipping step'
+                    )
+                    continue
+
+                optimizer_obj.step()
+
+                # Update learning rate scheduler
+                if early_stopping:
+                    scheduler.step(loss.item())
+
+                # Early stopping check
                 if loss.item() < best_loss - min_improvement:
                     best_loss = loss.item()
                     patience_counter = 0
                 else:
                     patience_counter += 1
 
+                # Update progress bar
                 current_lr = optimizer_obj.param_groups[0]['lr']
-                pbar.set_postfix_str(
-                    f'loss={loss.item():.4f} lr={current_lr:.1e} | NaN gradients - skipping step'
-                )
-                continue
+                progress_info = f'loss={loss.item():.4f} lr={current_lr:.1e}'
+                pbar.set_postfix_str(progress_info)
 
-            optimizer_obj.step()
+                if early_stopping and patience_counter >= patience:
+                    print(f"\nEarly stopping triggered after {i+1} iterations")
+                    print(f"Best loss: {best_loss:.6f}")
+                    break
 
-            # Update learning rate scheduler
-            scheduler.step(loss.item())
-
-            # Early stopping check
-            if loss.item() < best_loss - min_improvement:
-                best_loss = loss.item()
-                patience_counter = 0
-            else:
-                patience_counter += 1
-
-            # Update progress bar
-            current_lr = optimizer_obj.param_groups[0]['lr']
-            progress_info = f'loss={loss.item():.4f} lr={current_lr:.1e}'
-            pbar.set_postfix_str(progress_info)
-
-            if early_stopping and patience_counter >= patience:
-                print(f"\nEarly stopping triggered after {i+1} iterations")
-                print(f"Best loss: {best_loss:.6f}")
-                break
-
-        # Mark as fitted only after successful completion
-        self.is_fitted = True
+        except KeyboardInterrupt:
+            print(f"\nTraining interrupted at iteration {i+1}")
+            print(f"Best loss: {best_loss:.6f}")
+        finally:
+            # Mark as fitted after any training iterations have completed
+            self.is_fitted = True
 
     @is_fitted
     def predict(self,

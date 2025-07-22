@@ -259,8 +259,8 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         self,
         # a_prior=None,
         # a_constraint=None,
+        b_constraint,
         b_prior=None,
-        b_constraint=None,
         #b_constraint=gpytorch.constraints.Positive(),
         **kwargs,
         ):
@@ -276,15 +276,16 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         super().__init__(**kwargs)
 
         self.a = 20
+        # self.a = torch.nn.Parameter(torch.ones(*self.batch_shape, 1, 1) * 40)
         # self.register_parameter(
         #     name='raw_a',
-        #     parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
-        # )
-
-        #self.b = torch.nn.Parameter(torch.randn(*self.batch_shape, 1, 1))
-        # try to keep b within the data range
+        #     parameter=self.a)
+        
+        u = b_constraint.upper_bound
+        l = b_constraint.lower_bound
         self.b = torch.nn.Parameter(
-            0.5 - torch.rand(*self.batch_shape, 1, 1)
+            l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
+            #0.5 - torch.rand(*self.batch_shape, 1, 1)
         )
 
         self.register_parameter(
@@ -372,6 +373,15 @@ class InvertedSigmoidKernel(SigmoidKernel):
         # Initialize without its own raw_b; will share b parameter via sigmoid_kernel
         super().__init__(active_dims=active_dims, b_constraint=b_constraint)
         self.sigmoid_kernel = sigmoid_kernel
+
+    # @property
+    # def a(self):
+    #     """Delegate a parameter to the original SigmoidKernel."""
+    #     return self.sigmoid_kernel.a
+
+    # @a.setter
+    # def a(self, value):
+    #     self.sigmoid_kernel.a = value 
 
     @property
     def b(self):
