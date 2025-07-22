@@ -74,7 +74,7 @@ class RatingGPMarginalGPyTorch(
             noise=noise,
             #learn_additional_noise=False,
             learn_additional_noise=True,
-            noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.005),
+            noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
         )
 
         model = ExactGPModel(X, y, self.likelihood)
@@ -117,7 +117,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.covar_module = (
             sigmoid_lower * (
                 self.cov_shift(
-                    eta_prior=HalfNormalPrior(scale=2.0),
+                    #eta_prior=HalfNormalPrior(scale=2.0),
+                    eta_prior=HalfNormalPrior(scale=1.0),
+                    time_prior=GammaPrior(concentration=1, rate=7),
                 )
             )
             + sigmoid_upper * (
@@ -170,20 +172,24 @@ class ExactGPModel(gpytorch.models.ExactGP):
             outputscale_prior=eta_prior,
         )
     
-    def cov_shift(self, eta_prior=None):
+    def cov_shift(self, eta_prior=None, time_prior=None):
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=2.0) 
+            eta_prior = HalfNormalPrior(scale=0.3) 
+
+        if time_prior is None:
+            time_prior = GammaPrior(concentration=1, rate=7)
 
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=5, rate=1),
+                lengthscale_prior=GammaPrior(concentration=1, rate=1),
+                #nu=1.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                lengthscale_prior=GammaPrior(concentration=1, rate=2),
-                # TODO TESTING HERE
-                # lengthscale_prior=GammaPrior(concentration=2, rate=5),
+                # extreme prior for fast shift at 12413470
+                #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
+                lengthscale_prior=time_prior,
                 nu=1.5,
             ),
             outputscale_prior=eta_prior,
@@ -200,12 +206,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=2, rate=1),
-                # lengthscale_prior=GammaPrior(concentration=3, rate=1),
+                lengthscale_prior=GammaPrior(concentration=3, rate=1),
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                lengthscale_prior=GammaPrior(concentration=2, rate=5),
+                lengthscale_prior=GammaPrior(concentration=3, rate=2),
             ),
             outputscale_prior=eta_prior,
         )
