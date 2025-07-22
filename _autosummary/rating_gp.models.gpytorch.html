@@ -357,6 +357,7 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel"><code class="docutils literal notranslate"><span class="pre">ExactGPModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.cov_base"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.cov_base()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.cov_bend"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.cov_bend()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.cov_periodic"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.cov_periodic()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.forward"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.forward()</span></code></a></li>
 </ul>
@@ -402,8 +403,14 @@ document.write(`
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.gpytorch.</span></span><span class="sig-name descname"><span class="pre">ExactGPModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.gpytorch.ExactGPModel" title="Link to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="rating_gp.models.gpytorch.ExactGPModel.cov_base">
-<span class="sig-name descname"><span class="pre">cov_base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.gpytorch.ExactGPModel.cov_base" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">cov_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.gpytorch.ExactGPModel.cov_base" title="Link to this definition">#</a></dt>
 <dd><p>Smooth, time-independent base rating curve using a Matern kernel on stage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rating_gp.models.gpytorch.ExactGPModel.cov_bend">
+<span class="sig-name descname"><span class="pre">cov_bend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.gpytorch.ExactGPModel.cov_bend" title="Link to this definition">#</a></dt>
+<dd><p>Smooth, time-dependent bending kernel for switchpoint.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -511,6 +518,7 @@ latent variable implementation.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel"><code class="docutils literal notranslate"><span class="pre">ExactGPModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.cov_base"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.cov_base()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.cov_bend"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.cov_bend()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.cov_periodic"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.cov_periodic()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.gpytorch.ExactGPModel.forward"><code class="docutils literal notranslate"><span class="pre">ExactGPModel.forward()</span></code></a></li>
 </ul>

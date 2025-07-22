@@ -356,6 +356,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.InvertedSigmoidKernel"><code class="docutils literal notranslate"><span class="pre">InvertedSigmoidKernel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.InvertedSigmoidKernel.b"><code class="docutils literal notranslate"><span class="pre">InvertedSigmoidKernel.b</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.InvertedSigmoidKernel.forward"><code class="docutils literal notranslate"><span class="pre">InvertedSigmoidKernel.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarp"><code class="docutils literal notranslate"><span class="pre">LogWarp</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarp.forward"><code class="docutils literal notranslate"><span class="pre">LogWarp.forward()</span></code></a></li>
 </ul>
@@ -392,24 +397,68 @@ document.write(`
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.LogWarp" title="rating_gp.models.kernels.LogWarp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogWarp</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.InvertedSigmoidKernel" title="rating_gp.models.kernels.InvertedSigmoidKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InvertedSigmoidKernel</span></code></a>(sigmoid_kernel[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.LogWarp" title="rating_gp.models.kernels.LogWarp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogWarp</span></code></a>()</p></td>
 <td><p>Logarithmic Warp</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.PowerLawKernel" title="rating_gp.models.kernels.PowerLawKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLawKernel</span></code></a>([a_prior, a_constraint, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.PowerLawKernel" title="rating_gp.models.kernels.PowerLawKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLawKernel</span></code></a>([a_prior, a_constraint, ...])</p></td>
 <td><p>Power Law Kernel</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.SigmoidKernel" title="rating_gp.models.kernels.SigmoidKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidKernel</span></code></a>([b_prior, b_constraint])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.SigmoidKernel" title="rating_gp.models.kernels.SigmoidKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidKernel</span></code></a>(b_constraint[, b_prior])</p></td>
 <td><p>Sigmoid Kernel</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.StageTimeKernel" title="rating_gp.models.kernels.StageTimeKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StageTimeKernel</span></code></a>([a_prior, a_constraint])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.StageTimeKernel" title="rating_gp.models.kernels.StageTimeKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StageTimeKernel</span></code></a>([a_prior, a_constraint])</p></td>
 <td><p>A time RBF kernel with a stage-variable length scale.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.TanhWarp" title="rating_gp.models.kernels.TanhWarp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TanhWarp</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.TanhWarp" title="rating_gp.models.kernels.TanhWarp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TanhWarp</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<dl class="py class">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.InvertedSigmoidKernel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">InvertedSigmoidKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigmoid_kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.InvertedSigmoidKernel" title="Link to this definition">#</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.InvertedSigmoidKernel.b">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#rating_gp.models.kernels.InvertedSigmoidKernel.b" title="Link to this definition">#</a></dt>
+<dd><p>Delegate b parameter to the original SigmoidKernel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.InvertedSigmoidKernel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_dim_is_batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.InvertedSigmoidKernel.forward" title="Link to this definition">#</a></dt>
+<dd><p>Computes the covariance between <span class="math notranslate nohighlight">\(\mathbf x_1\)</span> and <span class="math notranslate nohighlight">\(\mathbf x_2\)</span>.
+This method should be implemented by all Kernel subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x1</strong> – First set of data (… x N x D).</p></li>
+<li><p><strong>x2</strong> – Second set of data (… x M x D).</p></li>
+<li><p><strong>diag</strong> – Should the Kernel compute the whole kernel, or just the diag?
+If True, it must be the case that <cite>x1 == x2</cite>. (Default: False.)</p></li>
+<li><p><strong>last_dim_is_batch</strong> – If True, treat the last dimension
+of <cite>x1</cite> and <cite>x2</cite> as another batch dimension.
+(Useful for additive structure over the dimensions). (Default: False.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>The kernel matrix or vector. The shape depends on the kernel’s evaluation mode:</p>
+<ul class="simple">
+<li><p><cite>full_covar</cite>: <cite>… x N x M</cite></p></li>
+<li><p><cite>full_covar</cite> with <cite>last_dim_is_batch=True</cite>: <cite>… x K x N x M</cite></p></li>
+<li><p><cite>diag</cite>: <cite>… x N</cite></p></li>
+<li><p><cite>diag</cite> with <cite>last_dim_is_batch=True</cite>: <cite>… x K x N</cite></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="rating_gp.models.kernels.LogWarp">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">LogWarp</span></span><a class="headerlink" href="#rating_gp.models.kernels.LogWarp" title="Link to this definition">#</a></dt>
@@ -474,7 +523,7 @@ of <cite>x1</cite> and <cite>x2</cite> as another batch dimension.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="rating_gp.models.kernels.SigmoidKernel">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">SigmoidKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.SigmoidKernel" title="Link to this definition">#</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">SigmoidKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b_constraint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.SigmoidKernel" title="Link to this definition">#</a></dt>
 <dd><p>Sigmoid Kernel</p>
 <p>This kernel can be multiplied by another kernel to give a breakpoint in the
 data using a sigmoid</p>
@@ -617,6 +666,11 @@ registered hooks while the latter silently ignores them.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.InvertedSigmoidKernel"><code class="docutils literal notranslate"><span class="pre">InvertedSigmoidKernel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.InvertedSigmoidKernel.b"><code class="docutils literal notranslate"><span class="pre">InvertedSigmoidKernel.b</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.InvertedSigmoidKernel.forward"><code class="docutils literal notranslate"><span class="pre">InvertedSigmoidKernel.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarp"><code class="docutils literal notranslate"><span class="pre">LogWarp</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarp.forward"><code class="docutils literal notranslate"><span class="pre">LogWarp.forward()</span></code></a></li>
 </ul>

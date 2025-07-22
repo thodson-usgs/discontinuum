@@ -8,6 +8,7 @@ rating\_gp.models.kernels
 
    .. autosummary::
    
+      InvertedSigmoidKernel
       LogWarp
       PowerLawKernel
       SigmoidKernel
