@@ -8,7 +8,8 @@ import gpytorch
 import numpy as np
 import torch
 import tqdm
-from xarray import DataArray
+import xarray as xr
+from xarray import DataArray, Dataset
 
 from discontinuum.engines.base import BaseModel, is_fitted
 
@@ -36,12 +37,68 @@ class LatentGPyTorch(BaseModel):
 
 
 class MarginalGPyTorch(BaseModel):
+
     def __init__(
         self,
         model_config: Optional[Dict] = None,
     ):
         """ """
         super().__init__(model_config=model_config)
+
+    @classmethod
+    def load(cls, ds: Dataset) -> MarginalGPyTorch:
+        """Load a MarginalGPyTorch model from an xarray Dataset."""
+        # Dispatch to concrete subclass if base class invoked
+        model_class_path = ds.attrs.get('model_class')
+        if model_class_path:
+            # If called on base class, redirect
+            full_name = f"{cls.__module__}.{cls.__name__}"
+            if model_class_path != full_name:
+                # dynamic import of subclass
+                import importlib
+                module_name, class_name = model_class_path.rsplit('.', 1)
+                submod = importlib.import_module(module_name)
+                subcls = getattr(submod, class_name)
+                return subcls.load(ds)
+
+        # Extract training data using stored variable names
+        info = ds.attrs.get('model', {})
+        target = ds[ info['target'] ]
+        covariates = ds[ info['covariates'] ]
+        target_unc = ds[ info['target_unc'] ] if info.get('target_unc') else None
+
+        # Instantiate and fit model structure
+        model = cls()
+        model.fit(covariates=covariates, target=target, target_unc=target_unc, iterations=1)
+
+        # Restore model parameters
+        state = info.get('state_dict')
+        if state is not None:
+            model.model.load_state_dict(state)
+        model.is_fitted = True
+        return model
+
+    def save(self) -> Dataset:
+        """Save the model's training data and parameters to an xarray Dataset."""
+        # Save training data as xarray Dataset
+        datasets = [
+            self.dm.data.target.to_dataset(),
+            self.dm.data.covariates,
+            ]
+        if self.dm.data.target_unc is not None:
+            datasets.append(self.dm.data.target_unc)
+
+        ds = xr.merge(datasets)
+
+        #ds.attrs['state_dict'] = self.model.state_dict()
+        ds.attrs["model"] = {
+            "state_dict": self.model.state_dict(),
+            "covariates": list(self.dm.data.covariates.data_vars.keys()),
+            "target": self.dm.data.target.name,
+            "target_unc": self.dm.data.target_unc.name if self.dm.data.target_unc is not None else None,
+        }
+
+        return ds
 
     def fit(
             self,
