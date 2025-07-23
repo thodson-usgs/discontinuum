@@ -198,7 +198,8 @@ class MarginalGPyTorch(BaseModel):
         nan_loss_counter = 0
         try:
             for i in pbar:
-                optimizer_obj.zero_grad()
+                # Clear gradients fully (set to None) to avoid persisting NaNs
+                optimizer_obj.zero_grad(set_to_none=True)
                 output = self.model(train_x)
                 
                 try:
@@ -237,10 +238,27 @@ class MarginalGPyTorch(BaseModel):
                     else:
                         patience_counter += 1
 
+                    # Sanitize NaN/Inf gradients and update parameters to allow loss change
+                    for param in self.model.parameters():
+                        if param.grad is not None:
+                            param.grad = torch.nan_to_num(param.grad, nan=0.0, posinf=0.0, neginf=0.0)
+                    optimizer_obj.step()
+                    # Update learning rate scheduler
+                    if early_stopping:
+                        scheduler.step(loss.item())
+                    # Early stopping logic
+                    if loss.item() < best_loss - min_improvement:
+                        best_loss = loss.item()
+                        patience_counter = 0
+                    else:
+                        patience_counter += 1
+                    # Update progress bar with sanitized warning
                     current_lr = optimizer_obj.param_groups[0]['lr']
-                    pbar.set_postfix_str(
-                        f'loss={loss.item():.4f} lr={current_lr:.1e} | NaN gradients - skipping step'
-                    )
+                    # Break if needed
+                    if early_stopping and patience_counter >= patience:
+                        print(f"\nEarly stopping triggered after {i+1} iterations")
+                        print(f"Best loss: {best_loss:.6f}")
+                        break
                     continue
 
                 optimizer_obj.step()
@@ -258,7 +276,10 @@ class MarginalGPyTorch(BaseModel):
 
                 # Update progress bar
                 current_lr = optimizer_obj.param_groups[0]['lr']
-                progress_info = f'loss={loss.item():.4f} lr={current_lr:.1e}'
+                progress_info = f'loss={loss.item():.4f}, lr={current_lr:.1e}'
+                if nan_loss_counter > 0:
+                    nan_info = f' | NaN gradients: {nan_loss_counter}'
+                    progress_info += nan_info
                 pbar.set_postfix_str(progress_info)
 
                 if early_stopping and patience_counter >= patience:
