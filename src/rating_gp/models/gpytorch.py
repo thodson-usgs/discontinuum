@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import gpytorch
 import numpy as np
 import torch
@@ -21,6 +25,9 @@ from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
 from rating_gp.models.kernels import SigmoidKernel, InvertedSigmoidKernel
 
+if TYPE_CHECKING:
+    from typing import Sequence
+
 
 class PowerLawTransform(torch.nn.Module):
     """
@@ -35,6 +42,34 @@ class PowerLawTransform(torch.nn.Module):
     def forward(self, x):
         self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
         return self.a + (self.b * torch.log(x - self.c))
+
+    def fit(self, x, y, epochs=200, lr=1e-2):
+        """
+        Fit the power law parameters to x, y and freeze them.
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input variable (e.g., stage)
+        y : torch.Tensor
+            Target variable (e.g., log-discharge)
+        epochs : int
+            Number of optimization steps
+        lr : float
+            Learning rate
+        """
+        optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        self.train()
+        for _ in range(epochs):
+            optimizer.zero_grad()
+            pred = self.forward(x)
+            loss = torch.nn.functional.mse_loss(pred, y)
+            loss.backward()
+            optimizer.step()
+        # Freeze parameters
+        for param in self.parameters():
+            param.requires_grad = False
+        self.eval()
+        print("PowerLawTransform fitted:")
 
 
 class RatingGPMarginalGPyTorch(
@@ -53,10 +88,12 @@ class RatingGPMarginalGPyTorch(
     def __init__(
             self,
             model_config: ModelConfig = ModelConfig(),
+            rating_mask: Sequence[bool] = [],
     ):
         """ """
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
+        self.rating_mask = rating_mask
         
 
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
@@ -67,6 +104,7 @@ class RatingGPMarginalGPyTorch(
             noise = y_unc
         else:
             noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
+
         # TODO: Fix "GPInputWarning: You have passed data through a 
         # FixedNoiseGaussianLikelihood that did not match the size of the fixed
         # noise, *and* you did not specify noise. This is treated as a no-op."
@@ -77,13 +115,13 @@ class RatingGPMarginalGPyTorch(
             noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
         )
 
-        model = ExactGPModel(X, y, self.likelihood)
+        model = ExactGPModel(X, y, self.likelihood, self.rating_mask)
 
         return model
 
 
 class ExactGPModel(gpytorch.models.ExactGP):
-    def __init__(self, train_x, train_y, likelihood):
+    def __init__(self, train_x, train_y, likelihood, rating_mask):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
 
         n_d = train_x.shape[1]  # number of dimensions
@@ -94,6 +132,12 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.stage_dim = [self.dims[1]]
 
         self.powerlaw = PowerLawTransform()
+
+        if np.any(rating_mask):
+            # prefit powerlaw transform
+            x_base = train_x[rating_mask][:, self.stage_dim[0]]
+            y_base = train_y[rating_mask]
+            self.powerlaw.fit(x_base, y_base)
 
         self.mean_module = NoOpMean()
 
