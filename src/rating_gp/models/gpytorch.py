@@ -36,6 +36,47 @@ class PowerLawTransform(torch.nn.Module):
         self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
         return self.a + (self.b * torch.log(x - self.c))
 
+    def fit(self, x, y, epochs=200, lr=5e-2, weight_exp=2.0):
+        """
+        Fit the power law parameters to x, y and freeze them.
+        Uses weighted regression to give more importance to high flow observations.
+        
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input variable (e.g., stage)
+        y : torch.Tensor
+            Target variable (e.g., log-discharge)
+        epochs : int
+            Number of optimization steps
+        lr : float
+            Learning rate
+        weight_exp : float
+            Exponent for weighting scheme. Higher values give more weight to high flows.
+            weights = (x / x.max()) ** weight_exp
+        """
+        # Create weights that emphasize high flow observations
+        # Normalize x to [0,1] and raise to power to create exponential weighting
+        x_norm = (x - x.min()) / (x.max() - x.min())
+        weights = x_norm ** weight_exp
+        # Ensure minimum weight to avoid completely ignoring low flows
+        weights = torch.clamp(weights, min=0.1)
+        
+        optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        self.train()
+        for _ in range(epochs):
+            optimizer.zero_grad()
+            pred = self.forward(x)
+            # Weighted mean squared error
+            residuals = (pred - y) ** 2
+            loss = torch.mean(weights * residuals)
+            loss.backward()
+            optimizer.step()
+        # Freeze parameters
+        for param in self.parameters():
+            param.requires_grad = False
+        self.eval()
+
 
 class RatingGPMarginalGPyTorch(
     RatingDataMixin,
@@ -53,11 +94,12 @@ class RatingGPMarginalGPyTorch(
     def __init__(
             self,
             model_config: ModelConfig = ModelConfig(),
+            prefit=False,
     ):
         """ """
         super(MarginalGPyTorch, self).__init__(model_config=model_config)
         self.build_datamanager(model_config)
-        
+        self.prefit = prefit
 
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
@@ -77,13 +119,13 @@ class RatingGPMarginalGPyTorch(
             noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
         )
 
-        model = ExactGPModel(X, y, self.likelihood)
+        model = ExactGPModel(X, y, self.likelihood, prefit=self.prefit)
 
         return model
 
 
 class ExactGPModel(gpytorch.models.ExactGP):
-    def __init__(self, train_x, train_y, likelihood):
+    def __init__(self, train_x, train_y, likelihood, prefit):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
 
         n_d = train_x.shape[1]  # number of dimensions
@@ -99,6 +141,16 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         # Use stage (not y) for sigmoid kernel constraint
         stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
+
+        if prefit:
+            self.powerlaw.fit(
+                stage,
+                train_y,
+                epochs=2000,
+                lr=2e-5,
+                weight_exp=2,
+            )
+
         b_min = np.quantile(stage, 0.10)
         b_max = np.quantile(stage, 0.90)
  
