@@ -10,5 +10,6 @@ rating\_gp.models.gpytorch
    
       ExactGPModel
       PowerLawTransform
+      PowerLawWarpKernel
       RatingGPMarginalGPyTorch
    
