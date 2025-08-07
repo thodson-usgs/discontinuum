@@ -4,6 +4,28 @@ import torch
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 
+# --- Custom kernel for warping input with PowerLawTransform ---
+class PowerLawWarpKernel(gpytorch.kernels.Kernel):
+    """
+    Wraps a base kernel and applies a PowerLawTransform to the stage input.
+    """
+    def __init__(self, base_kernel, powerlaw_transform, stage_dim):
+        super().__init__()
+        self.base_kernel = base_kernel
+        self.powerlaw_transform = powerlaw_transform
+        self.stage_dim = stage_dim
+
+    def forward(self, x1, x2=None, **params):
+        x1_ = x1.clone()
+        x1_[:, self.stage_dim] = self.powerlaw_transform(x1_[:, self.stage_dim])
+        if x2 is not None:
+            x2_ = x2.clone()
+            x2_[:, self.stage_dim] = self.powerlaw_transform(x2_[:, self.stage_dim])
+        else:
+            x2_ = None
+        return self.base_kernel(x1_, x2_, **params)
+
+
 from gpytorch.kernels import (
     MaternKernel,
     RBFKernel,
@@ -114,21 +136,23 @@ class ExactGPModel(gpytorch.models.ExactGP):
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
  
+        # Compose the upper kernel branch and wrap in PowerLawWarpKernel
+        upper_kernel = (
+            self.cov_base(eta_prior=HalfNormalPrior(scale=1.0))
+            + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
+            + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.2))
+        )
+        upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
+
         self.covar_module = (
             sigmoid_lower * (
                 self.cov_shift(
+                    eta_prior=HalfNormalPrior(scale=2.0),
                     #eta_prior=HalfNormalPrior(scale=2.0),
-                    eta_prior=HalfNormalPrior(scale=1.0),
                     time_prior=GammaPrior(concentration=1, rate=7),
                 )
             )
-            + sigmoid_upper * (
-                self.cov_base(eta_prior=HalfNormalPrior(scale=4.0))
-                +
-                self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
-                +
-                self.cov_bend(eta_prior=HalfNormalPrior(scale=0.2))
-            )
+            + sigmoid_upper * upper_kernel_warped
         )
 
 
@@ -153,7 +177,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
             MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=ls_prior,
-                nu=2.5,  # Smoother kernel (was nu=1.5)
+                nu=2.5,
             ),
             outputscale_prior=eta,
         )
@@ -167,7 +191,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
             MaternKernel(
                 active_dims=self.time_dim,
                 lengthscale_prior=ls_prior,
-                nu=1.5, # was 1.5 XXX
+                nu=1.5,
             ),
             outputscale_prior=eta_prior,
         )
@@ -183,14 +207,15 @@ class ExactGPModel(gpytorch.models.ExactGP):
             MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=GammaPrior(concentration=1, rate=1),
-                #nu=1.5,
+                # 2,1 was great
+                nu=2.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
                 # extreme prior for fast shift at 12413470
                 #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
                 lengthscale_prior=time_prior,
-                nu=1.5,
+                nu=2.5,
             ),
             outputscale_prior=eta_prior,
         )
@@ -244,16 +269,13 @@ class ExactGPModel(gpytorch.models.ExactGP):
         """
         Smooth, time-independent base rating curve using a Matern kernel on stage.
         """
-        # Base should capture most variation
         if eta_prior is None:
             eta = HalfNormalPrior(scale=1.0)
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=5, rate=1) # amazing!
-        # ls = GammaPrior(concentration=6, rate=1)
+        ls = GammaPrior(concentration=5, rate=1)
         return ScaleKernel(
-            #RBFKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=ls,
