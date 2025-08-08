@@ -104,6 +104,106 @@ class RatingGPMarginalGPyTorch(
 
         return model
 
+    def fit(self, covariates, target, target_unc=None, iterations=100, optimizer=None,
+            learning_rate=None, early_stopping=False, patience=60, scheduler=True,
+            monotonic_penalty_weight: float = 0.0, grid_size: int = 64,
+            monotonic_penalty_interval: int = 1):
+        """
+        Override fit to inject a monotonicity penalty on the rating curve.
+
+        monotonic_penalty_weight: strength of penalty on negative dQ/dStage
+        grid_size: number of random points to sample over time-stage grid
+        monotonic_penalty_interval: compute the penalty every k iterations (k>=1).
+          When k>1, the penalty is applied every k-th iteration and scaled by k
+          to maintain the same expected regularization strength, reducing compute.
+        """
+        # If no penalty, just call base implementation
+        if monotonic_penalty_weight <= 0:
+            return super().fit(
+                covariates=covariates,
+                target=target,
+                target_unc=target_unc,
+                iterations=iterations,
+                optimizer=optimizer,
+                learning_rate=learning_rate,
+                early_stopping=early_stopping,
+                patience=patience,
+                scheduler=scheduler,
+                penalty_callback=None,
+                penalty_weight=0.0,
+            )
+
+        # Simple counter to optionally skip penalty some iterations for speed
+        step = {"i": 0}
+
+        # Define penalty callback that depends on current model params
+        def penalty_callback():
+            # Optionally skip penalty to save compute
+            step["i"] += 1
+            if monotonic_penalty_interval > 1 and (step["i"] % monotonic_penalty_interval) != 0:
+                # Return a 0 scalar on the correct device (no gradient contribution this step)
+                dev = next(self.model.parameters()).device
+                return torch.zeros((), device=dev)
+
+            # Sample a random grid in transformed model space
+            # time is uniform, stage is log-uniform (denser at low values)
+            time_dim = 0
+            stage_dim = 1
+
+            X_np = self.dm.X  # training transformed inputs
+            x_min = X_np.min(axis=0)
+            x_max = X_np.max(axis=0)
+            device = next(self.model.parameters()).device
+            # Uniform for time
+            u_time = torch.rand((grid_size,), dtype=torch.float32, device=device)
+            time_grid = u_time * (x_max[time_dim] - x_min[time_dim]) + x_min[time_dim]
+            # Log-uniform for stage
+            log_xmin = float(np.log(x_min[stage_dim]))
+            log_xmax = float(np.log(x_max[stage_dim]))
+            u_stage = torch.rand((grid_size,), dtype=torch.float32, device=device)
+            log_stage_grid = u_stage * (log_xmax - log_xmin) + log_xmin
+            # Only the stage dimension requires gradients
+            stage_grid = torch.exp(log_stage_grid).requires_grad_(True)
+            # Stack into grid
+            x_grid = torch.stack([time_grid, stage_grid], dim=1)
+
+            # Temporarily switch to eval mode to use predictive mean; remember mode
+            was_model_training = self.model.training
+            self.model.eval()
+            try:
+                with gpytorch.settings.fast_pred_var():
+                    # Use the model's latent posterior mean directly (skip likelihood wrapper)
+                    mean = self.model(x_grid).mean
+            finally:
+                if was_model_training:
+                    self.model.train()
+
+            # Compute gradient of mean w.r.t. stage coordinate only
+            d_mean_d_stage = torch.autograd.grad(mean.sum(), stage_grid, create_graph=True)[0]
+
+            # Penalize negative slopes: relu on negative part (-min(grad, 0))
+            neg = torch.clamp(-d_mean_d_stage, min=0.0)
+            pen = neg.mean()
+
+            # If computing less frequently, scale to preserve expected magnitude
+            if monotonic_penalty_interval > 1:
+                pen = pen * float(monotonic_penalty_interval)
+            return pen
+
+        return super().fit(
+            covariates=covariates,
+            target=target,
+            target_unc=target_unc,
+            iterations=iterations,
+            optimizer=optimizer,
+            learning_rate=learning_rate,
+            early_stopping=early_stopping,
+            patience=patience,
+            scheduler=scheduler,
+            penalty_callback=penalty_callback,
+            penalty_weight=float(monotonic_penalty_weight),
+        )
+
 
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood):

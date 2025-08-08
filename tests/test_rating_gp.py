@@ -48,3 +48,19 @@ def test_rating_gp(training_data):
     )
     assert isinstance(ax, Axes)
     assert isinstance(model.add_time_colorbar(ax=ax), Colorbar)
+
+
+def test_rating_gp_with_monotonic_penalty(training_data):
+    model = RatingGP()
+    # Run a short training with the monotonicity penalty enabled to ensure it integrates
+    model.fit(
+        target=training_data['discharge'],
+        covariates=training_data[['stage']],
+        target_unc=training_data['discharge_unc'],
+        iterations=5,
+        scheduler=False,
+        monotonic_penalty_weight=0.5,
+        # keep grid small for speed
+        grid_size=16,
+    )
+    assert model.is_fitted

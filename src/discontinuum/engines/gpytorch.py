@@ -15,7 +15,7 @@ from discontinuum.engines.base import BaseModel, is_fitted
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
-    from typing import Dict, Optional, Tuple
+    from typing import Dict, Optional, Tuple, Callable
     from xarray import Dataset
 
 
@@ -177,6 +177,8 @@ class MarginalGPyTorch(BaseModel):
             early_stopping: bool = False,
             patience: int = 60,
             scheduler: bool = True,
+            penalty_callback: 'Optional[Callable[[], torch.Tensor]]' = None,
+            penalty_weight: float = 0.0,
             ):
         """Fit the model to data.
 
@@ -202,6 +204,12 @@ class MarginalGPyTorch(BaseModel):
             Number of iterations to wait without improvement before stopping. The default is 60.
         scheduler : bool, optional
             Whether to use a learning rate scheduler. The default is True.
+        penalty_callback : callable, optional
+            A zero-argument callable that returns a scalar torch.Tensor penalty to be added
+            to the optimization objective each iteration. This enables model-specific
+            regularization such as monotonicity constraints.
+        penalty_weight : float, optional
+            Multiplier applied to the penalty value when added to the objective. Default 0.0.
         """
         # setup data manager (self.dm)
         self.dm.fit(target=target, covariates=covariates, target_unc=target_unc)
@@ -307,7 +315,7 @@ class MarginalGPyTorch(BaseModel):
 
         # Training loop with stability features
         pbar = tqdm.tqdm(range(iterations), ncols=100)
-        best_loss = float('inf')
+        best_obj = float('inf')
         patience_counter = 0
         min_improvement = 1e-6
         
@@ -318,23 +326,38 @@ class MarginalGPyTorch(BaseModel):
                 output = self.model(train_x)
                 
                 try:
-                    loss = -mll(output, train_y)
+                    nll = -mll(output, train_y)
                 except Exception as e:
                     nan_loss_counter += 1
                     if nan_loss_counter > 10:
                         raise e
                     continue
                 
-                # Check for NaN/Inf loss after successful computation
-                if torch.isnan(loss) or torch.isinf(loss):
+                # Optional penalty term
+                penalty_val = None
+                if penalty_callback is not None and penalty_weight > 0.0:
+                    try:
+                        penalty_val = penalty_callback()
+                        # basic sanity check
+                        if not torch.is_tensor(penalty_val):
+                            penalty_val = None
+                    except Exception:
+                        penalty_val = None
+                
+                objective = nll
+                if penalty_val is not None:
+                    objective = objective + float(penalty_weight) * penalty_val
+                
+                # Check for NaN/Inf objective after successful computation
+                if torch.isnan(objective) or torch.isinf(objective):
                     nan_loss_counter += 1
                     if nan_loss_counter > 10:
-                        raise RuntimeError(f"Encountered more than 10 consecutive NaN/Inf losses at iteration {i+1}")
+                        raise RuntimeError(f"Encountered more than 10 consecutive NaN/Inf objectives at iteration {i+1}")
                     continue
                     
                 nan_loss_counter = 0
 
-                loss.backward()
+                objective.backward()
 
                 # Gradient clipping for stability
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
@@ -346,9 +369,10 @@ class MarginalGPyTorch(BaseModel):
                 )
 
                 if has_nan_grad:
-                    # Update best loss tracking (loss is still valid, just gradients are NaN)
-                    if loss.item() < best_loss - min_improvement:
-                        best_loss = loss.item()
+                    # Update best objective tracking (objective is still valid, just gradients are NaN)
+                    obj_item = float(objective.item())
+                    if obj_item < best_obj - min_improvement:
+                        best_obj = obj_item
                         patience_counter = 0
                     else:
                         patience_counter += 1
@@ -359,11 +383,11 @@ class MarginalGPyTorch(BaseModel):
                             param.grad = torch.nan_to_num(param.grad, nan=0.0, posinf=0.0, neginf=0.0)
                     optimizer_obj.step()
                     if scheduler_obj is not None:
-                        scheduler_obj.step(loss.item())
+                        scheduler_obj.step(obj_item)
 
                     # Early stopping logic (independent of scheduler)
-                    if loss.item() < best_loss - min_improvement:
-                        best_loss = loss.item()
+                    if obj_item < best_obj - min_improvement:
+                        best_obj = obj_item
                         patience_counter = 0
                     else:
                         patience_counter += 1
@@ -371,37 +395,42 @@ class MarginalGPyTorch(BaseModel):
                     current_lr = optimizer_obj.param_groups[0]['lr']
                     if early_stopping and patience_counter >= patience:
                         print(f"\nEarly stopping triggered after {i+1} iterations")
-                        print(f"Best loss: {best_loss:.6f}")
+                        print(f"Best objective: {best_obj:.6f}")
                         break
                     continue
 
                 optimizer_obj.step()
+                obj_item = float(objective.item())
                 if scheduler_obj is not None:
-                    scheduler_obj.step(loss.item())
+                    scheduler_obj.step(obj_item)
 
                 # Early stopping check
-                if loss.item() < best_loss - min_improvement:
-                    best_loss = loss.item()
+                if obj_item < best_obj - min_improvement:
+                    best_obj = obj_item
                     patience_counter = 0
                 else:
                     patience_counter += 1
 
                 # Update progress bar
                 current_lr = optimizer_obj.param_groups[0]['lr']
-                progress_info = f'loss={loss.item():.4f}, lr={current_lr:.1e}'
+                suffix = f'obj={obj_item:.4f}, lr={current_lr:.1e}'
+                if penalty_val is not None:
+                    try:
+                        suffix += f', pen={float(penalty_val.item()):.3e}'
+                    except Exception:
+                        pass
                 if nan_loss_counter > 0:
-                    nan_info = f' | NaN gradients: {nan_loss_counter}'
-                    progress_info += nan_info
-                pbar.set_postfix_str(progress_info)
+                    suffix += f' | NaN gradients: {nan_loss_counter}'
+                pbar.set_postfix_str(suffix)
 
                 if early_stopping and patience_counter >= patience:
                     print(f"\nEarly stopping triggered after {i+1} iterations")
-                    print(f"Best loss: {best_loss:.6f}")
+                    print(f"Best objective: {best_obj:.6f}")
                     break
 
         except KeyboardInterrupt:
             print(f"\nTraining interrupted at iteration {i+1}")
-            print(f"Best loss: {best_loss:.6f}")
+            print(f"Best objective: {best_obj:.6f}")
         finally:
             # Mark as fitted after any training iterations have completed
             self.is_fitted = True
