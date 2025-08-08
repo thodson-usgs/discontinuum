@@ -44,61 +44,127 @@ class MarginalGPyTorch(BaseModel):
     ):
         """ """
         super().__init__(model_config=model_config)
+        # --- Checkpointing state ---
+        self._resume_info = None  # holds checkpoint info to resume training
+        self._last_optimizer = None
+        self._last_scheduler = None
 
     @classmethod
-    def load(cls, ds: Dataset) -> MarginalGPyTorch:
-        """Load a MarginalGPyTorch model from an xarray Dataset."""
-        # Dispatch to concrete subclass if base class invoked
-        model_class_path = ds.attrs.get('model_class')
-        if model_class_path:
-            # If called on base class, redirect
-            full_name = f"{cls.__module__}.{cls.__name__}"
-            if model_class_path != full_name:
-                # dynamic import of subclass
-                import importlib
-                module_name, class_name = model_class_path.rsplit('.', 1)
-                submod = importlib.import_module(module_name)
-                subcls = getattr(submod, class_name)
-                return subcls.load(ds)
+    def load(
+        cls,
+        filepath: str,
+        covariates: Dataset,
+        target: Dataset,
+        target_unc: Optional[Dataset] = None,
+    ) -> 'MarginalGPyTorch':
+        """Load a model from a checkpoint file and initialize for resume.
 
-        # Extract training data using stored variable names
-        info = ds.attrs.get('model', {})
-        target = ds[ info['target'] ]
-        covariates = ds[ info['covariates'] ]
-        target_unc = ds[ info['target_unc'] ] if info.get('target_unc') else None
+        Parameters
+        ----------
+        filepath : str
+            Path to a checkpoint saved by save().
+        covariates : xarray.Dataset
+            Training covariates used to rebuild the data manager.
+        target : xarray.DataArray or Dataset
+            Training target used to rebuild the data manager.
+        target_unc : xarray.DataArray or Dataset, optional
+            Training uncertainty used to rebuild the data manager.
+        """
+        ckpt = torch.load(filepath, map_location='cpu')
 
-        # Instantiate and fit model structure
         model = cls()
-        model.fit(covariates=covariates, target=target, target_unc=target_unc, iterations=1)
+        # Setup data manager and tensors
+        model.dm.fit(target=target, covariates=covariates, target_unc=target_unc)
+        model.X = model.dm.X
+        model.y = model.dm.y
+        train_x = torch.tensor(model.X, dtype=torch.float32)
+        train_y = torch.tensor(model.y, dtype=torch.float32)
 
-        # Restore model parameters
-        state = info.get('state_dict')
-        if state is not None:
-            model.model.load_state_dict(state)
+        if target_unc is None:
+            model.model = model.build_model(train_x, train_y)
+        else:
+            model.y_unc = model.dm.y_unc
+            train_y_unc = torch.tensor(model.y_unc, dtype=torch.float32)
+            model.model = model.build_model(train_x, train_y, train_y_unc)
+
+        # Restore model/likelihood
+        model.model.load_state_dict(ckpt['model_state_dict'])
+        if 'likelihood_state_dict' in ckpt and ckpt['likelihood_state_dict'] is not None:
+            model.likelihood.load_state_dict(ckpt['likelihood_state_dict'])
+
+        # Store optimizer/scheduler info to apply in fit()
+        model._resume_info = {
+            'optimizer_state_dict': ckpt.get('optimizer_state_dict'),
+            'optimizer_name': ckpt.get('optimizer_name'),
+            'optimizer_lr': ckpt.get('optimizer_lr'),
+            'scheduler_state_dict': ckpt.get('scheduler_state_dict'),
+            'scheduler_name': ckpt.get('scheduler_name'),
+        }
+
+        # Mark as fitted (weights are loaded), but allow further training
         model.is_fitted = True
         return model
 
-    def save(self) -> Dataset:
-        """Save the model's training data and parameters to an xarray Dataset."""
-        # Save training data as xarray Dataset
-        datasets = [
-            self.dm.data.target.to_dataset(),
-            self.dm.data.covariates,
-            ]
-        if self.dm.data.target_unc is not None:
-            datasets.append(self.dm.data.target_unc)
+    def save(
+        self,
+        filepath: str,
+        optimizer_obj: Optional[torch.optim.Optimizer] = None,
+        scheduler: Optional[torch.optim.lr_scheduler._LRScheduler] = None,
+        extra: Optional[Dict] = None,
+    ) -> None:
+        """Save the model to a checkpoint file (weights + optimizer/scheduler).
 
-        ds = xr.merge(datasets)
+        Parameters
+        ----------
+        filepath : str
+            Path to save the checkpoint (.pt/.pth).
+        optimizer_obj : torch.optim.Optimizer, optional
+            Optimizer whose state will be saved. If None, uses the last one from fit().
+        scheduler : torch.optim.lr_scheduler, optional
+            LR scheduler whose state will be saved. If None, uses the last one from fit().
+        extra : dict, optional
+            Extra metadata to include in the checkpoint.
+        """
+        # Prefer last-used optimizer/scheduler if not provided explicitly
+        if optimizer_obj is None:
+            optimizer_obj = getattr(self, '_last_optimizer', None)
+        if scheduler is None:
+            scheduler = getattr(self, '_last_scheduler', None)
 
-        #ds.attrs['state_dict'] = self.model.state_dict()
-        ds.attrs["model"] = {
-            "state_dict": self.model.state_dict(),
-            "covariates": list(self.dm.data.covariates.data_vars.keys()),
-            "target": self.dm.data.target.name,
-            "target_unc": self.dm.data.target_unc.name if self.dm.data.target_unc is not None else None,
+        if not hasattr(self, 'model'):
+            raise RuntimeError('No model to save. Call fit() first.')
+        if not hasattr(self, 'likelihood'):
+            raise RuntimeError('No likelihood to save. Call fit() first.')
+
+        # Normalize optimizer name for easy restoration
+        opt_name = None
+        lr_val = None
+        if optimizer_obj is not None:
+            if isinstance(optimizer_obj, torch.optim.AdamW):
+                opt_name = 'adamw'
+            elif isinstance(optimizer_obj, torch.optim.Adam):
+                opt_name = 'adam'
+            else:
+                opt_name = optimizer_obj.__class__.__name__
+            # capture first param group LR as hint
+            try:
+                lr_val = optimizer_obj.param_groups[0].get('lr', None)
+            except Exception:
+                lr_val = None
+
+        ckpt = {
+            'model_class': f"{self.__class__.__module__}.{self.__class__.__name__}",
+            'model_state_dict': self.model.state_dict(),
+            'likelihood_state_dict': self.likelihood.state_dict(),
+            'optimizer_state_dict': optimizer_obj.state_dict() if optimizer_obj is not None else None,
+            'optimizer_name': opt_name,
+            'optimizer_lr': lr_val,
+            'scheduler_state_dict': scheduler.state_dict() if scheduler is not None else None,
+            'scheduler_name': scheduler.__class__.__name__ if scheduler is not None else None,
+            'model_config': getattr(self, 'model_config', None),
+            'extra': extra or {},
         }
-
-        return ds
+        torch.save(ckpt, filepath)
 
     def fit(
             self,
@@ -106,10 +172,11 @@ class MarginalGPyTorch(BaseModel):
             target: Dataset,
             target_unc: Dataset = None,
             iterations: int = 100,
-            optimizer: str = "adamw",
+            optimizer: Optional[str] = None,
             learning_rate: float = None,
             early_stopping: bool = False,
             patience: int = 60,
+            scheduler: bool = True,
             ):
         """Fit the model to data.
 
@@ -124,13 +191,17 @@ class MarginalGPyTorch(BaseModel):
         iterations : int, optional
             Number of iterations for optimization. The default is 100.
         optimizer : str, optional
-            Optimization method. Supported: "adam", "adamw". The default is "adamw".
+            Optimization method. Supported: "adam", "adamw". If None, uses the
+            optimizer stored in a loaded checkpoint, otherwise defaults to "adamw".
         learning_rate : float, optional
-            Learning rate for optimization. If None, uses adaptive defaults.
+            Learning rate for optimization. If None, uses the value from checkpoint
+            if available, otherwise a conservative default.
         early_stopping : bool, optional
             Whether to use early stopping. The default is False.
         patience : int, optional
             Number of iterations to wait without improvement before stopping. The default is 60.
+        scheduler : bool, optional
+            Whether to use a learning rate scheduler. The default is True.
         """
         # setup data manager (self.dm)
         self.dm.fit(target=target, covariates=covariates, target_unc=target_unc)
@@ -140,65 +211,109 @@ class MarginalGPyTorch(BaseModel):
         train_x = torch.tensor(self.X, dtype=torch.float32)
         train_y = torch.tensor(self.y, dtype=torch.float32)
 
-        if target_unc is None:
-            self.model = self.build_model(train_x, train_y)
-            # also sets self.likelihood
+        resuming = self._resume_info is not None and getattr(self, 'model', None) is not None and getattr(self, 'likelihood', None) is not None
+
+        if not resuming:
+            # fresh build
+            if target_unc is None:
+                self.model = self.build_model(train_x, train_y)
+                # also sets self.likelihood
+            else:
+                self.y_unc = self.dm.y_unc
+                train_y_unc = torch.tensor(self.y_unc, dtype=torch.float32)
+                self.model = self.build_model(train_x, train_y, train_y_unc)
         else:
-            self.y_unc = self.dm.y_unc
-            train_y_unc = torch.tensor(self.y_unc, dtype=torch.float32)
-            self.model = self.build_model(train_x, train_y, train_y_unc)
+            # Continue training with existing model/likelihood; update training data if needed
+            try:
+                self.model.set_train_data(inputs=train_x, targets=train_y, strict=False)
+            except Exception:
+                # If that fails (e.g., structure changed), rebuild
+                if target_unc is None:
+                    self.model = self.build_model(train_x, train_y)
+                else:
+                    self.y_unc = self.dm.y_unc
+                    train_y_unc = torch.tensor(self.y_unc, dtype=torch.float32)
+                    self.model = self.build_model(train_x, train_y, train_y_unc)
+                resuming = False  # cannot restore optimizer state safely
 
         self.model.train()
         self.likelihood.train()
 
         if learning_rate is None:
-            # More conservative starting LR
             learning_rate = 0.05
+
+        # If resuming, prefer saved optimizer settings when caller uses defaults
+        resume = self._resume_info or {}
+        opt_name_saved = resume.get('optimizer_name')
+        lr_saved = resume.get('optimizer_lr')
+        opt_choice = optimizer if optimizer is not None else (opt_name_saved or 'adamw')
+        lr_choice = learning_rate if learning_rate is not None else (lr_saved or 0.05)
         
-        if optimizer == "adamw":
+        if opt_choice == "adamw" or (opt_name_saved and opt_name_saved.lower() == 'adamw'):
             optimizer_obj = torch.optim.AdamW(
                 self.model.parameters(),
-                lr=learning_rate,
+                lr=lr_choice,
                 betas=(0.9, 0.999),
                 eps=1e-8,
-                weight_decay=1e-2      # Stronger regularization for AdamW
+                weight_decay=1e-2
             )
-        elif optimizer == "adam":
+        elif opt_choice == "adam" or (opt_name_saved and opt_name_saved.lower() == 'adam'):
             optimizer_obj = torch.optim.Adam(
                 self.model.parameters(),
-                lr=learning_rate,
+                lr=lr_choice,
                 betas=(0.9, 0.999),
                 eps=1e-8,
-                weight_decay=1e-4      # Lighter regularization for Adam
+                weight_decay=1e-4
             )
         else:
-            raise NotImplementedError(f"Only 'adam' and 'adamw' optimizers are supported. Got '{optimizer}'.")
+            optimizer_obj = torch.optim.AdamW(
+                self.model.parameters(),
+                lr=lr_choice,
+                betas=(0.9, 0.999),
+                eps=1e-8,
+                weight_decay=1e-2
+            )
 
-        # Use ReduceLROnPlateau for more stable learning rate adaptation
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer_obj,
-            mode='min',
-            factor=0.7,                      # Reduce LR more gradually (30% reduction)
-            patience=max(20, patience // 2), # Scheduler should be less patient than early stopping
-            threshold=1e-4,                  # Less sensitive threshold (0.01% improvement)
-            threshold_mode='rel',            # Use relative threshold
-            min_lr=1e-6
-        )
+        # Restore optimizer state if resuming and compatible
+        if resuming and resume.get('optimizer_state_dict') is not None:
+            try:
+                optimizer_obj.load_state_dict(resume['optimizer_state_dict'])
+            except Exception:
+                pass
+
+        if scheduler:
+            scheduler_obj = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer_obj,
+                mode='min',
+                factor=0.7,
+                patience=max(20, patience // 2),
+                threshold=1e-4,
+                threshold_mode='rel',
+                min_lr=1e-6,
+                cooldown=10,
+                verbose=True,
+            )
+            # Restore scheduler if resuming
+            if resuming and resume.get('scheduler_state_dict') is not None:
+                try:
+                    scheduler_obj.load_state_dict(resume['scheduler_state_dict'])
+                except Exception:
+                    pass
+        else:
+            scheduler_obj = None
 
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
         # Training loop with stability features
-        pbar = tqdm.tqdm(range(iterations), ncols=100)  # Wider progress bar
+        pbar = tqdm.tqdm(range(iterations), ncols=100)
         best_loss = float('inf')
         patience_counter = 0
-        min_improvement = 1e-6  # Minimum improvement to reset patience counter
+        min_improvement = 1e-6
         
-
         nan_loss_counter = 0
         try:
             for i in pbar:
-                # Clear gradients fully (set to None) to avoid persisting NaNs
                 optimizer_obj.zero_grad(set_to_none=True)
                 output = self.model(train_x)
                 
@@ -243,18 +358,17 @@ class MarginalGPyTorch(BaseModel):
                         if param.grad is not None:
                             param.grad = torch.nan_to_num(param.grad, nan=0.0, posinf=0.0, neginf=0.0)
                     optimizer_obj.step()
-                    # Update learning rate scheduler
-                    if early_stopping:
-                        scheduler.step(loss.item())
-                    # Early stopping logic
+                    if scheduler_obj is not None:
+                        scheduler_obj.step(loss.item())
+
+                    # Early stopping logic (independent of scheduler)
                     if loss.item() < best_loss - min_improvement:
                         best_loss = loss.item()
                         patience_counter = 0
                     else:
                         patience_counter += 1
-                    # Update progress bar with sanitized warning
+                    
                     current_lr = optimizer_obj.param_groups[0]['lr']
-                    # Break if needed
                     if early_stopping and patience_counter >= patience:
                         print(f"\nEarly stopping triggered after {i+1} iterations")
                         print(f"Best loss: {best_loss:.6f}")
@@ -262,10 +376,8 @@ class MarginalGPyTorch(BaseModel):
                     continue
 
                 optimizer_obj.step()
-
-                # Update learning rate scheduler
-                if early_stopping:
-                    scheduler.step(loss.item())
+                if scheduler_obj is not None:
+                    scheduler_obj.step(loss.item())
 
                 # Early stopping check
                 if loss.item() < best_loss - min_improvement:
@@ -293,6 +405,13 @@ class MarginalGPyTorch(BaseModel):
         finally:
             # Mark as fitted after any training iterations have completed
             self.is_fitted = True
+
+        # Optionally: keep last optimizer/scheduler for quick checkpointing by caller
+        self._last_optimizer = optimizer_obj
+        self._last_scheduler = scheduler_obj
+
+        # Return for chaining
+        return None
 
     @is_fitted
     def predict(self,
