@@ -194,7 +194,7 @@ class MarginalGPyTorch(BaseModel):
             Number of iterations for optimization. The default is 100.
         optimizer : str, optional
             Optimization method. Supported: "adam", "adamw". If None, uses the
-            optimizer stored in a loaded checkpoint, otherwise defaults to "adamw".
+            optimizer stored in a loaded checkpoint, otherwise defaults to "adam".
         learning_rate : float, optional
             Learning rate for optimization. If None, uses the value from checkpoint
             if available, otherwise a conservative default.
@@ -247,23 +247,20 @@ class MarginalGPyTorch(BaseModel):
         self.model.train()
         self.likelihood.train()
 
-        if learning_rate is None:
-            learning_rate = 0.05
-
         # If resuming, prefer saved optimizer settings when caller uses defaults
         resume = self._resume_info or {}
         opt_name_saved = resume.get('optimizer_name')
         lr_saved = resume.get('optimizer_lr')
-        opt_choice = optimizer if optimizer is not None else (opt_name_saved or 'adamw')
+        opt_choice = optimizer if optimizer is not None else (opt_name_saved or 'adam')
         lr_choice = learning_rate if learning_rate is not None else (lr_saved or 0.05)
-        
+
         if opt_choice == "adamw" or (opt_name_saved and opt_name_saved.lower() == 'adamw'):
             optimizer_obj = torch.optim.AdamW(
                 self.model.parameters(),
                 lr=lr_choice,
                 betas=(0.9, 0.999),
                 eps=1e-8,
-                weight_decay=1e-2
+                weight_decay=1e-2,
             )
         elif opt_choice == "adam" or (opt_name_saved and opt_name_saved.lower() == 'adam'):
             optimizer_obj = torch.optim.Adam(
@@ -271,15 +268,11 @@ class MarginalGPyTorch(BaseModel):
                 lr=lr_choice,
                 betas=(0.9, 0.999),
                 eps=1e-8,
-                weight_decay=1e-4
+                weight_decay=1e-4,
             )
         else:
-            optimizer_obj = torch.optim.AdamW(
-                self.model.parameters(),
-                lr=lr_choice,
-                betas=(0.9, 0.999),
-                eps=1e-8,
-                weight_decay=1e-2
+            raise ValueError(
+                f"Unsupported optimizer: {opt_choice!r}. Supported optimizers are 'adam' and 'adamw'."
             )
 
         # Restore optimizer state if resuming and compatible
