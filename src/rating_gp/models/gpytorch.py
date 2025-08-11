@@ -111,7 +111,8 @@ class RatingGPMarginalGPyTorch(
         """
         Override fit to inject a monotonicity penalty on the rating curve.
 
-        monotonic_penalty_weight: strength of penalty on negative dQ/dStage
+        monotonic_penalty_weight: strength of penalty on negative dQ/dStage.
+          1.0 works well in practice.
         grid_size: number of random points to sample over time-stage grid
         monotonic_penalty_interval: compute the penalty every k iterations (k>=1).
           When k>1, the penalty is applied every k-th iteration and scaled by k
