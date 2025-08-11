@@ -310,14 +310,14 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 active_dims=self.stage_dim,
                 lengthscale_prior=GammaPrior(concentration=1, rate=1),
                 # 2,1 was great
-                nu=2.5,
+                nu=1.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
                 # extreme prior for fast shift at 12413470
                 #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
                 lengthscale_prior=time_prior,
-                nu=2.5,
+                nu=1.5,
             ),
             outputscale_prior=eta_prior,
         )
