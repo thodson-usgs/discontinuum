@@ -292,7 +292,6 @@ class MarginalGPyTorch(BaseModel):
                 threshold_mode='rel',
                 min_lr=1e-6,
                 cooldown=10,
-                verbose=True,
             )
             # Restore scheduler if resuming
             if resuming and resume.get('scheduler_state_dict') is not None:
