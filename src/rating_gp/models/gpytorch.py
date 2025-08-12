@@ -3,6 +3,26 @@ import numpy as np
 import torch
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
+# --- Custom kernel for log warping a single input dimension ---
+class LogWarpKernel(gpytorch.kernels.Kernel):
+    """
+    Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).
+    """
+    def __init__(self, base_kernel, dim, eps=1e-6):
+        super().__init__()
+        self.base_kernel = base_kernel
+        self.dim = dim
+        self.eps = eps
+
+    def forward(self, x1, x2=None, **params):
+        x1_ = x1.clone()
+        x1_[:, self.dim] = torch.log(x1_[:, self.dim] + self.eps)
+        if x2 is not None:
+            x2_ = x2.clone()
+            x2_[:, self.dim] = torch.log(x2_[:, self.dim] + self.eps)
+        else:
+            x2_ = None
+        return self.base_kernel(x1_, x2_, **params)
 
 # --- Custom kernel for warping input with PowerLawTransform ---
 class PowerLawWarpKernel(gpytorch.kernels.Kernel):
@@ -158,9 +178,10 @@ class RatingGPMarginalGPyTorch(
             # Uniform for time
             u_time = torch.rand((grid_size,), dtype=torch.float32, device=device)
             time_grid = u_time * (x_max[time_dim] - x_min[time_dim]) + x_min[time_dim]
-            # Log-uniform for stage
-            log_xmin = float(np.log(x_min[stage_dim]))
-            log_xmax = float(np.log(x_max[stage_dim]))
+            # Log-uniform for stage, add epsilon to avoid log(0)
+            eps = 1e-6
+            log_xmin = float(np.log(x_min[stage_dim] + eps))
+            log_xmax = float(np.log(x_max[stage_dim] + eps))
             u_stage = torch.rand((grid_size,), dtype=torch.float32, device=device)
             log_stage_grid = u_stage * (log_xmax - log_xmin) + log_xmin
             # Only the stage dimension requires gradients
@@ -168,25 +189,22 @@ class RatingGPMarginalGPyTorch(
             # Stack into grid
             x_grid = torch.stack([time_grid, stage_grid], dim=1)
 
-            # Temporarily switch to eval mode to use predictive mean; remember mode
             was_model_training = self.model.training
+            was_likelihood_training = self.likelihood.training
             self.model.eval()
+            self.likelihood.eval()
             try:
                 with gpytorch.settings.fast_pred_var():
-                    # Use the model's latent posterior mean directly (skip likelihood wrapper)
-                    mean = self.model(x_grid).mean
+                    mean = self.likelihood(self.model(x_grid)).mean
             finally:
                 if was_model_training:
                     self.model.train()
+                if was_likelihood_training:
+                    self.likelihood.train()
 
-            # Compute gradient of mean w.r.t. stage coordinate only
             d_mean_d_stage = torch.autograd.grad(mean.sum(), stage_grid, create_graph=True)[0]
-
-            # Penalize negative slopes: relu on negative part (-min(grad, 0))
             neg = torch.clamp(-d_mean_d_stage, min=0.0)
             pen = neg.mean()
-
-            # If computing less frequently, scale to preserve expected magnitude
             if monotonic_penalty_interval > 1:
                 pen = pen * float(monotonic_penalty_interval)
             return pen
@@ -238,11 +256,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
  
-        # Compose the upper kernel branch and wrap in PowerLawWarpKernel
+        # Compose the upper kernel branch and wrap in LogWarpKernel
         upper_kernel = (
             self.cov_base(eta_prior=HalfNormalPrior(scale=1.0))
             + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
-            + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.2))
+            + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.6))
         )
         upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
 
@@ -308,9 +326,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=1, rate=1),
-                # 2,1 was great
-                nu=1.5,
+                lengthscale_prior=GammaPrior(concentration=3, rate=2),
+                nu=2.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
