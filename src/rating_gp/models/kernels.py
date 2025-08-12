@@ -281,18 +281,14 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         #     name='raw_a',
         #     parameter=self.a)
         
+        # initialize raw_b parameter such that b starts within [l, u]
         u = b_constraint.upper_bound
         l = b_constraint.lower_bound
-        self.b = torch.nn.Parameter(
-            l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
-            #0.5 - torch.rand(*self.batch_shape, 1, 1)
-        )
-
+        init_b = l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
+        # register raw_b parameter
         self.register_parameter(
             name='raw_b',
-            # the changepoint is in log-standardized q, so initialize with randn
-            # set the b as a rand in the rand 
-            parameter=self.b
+            parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1)))
         )
 
         b_prior = gpytorch.priors.NormalPrior(0, 1)
@@ -309,6 +305,8 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         # self.register_constraint("raw_a", a_constraint)
         if b_constraint is not None:
             self.register_constraint("raw_b", b_constraint)
+        # set initial value using inverse transform of the constraint
+        self.initialize(raw_b=self.raw_b_constraint.inverse_transform(init_b))
 
         # set the parameter prior
         # if a_prior is not None:
@@ -369,10 +367,19 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 
 # Inverted sigmoid kernel as a proper GPyTorch kernel
 class InvertedSigmoidKernel(SigmoidKernel):
+    @property
+    def a(self):
+        return self.sigmoid_kernel.a
+
+    @a.setter
+    def a(self, value):
+        self.sigmoid_kernel.a = value
     def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
-        # Initialize without its own raw_b; will share b parameter via sigmoid_kernel
-        super().__init__(active_dims=active_dims, b_constraint=b_constraint)
+        # Properly initialize as a Kernel without registering a separate raw_b
+        gpytorch.kernels.Kernel.__init__(self)
         self.sigmoid_kernel = sigmoid_kernel
+        if active_dims is not None:
+            self.register_buffer('active_dims', torch.tensor(active_dims, dtype=torch.long))
 
     # @property
     # def a(self):

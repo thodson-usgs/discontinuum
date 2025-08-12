@@ -3,6 +3,26 @@ import numpy as np
 import torch
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
+# --- Custom kernel for log warping a single input dimension ---
+class LogWarpKernel(gpytorch.kernels.Kernel):
+    """
+    Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).
+    """
+    def __init__(self, base_kernel, dim, eps=1e-6):
+        super().__init__()
+        self.base_kernel = base_kernel
+        self.dim = dim
+        self.eps = eps
+
+    def forward(self, x1, x2=None, **params):
+        x1_ = x1.clone()
+        x1_[:, self.dim] = torch.log(x1_[:, self.dim] + self.eps)
+        if x2 is not None:
+            x2_ = x2.clone()
+            x2_[:, self.dim] = torch.log(x2_[:, self.dim] + self.eps)
+        else:
+            x2_ = None
+        return self.base_kernel(x1_, x2_, **params)
 
 # --- Custom kernel for warping input with PowerLawTransform ---
 class PowerLawWarpKernel(gpytorch.kernels.Kernel):
@@ -77,7 +97,8 @@ class RatingGPMarginalGPyTorch(
             model_config: ModelConfig = ModelConfig(),
     ):
         """ """
-        super(MarginalGPyTorch, self).__init__(model_config=model_config)
+        # Ensure MarginalGPyTorch.__init__ executes to set checkpoint fields
+        super().__init__(model_config=model_config)
         self.build_datamanager(model_config)
         
 
@@ -102,6 +123,105 @@ class RatingGPMarginalGPyTorch(
         model = ExactGPModel(X, y, self.likelihood)
 
         return model
+
+    def fit(self, covariates, target, target_unc=None, iterations=100, optimizer=None,
+            learning_rate=None, early_stopping=False, patience=60, scheduler=True,
+            monotonic_penalty_weight: float = 0.0, grid_size: int = 64,
+            monotonic_penalty_interval: int = 1):
+        """
+        Override fit to inject a monotonicity penalty on the rating curve.
+
+        monotonic_penalty_weight: strength of penalty on negative dQ/dStage.
+          1.0 works well in practice.
+        grid_size: number of random points to sample over time-stage grid
+        monotonic_penalty_interval: compute the penalty every k iterations (k>=1).
+          When k>1, the penalty is applied every k-th iteration and scaled by k
+          to maintain the same expected regularization strength, reducing compute.
+        """
+        # If no penalty, just call base implementation
+        if monotonic_penalty_weight <= 0:
+            return super().fit(
+                covariates=covariates,
+                target=target,
+                target_unc=target_unc,
+                iterations=iterations,
+                optimizer=optimizer,
+                learning_rate=learning_rate,
+                early_stopping=early_stopping,
+                patience=patience,
+                scheduler=scheduler,
+                penalty_callback=None,
+                penalty_weight=0.0,
+            )
+
+        # Simple counter to optionally skip penalty some iterations for speed
+        step = {"i": 0}
+
+        # Define penalty callback that depends on current model params
+        def penalty_callback():
+            # Optionally skip penalty to save compute
+            step["i"] += 1
+            if monotonic_penalty_interval > 1 and (step["i"] % monotonic_penalty_interval) != 0:
+                # Return a 0 scalar on the correct device (no gradient contribution this step)
+                dev = next(self.model.parameters()).device
+                return torch.zeros((), device=dev)
+
+            # Sample a random grid in transformed model space
+            # time is uniform, stage is log-uniform (denser at low values)
+            time_dim = 0
+            stage_dim = 1
+
+            X_np = self.dm.X  # training transformed inputs
+            x_min = X_np.min(axis=0)
+            x_max = X_np.max(axis=0)
+            device = next(self.model.parameters()).device
+            # Uniform for time
+            u_time = torch.rand((grid_size,), dtype=torch.float32, device=device)
+            time_grid = u_time * (x_max[time_dim] - x_min[time_dim]) + x_min[time_dim]
+            # Log-uniform for stage, add epsilon to avoid log(0)
+            eps = 1e-6
+            log_xmin = float(np.log(x_min[stage_dim] + eps))
+            log_xmax = float(np.log(x_max[stage_dim] + eps))
+            u_stage = torch.rand((grid_size,), dtype=torch.float32, device=device)
+            log_stage_grid = u_stage * (log_xmax - log_xmin) + log_xmin
+            # Only the stage dimension requires gradients
+            stage_grid = torch.exp(log_stage_grid).requires_grad_(True)
+            # Stack into grid
+            x_grid = torch.stack([time_grid, stage_grid], dim=1)
+
+            was_model_training = self.model.training
+            was_likelihood_training = self.likelihood.training
+            self.model.eval()
+            self.likelihood.eval()
+            try:
+                with gpytorch.settings.fast_pred_var():
+                    mean = self.likelihood(self.model(x_grid)).mean
+            finally:
+                if was_model_training:
+                    self.model.train()
+                if was_likelihood_training:
+                    self.likelihood.train()
+
+            d_mean_d_stage = torch.autograd.grad(mean.sum(), stage_grid, create_graph=True)[0]
+            neg = torch.clamp(-d_mean_d_stage, min=0.0)
+            pen = neg.mean()
+            if monotonic_penalty_interval > 1:
+                pen = pen * float(monotonic_penalty_interval)
+            return pen
+
+        return super().fit(
+            covariates=covariates,
+            target=target,
+            target_unc=target_unc,
+            iterations=iterations,
+            optimizer=optimizer,
+            learning_rate=learning_rate,
+            early_stopping=early_stopping,
+            patience=patience,
+            scheduler=scheduler,
+            penalty_callback=penalty_callback,
+            penalty_weight=float(monotonic_penalty_weight),
+        )
 
 
 class ExactGPModel(gpytorch.models.ExactGP):
@@ -136,11 +256,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
  
-        # Compose the upper kernel branch and wrap in PowerLawWarpKernel
+        # Compose the upper kernel branch and wrap in LogWarpKernel
         upper_kernel = (
             self.cov_base(eta_prior=HalfNormalPrior(scale=1.0))
             + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
-            + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.2))
+            + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.6))
         )
         upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
 
@@ -206,8 +326,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=1, rate=1),
-                # 2,1 was great
+                lengthscale_prior=GammaPrior(concentration=3, rate=2),
                 nu=2.5,
             ) *
             MaternKernel(
@@ -215,7 +334,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 # extreme prior for fast shift at 12413470
                 #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
                 lengthscale_prior=time_prior,
-                nu=2.5,
+                nu=1.5,
             ),
             outputscale_prior=eta_prior,
         )

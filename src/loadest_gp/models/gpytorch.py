@@ -36,7 +36,8 @@ class LoadestGPMarginalGPyTorch(
             model_config: ModelConfig = ModelConfig(),
     ):
         """ """
-        super(MarginalGPyTorch, self).__init__(model_config=model_config)
+        # Ensure MarginalGPyTorch.__init__ executes to set checkpoint fields
+        super().__init__(model_config=model_config)
         self.build_datamanager(model_config)
 
     def build_model(self, X, y) -> gpytorch.models.ExactGP:
