@@ -14,6 +14,8 @@ from xarray import DataArray, Dataset
 from discontinuum.engines.base import BaseModel, is_fitted
 
 if TYPE_CHECKING:
+    from os import PathLike
+    from typing import IO, Union
     from numpy.typing import ArrayLike
     from typing import Dict, Optional, Tuple, Callable
     from xarray import Dataset
@@ -52,7 +54,7 @@ class MarginalGPyTorch(BaseModel):
     @classmethod
     def load(
         cls,
-        filepath: str,
+        f: Union[str, PathLike[str], IO[bytes]],
         covariates: Dataset,
         target: Dataset,
         target_unc: Optional[Dataset] = None,
@@ -70,7 +72,7 @@ class MarginalGPyTorch(BaseModel):
         target_unc : xarray.DataArray or Dataset, optional
             Training uncertainty used to rebuild the data manager.
         """
-        ckpt = torch.load(filepath, map_location='cpu')
+        ckpt = torch.load(f, map_location='cpu')
 
         model = cls()
         # Setup data manager and tensors
@@ -107,7 +109,7 @@ class MarginalGPyTorch(BaseModel):
 
     def save(
         self,
-        filepath: str,
+        f: Union[str, PathLike[str], IO[bytes]],
         optimizer_obj: Optional[torch.optim.Optimizer] = None,
         scheduler: Optional[torch.optim.lr_scheduler._LRScheduler] = None,
         extra: Optional[Dict] = None,
@@ -164,7 +166,7 @@ class MarginalGPyTorch(BaseModel):
             'model_config': getattr(self, 'model_config', None),
             'extra': extra or {},
         }
-        torch.save(ckpt, filepath)
+        torch.save(ckpt, f)
 
     def fit(
             self,
