@@ -70,7 +70,9 @@ class PowerLawTransform(torch.nn.Module):
     def __init__(self):
         super(PowerLawTransform, self).__init__()
         self.a = torch.nn.Parameter(torch.randn(1))
-        self.b = torch.nn.Parameter(torch.randn(1))
+        # initialize b according to Manning's equation (refer to clamp)
+        # Use proper parameter initialization to maintain gradient flow
+        self.b = torch.nn.Parameter(torch.randn(1) + 1.3)
         # stage is scaled to 1-2, so initialize c to 0-1
         self.c = torch.nn.Parameter(torch.rand(1))
 
@@ -258,11 +260,13 @@ class ExactGPModel(gpytorch.models.ExactGP):
  
         # Compose the upper kernel branch and wrap in LogWarpKernel
         upper_kernel = (
-            self.cov_base(eta_prior=HalfNormalPrior(scale=1.0))
+            self.cov_base(eta_prior=HalfNormalPrior(scale=2.0))
             + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
             + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.6))
         )
-        upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
+        
+        # upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
+        upper_kernel_warped = LogWarpKernel(upper_kernel, self.stage_dim[0])
 
         self.covar_module = (
             sigmoid_lower * (
@@ -282,8 +286,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         #q = self.powerlaw(x[:, self.stage_dim])
         #x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
         x_t = x.clone()
-        x_t[:, self.stage_dim] = self.powerlaw(x_t[:, self.stage_dim])
-        q = x_t[:, self.stage_dim]
+        x_t[:, self.stage_dim[0]] = self.powerlaw(x_t[:, self.stage_dim[0]])
+        q = x_t[:, self.stage_dim[0]]
         mean_x = self.mean_module(q)
 
         #covar_x = self.covar_module(x_t)
