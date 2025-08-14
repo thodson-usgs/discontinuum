@@ -3,48 +3,6 @@ import numpy as np
 import torch
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
-# --- Custom kernel for log warping a single input dimension ---
-class LogWarpKernel(gpytorch.kernels.Kernel):
-    """
-    Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).
-    """
-    def __init__(self, base_kernel, dim, eps=1e-6):
-        super().__init__()
-        self.base_kernel = base_kernel
-        self.dim = dim
-        self.eps = eps
-
-    def forward(self, x1, x2=None, **params):
-        x1_ = x1.clone()
-        x1_[:, self.dim] = torch.log(x1_[:, self.dim] + self.eps)
-        if x2 is not None:
-            x2_ = x2.clone()
-            x2_[:, self.dim] = torch.log(x2_[:, self.dim] + self.eps)
-        else:
-            x2_ = None
-        return self.base_kernel(x1_, x2_, **params)
-
-# --- Custom kernel for warping input with PowerLawTransform ---
-class PowerLawWarpKernel(gpytorch.kernels.Kernel):
-    """
-    Wraps a base kernel and applies a PowerLawTransform to the stage input.
-    """
-    def __init__(self, base_kernel, powerlaw_transform, stage_dim):
-        super().__init__()
-        self.base_kernel = base_kernel
-        self.powerlaw_transform = powerlaw_transform
-        self.stage_dim = stage_dim
-
-    def forward(self, x1, x2=None, **params):
-        x1_ = x1.clone()
-        x1_[:, self.stage_dim] = self.powerlaw_transform(x1_[:, self.stage_dim])
-        if x2 is not None:
-            x2_ = x2.clone()
-            x2_[:, self.stage_dim] = self.powerlaw_transform(x2_[:, self.stage_dim])
-        else:
-            x2_ = None
-        return self.base_kernel(x1_, x2_, **params)
-
 
 from gpytorch.kernels import (
     MaternKernel,
@@ -61,7 +19,11 @@ from gpytorch.priors import (
 
 from rating_gp.models.base import RatingDataMixin, ModelConfig
 from rating_gp.plot import RatingPlotMixin
-from rating_gp.models.kernels import SigmoidKernel, InvertedSigmoidKernel
+from rating_gp.models.kernels import (
+    SigmoidKernel,
+    InvertedSigmoidKernel,
+    LogWarpKernel,
+)
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -268,15 +230,17 @@ class ExactGPModel(gpytorch.models.ExactGP):
         # upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
         upper_kernel_warped = LogWarpKernel(upper_kernel, self.stage_dim[0])
 
-        self.covar_module = (
-            sigmoid_lower * (
-                self.cov_shift(
-                    eta_prior=HalfNormalPrior(scale=2.0),
-                    #eta_prior=HalfNormalPrior(scale=2.0),
-                    time_prior=GammaPrior(concentration=1, rate=7),
-                )
+        lower_kernel = (
+            self.cov_shift(
+                eta_prior=HalfNormalPrior(scale=2.0),
+                time_prior=GammaPrior(concentration=1, rate=7),
             )
-            + sigmoid_upper * upper_kernel_warped
+        )
+
+        self.covar_module = (
+            sigmoid_lower * lower_kernel
+            +
+            sigmoid_upper * upper_kernel_warped
         )
 
 
@@ -405,3 +369,4 @@ class ExactGPModel(gpytorch.models.ExactGP):
             ),
             outputscale_prior=eta,
         )
+    

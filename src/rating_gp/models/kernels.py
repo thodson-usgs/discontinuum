@@ -1,6 +1,8 @@
 import gpytorch
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 from linear_operator.operators import MatmulLinearOperator, to_dense
 
@@ -367,6 +369,13 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 
 # Inverted sigmoid kernel as a proper GPyTorch kernel
 class InvertedSigmoidKernel(SigmoidKernel):
+    def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
+        # Properly initialize as a Kernel without registering a separate raw_b
+        gpytorch.kernels.Kernel.__init__(self)
+        self.sigmoid_kernel = sigmoid_kernel
+        if active_dims is not None:
+            self.register_buffer('active_dims', torch.tensor(active_dims, dtype=torch.long))
+
     @property
     def a(self):
         return self.sigmoid_kernel.a
@@ -374,12 +383,6 @@ class InvertedSigmoidKernel(SigmoidKernel):
     @a.setter
     def a(self, value):
         self.sigmoid_kernel.a = value
-    def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
-        # Properly initialize as a Kernel without registering a separate raw_b
-        gpytorch.kernels.Kernel.__init__(self)
-        self.sigmoid_kernel = sigmoid_kernel
-        if active_dims is not None:
-            self.register_buffer('active_dims', torch.tensor(active_dims, dtype=torch.long))
 
     # @property
     # def a(self):
@@ -412,3 +415,45 @@ class InvertedSigmoidKernel(SigmoidKernel):
             return prod.diagonal(dim1=-1, dim2=-2)
         else:
             return prod
+
+
+class LogWarpKernel(gpytorch.kernels.Kernel):
+    """
+    Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).
+    """
+    def __init__(self, base_kernel, dim, eps=1e-6):
+        super().__init__()
+        self.base_kernel = base_kernel
+        self.dim = dim
+        self.eps = eps
+
+    def forward(self, x1, x2=None, **params):
+        x1_ = x1.clone()
+        x1_[:, self.dim] = torch.log(x1_[:, self.dim] + self.eps)
+        if x2 is not None:
+            x2_ = x2.clone()
+            x2_[:, self.dim] = torch.log(x2_[:, self.dim] + self.eps)
+        else:
+            x2_ = None
+        return self.base_kernel(x1_, x2_, **params)
+
+
+class PowerLawWarpKernel(gpytorch.kernels.Kernel):
+    """
+    Wraps a base kernel and applies a PowerLawTransform to the stage input.
+    """
+    def __init__(self, base_kernel, powerlaw_transform, stage_dim):
+        super().__init__()
+        self.base_kernel = base_kernel
+        self.powerlaw_transform = powerlaw_transform
+        self.stage_dim = stage_dim
+
+    def forward(self, x1, x2=None, **params):
+        x1_ = x1.clone()
+        x1_[:, self.stage_dim] = self.powerlaw_transform(x1_[:, self.stage_dim])
+        if x2 is not None:
+            x2_ = x2.clone()
+            x2_[:, self.stage_dim] = self.powerlaw_transform(x2_[:, self.stage_dim])
+        else:
+            x2_ = None
+        return self.base_kernel(x1_, x2_, **params)
