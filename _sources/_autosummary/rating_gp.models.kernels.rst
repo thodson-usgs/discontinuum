@@ -10,7 +10,9 @@ rating\_gp.models.kernels
    
       InvertedSigmoidKernel
       LogWarp
+      LogWarpKernel
       PowerLawKernel
+      PowerLawWarpKernel
       SigmoidKernel
       StageTimeKernel
       TanhWarp

@@ -9,8 +9,6 @@ rating\_gp.models.gpytorch
    .. autosummary::
    
       ExactGPModel
-      LogWarpKernel
       PowerLawTransform
-      PowerLawWarpKernel
       RatingGPMarginalGPyTorch
    

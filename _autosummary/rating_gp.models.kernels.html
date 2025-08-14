@@ -365,8 +365,16 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarp.forward"><code class="docutils literal notranslate"><span class="pre">LogWarp.forward()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarpKernel"><code class="docutils literal notranslate"><span class="pre">LogWarpKernel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarpKernel.forward"><code class="docutils literal notranslate"><span class="pre">LogWarpKernel.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawKernel"><code class="docutils literal notranslate"><span class="pre">PowerLawKernel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawKernel.forward"><code class="docutils literal notranslate"><span class="pre">PowerLawKernel.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawWarpKernel"><code class="docutils literal notranslate"><span class="pre">PowerLawWarpKernel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawWarpKernel.forward"><code class="docutils literal notranslate"><span class="pre">PowerLawWarpKernel.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.SigmoidKernel"><code class="docutils literal notranslate"><span class="pre">SigmoidKernel</span></code></a><ul class="nav section-nav flex-column">
@@ -403,8 +411,14 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.LogWarp" title="rating_gp.models.kernels.LogWarp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogWarp</span></code></a>()</p></td>
 <td><p>Logarithmic Warp</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.PowerLawKernel" title="rating_gp.models.kernels.PowerLawKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLawKernel</span></code></a>([a_prior, a_constraint, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.LogWarpKernel" title="rating_gp.models.kernels.LogWarpKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogWarpKernel</span></code></a>(base_kernel, dim[, eps])</p></td>
+<td><p>Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.PowerLawKernel" title="rating_gp.models.kernels.PowerLawKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLawKernel</span></code></a>([a_prior, a_constraint, ...])</p></td>
 <td><p>Power Law Kernel</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rating_gp.models.kernels.PowerLawWarpKernel" title="rating_gp.models.kernels.PowerLawWarpKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PowerLawWarpKernel</span></code></a>(base_kernel, ...)</p></td>
+<td><p>Wraps a base kernel and applies a PowerLawTransform to the stage input.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rating_gp.models.kernels.SigmoidKernel" title="rating_gp.models.kernels.SigmoidKernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SigmoidKernel</span></code></a>(b_constraint[, b_prior])</p></td>
 <td><p>Sigmoid Kernel</p></td>
@@ -481,6 +495,42 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.LogWarpKernel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">LogWarpKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.LogWarpKernel" title="Link to this definition">#</a></dt>
+<dd><p>Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.LogWarpKernel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.LogWarpKernel.forward" title="Link to this definition">#</a></dt>
+<dd><p>Computes the covariance between <span class="math notranslate nohighlight">\(\mathbf x_1\)</span> and <span class="math notranslate nohighlight">\(\mathbf x_2\)</span>.
+This method should be implemented by all Kernel subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x1</strong> – First set of data (… x N x D).</p></li>
+<li><p><strong>x2</strong> – Second set of data (… x M x D).</p></li>
+<li><p><strong>diag</strong> – Should the Kernel compute the whole kernel, or just the diag?
+If True, it must be the case that <cite>x1 == x2</cite>. (Default: False.)</p></li>
+<li><p><strong>last_dim_is_batch</strong> – If True, treat the last dimension
+of <cite>x1</cite> and <cite>x2</cite> as another batch dimension.
+(Useful for additive structure over the dimensions). (Default: False.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>The kernel matrix or vector. The shape depends on the kernel’s evaluation mode:</p>
+<ul class="simple">
+<li><p><cite>full_covar</cite>: <cite>… x N x M</cite></p></li>
+<li><p><cite>full_covar</cite> with <cite>last_dim_is_batch=True</cite>: <cite>… x K x N x M</cite></p></li>
+<li><p><cite>diag</cite>: <cite>… x N</cite></p></li>
+<li><p><cite>diag</cite> with <cite>last_dim_is_batch=True</cite>: <cite>… x K x N</cite></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="rating_gp.models.kernels.PowerLawKernel">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">PowerLawKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Positive()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Positive()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.PowerLawKernel" title="Link to this definition">#</a></dt>
 <dd><p>Power Law Kernel</p>
@@ -492,6 +542,42 @@ The power law equation is given by:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="rating_gp.models.kernels.PowerLawKernel.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.PowerLawKernel.forward" title="Link to this definition">#</a></dt>
+<dd><p>Computes the covariance between <span class="math notranslate nohighlight">\(\mathbf x_1\)</span> and <span class="math notranslate nohighlight">\(\mathbf x_2\)</span>.
+This method should be implemented by all Kernel subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x1</strong> – First set of data (… x N x D).</p></li>
+<li><p><strong>x2</strong> – Second set of data (… x M x D).</p></li>
+<li><p><strong>diag</strong> – Should the Kernel compute the whole kernel, or just the diag?
+If True, it must be the case that <cite>x1 == x2</cite>. (Default: False.)</p></li>
+<li><p><strong>last_dim_is_batch</strong> – If True, treat the last dimension
+of <cite>x1</cite> and <cite>x2</cite> as another batch dimension.
+(Useful for additive structure over the dimensions). (Default: False.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>The kernel matrix or vector. The shape depends on the kernel’s evaluation mode:</p>
+<ul class="simple">
+<li><p><cite>full_covar</cite>: <cite>… x N x M</cite></p></li>
+<li><p><cite>full_covar</cite> with <cite>last_dim_is_batch=True</cite>: <cite>… x K x N x M</cite></p></li>
+<li><p><cite>diag</cite>: <cite>… x N</cite></p></li>
+<li><p><cite>diag</cite> with <cite>last_dim_is_batch=True</cite>: <cite>… x K x N</cite></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.PowerLawWarpKernel">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.models.kernels.</span></span><span class="sig-name descname"><span class="pre">PowerLawWarpKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powerlaw_transform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage_dim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.PowerLawWarpKernel" title="Link to this definition">#</a></dt>
+<dd><p>Wraps a base kernel and applies a PowerLawTransform to the stage input.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rating_gp.models.kernels.PowerLawWarpKernel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rating_gp.models.kernels.PowerLawWarpKernel.forward" title="Link to this definition">#</a></dt>
 <dd><p>Computes the covariance between <span class="math notranslate nohighlight">\(\mathbf x_1\)</span> and <span class="math notranslate nohighlight">\(\mathbf x_2\)</span>.
 This method should be implemented by all Kernel subclasses.</p>
 <dl class="field-list simple">
@@ -675,8 +761,16 @@ registered hooks while the latter silently ignores them.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarp.forward"><code class="docutils literal notranslate"><span class="pre">LogWarp.forward()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarpKernel"><code class="docutils literal notranslate"><span class="pre">LogWarpKernel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.LogWarpKernel.forward"><code class="docutils literal notranslate"><span class="pre">LogWarpKernel.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawKernel"><code class="docutils literal notranslate"><span class="pre">PowerLawKernel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawKernel.forward"><code class="docutils literal notranslate"><span class="pre">PowerLawKernel.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawWarpKernel"><code class="docutils literal notranslate"><span class="pre">PowerLawWarpKernel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.PowerLawWarpKernel.forward"><code class="docutils literal notranslate"><span class="pre">PowerLawWarpKernel.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rating_gp.models.kernels.SigmoidKernel"><code class="docutils literal notranslate"><span class="pre">SigmoidKernel</span></code></a><ul class="nav section-nav flex-column">
