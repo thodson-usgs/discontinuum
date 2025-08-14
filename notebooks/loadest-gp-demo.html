@@ -427,523 +427,106 @@ However, LOADEST has several serious limitations, and it has been all but replac
   warnings.warn(
 </pre></div>
 </div>
-<div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
-<defs>
-<symbol id="icon-database" viewBox="0 0 32 32">
-<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
-<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-</symbol>
-<symbol id="icon-file-text2" viewBox="0 0 32 32">
-<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
-<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
-</symbol>
-</defs>
-</svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">KeyError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
+<span class="nn">File /opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/pandas/core/indexes/base.py:3812,</span> in <span class="ni">Index.get_loc</span><span class="nt">(self, key)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3811</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">3812</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">casted_key</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3813</span> <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
 
-:root {
-  --xr-font-color0: var(
-    --jp-content-font-color0,
-    var(--pst-color-text-base rgba(0, 0, 0, 1))
-  );
-  --xr-font-color2: var(
-    --jp-content-font-color2,
-    var(--pst-color-text-base, rgba(0, 0, 0, 0.54))
-  );
-  --xr-font-color3: var(
-    --jp-content-font-color3,
-    var(--pst-color-text-base, rgba(0, 0, 0, 0.38))
-  );
-  --xr-border-color: var(
-    --jp-border-color2,
-    hsl(from var(--pst-color-on-background, white) h s calc(l - 10))
-  );
-  --xr-disabled-color: var(
-    --jp-layout-color3,
-    hsl(from var(--pst-color-on-background, white) h s calc(l - 40))
-  );
-  --xr-background-color: var(
-    --jp-layout-color0,
-    var(--pst-color-on-background, white)
-  );
-  --xr-background-color-row-even: var(
-    --jp-layout-color1,
-    hsl(from var(--pst-color-on-background, white) h s calc(l - 5))
-  );
-  --xr-background-color-row-odd: var(
-    --jp-layout-color2,
-    hsl(from var(--pst-color-on-background, white) h s calc(l - 15))
-  );
-}
+<span class="nn">File pandas/_libs/index.pyx:167,</span> in <span class="ni">pandas._libs.index.IndexEngine.get_loc</span><span class="nt">()</span>
 
-html[theme="dark"],
-html[data-theme="dark"],
-body[data-theme="dark"],
-body.vscode-dark {
-  --xr-font-color0: var(
-    --jp-content-font-color0,
-    var(--pst-color-text-base, rgba(255, 255, 255, 1))
-  );
-  --xr-font-color2: var(
-    --jp-content-font-color2,
-    var(--pst-color-text-base, rgba(255, 255, 255, 0.54))
-  );
-  --xr-font-color3: var(
-    --jp-content-font-color3,
-    var(--pst-color-text-base, rgba(255, 255, 255, 0.38))
-  );
-  --xr-border-color: var(
-    --jp-border-color2,
-    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 10))
-  );
-  --xr-disabled-color: var(
-    --jp-layout-color3,
-    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 40))
-  );
-  --xr-background-color: var(
-    --jp-layout-color0,
-    var(--pst-color-on-background, #111111)
-  );
-  --xr-background-color-row-even: var(
-    --jp-layout-color1,
-    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 5))
-  );
-  --xr-background-color-row-odd: var(
-    --jp-layout-color2,
-    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 15))
-  );
-}
+<span class="nn">File pandas/_libs/index.pyx:196,</span> in <span class="ni">pandas._libs.index.IndexEngine.get_loc</span><span class="nt">()</span>
 
-.xr-wrap {
-  display: block !important;
-  min-width: 300px;
-  max-width: 700px;
-}
+<span class="nn">File pandas/_libs/hashtable_class_helper.pxi:7088,</span> in <span class="ni">pandas._libs.hashtable.PyObjectHashTable.get_item</span><span class="nt">()</span>
 
-.xr-text-repr-fallback {
-  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
-  display: none;
-}
+<span class="nn">File pandas/_libs/hashtable_class_helper.pxi:7096,</span> in <span class="ni">pandas._libs.hashtable.PyObjectHashTable.get_item</span><span class="nt">()</span>
 
-.xr-header {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  margin-bottom: 4px;
-  border-bottom: solid 1px var(--xr-border-color);
-}
+<span class="ne">KeyError</span>: &#39;parameter_cd&#39;
 
-.xr-header > div,
-.xr-header > ul {
-  display: inline;
-  margin-top: 0;
-  margin-bottom: 0;
-}
+<span class="n">The</span> <span class="n">above</span> <span class="n">exception</span> <span class="n">was</span> <span class="n">the</span> <span class="n">direct</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">following</span> <span class="n">exception</span><span class="p">:</span>
 
-.xr-obj-type,
-.xr-array-name {
-  margin-left: 2px;
-  margin-right: 10px;
-}
+<span class="ne">KeyError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span> <span class="mi">7</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">daily</span> <span class="o">=</span> <span class="n">usgs</span><span class="o">.</span><span class="n">get_daily</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="c1"># download target (concentration)</span>
+<span class="ne">----&gt; </span><span class="mi">7</span> <span class="n">samples</span> <span class="o">=</span> <span class="n">usgs</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> 
+<span class="g g-Whitespace">      </span><span class="mi">8</span>                            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> 
+<span class="g g-Whitespace">      </span><span class="mi">9</span>                            <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> 
+<span class="g g-Whitespace">     </span><span class="mi">10</span>                            <span class="n">characteristic</span><span class="o">=</span><span class="n">characteristic</span><span class="p">,</span> 
+<span class="g g-Whitespace">     </span><span class="mi">11</span>                            <span class="n">fraction</span><span class="o">=</span><span class="n">fraction</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">samples</span>
 
-.xr-obj-type {
-  color: var(--xr-font-color2);
-}
+<span class="nn">File ~/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:346,</span> in <span class="ni">get_samples</span><span class="nt">(site, start_date, end_date, characteristic, fraction, provider, name, filter_pcodes, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">343</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">344</span>     <span class="n">pcode</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="ne">--&gt; </span><span class="mi">346</span> <span class="n">ds</span> <span class="o">=</span> <span class="n">format_wqp_samples</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pcode</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">348</span> <span class="k">if</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">&quot;NWIS&quot;</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">349</span>     <span class="c1"># strip the &quot;USGS-&quot; prefix from the site number</span>
+<span class="g g-Whitespace">    </span><span class="mi">350</span>     <span class="n">site_id</span> <span class="o">=</span> <span class="n">site</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
 
-.xr-sections {
-  padding-left: 0 !important;
-  display: grid;
-  grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
-}
+<span class="nn">File ~/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:261,</span> in <span class="ni">format_wqp_samples</span><span class="nt">(df, name, pcode)</span>
+<span class="g g-Whitespace">    </span><span class="mi">255</span>     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">256</span>         <span class="s2">&quot;Censored values have been removed from the dataset.&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">257</span>         <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">258</span>         <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">260</span> <span class="k">if</span> <span class="n">pcode</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">261</span>     <span class="n">attrs</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">pcode</span><span class="p">})</span>
+<span class="g g-Whitespace">    </span><span class="mi">262</span>     <span class="n">ds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="vm">__dict__</span>
+<span class="g g-Whitespace">    </span><span class="mi">264</span> <span class="k">return</span> <span class="n">ds</span>
 
-.xr-section-item {
-  display: contents;
-}
+<span class="nn">File ~/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:85,</span> in <span class="ni">get_parameters</span><span class="nt">(pcodes)</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span> <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+<span class="g g-Whitespace">     </span><span class="mi">83</span>     <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">84</span>         <span class="n">USGSParameter</span><span class="p">(</span>
+<span class="ne">---&gt; </span><span class="mi">85</span>             <span class="n">pcode</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;parameter_cd&quot;</span><span class="p">],</span>
+<span class="g g-Whitespace">     </span><span class="mi">86</span>             <span class="n">standard_name</span><span class="o">=</span><span class="n">lookup_name</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;parameter_cd&quot;</span><span class="p">]],</span>
+<span class="g g-Whitespace">     </span><span class="mi">87</span>             <span class="n">long_name</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;SRSName&quot;</span><span class="p">],</span>
+<span class="g g-Whitespace">     </span><span class="mi">88</span>             <span class="n">units</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;parm_unit&quot;</span><span class="p">],</span>
+<span class="g g-Whitespace">     </span><span class="mi">89</span>         <span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">90</span>     <span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">92</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">93</span>     <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-.xr-section-item input {
-  display: inline-block;
-  opacity: 0;
-  height: 0;
-}
+<span class="nn">File /opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/pandas/core/series.py:1130,</span> in <span class="ni">Series.__getitem__</span><span class="nt">(self, key)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1127</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="k">elif</span> <span class="n">key_is_scalar</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1130</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1132</span> <span class="c1"># Convert generator to list before going through hashable part</span>
+<span class="g g-Whitespace">   </span><span class="mi">1133</span> <span class="c1"># (We will iterate through the generator there to check for slices)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1134</span> <span class="k">if</span> <span class="n">is_iterator</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
 
-.xr-section-item input + label {
-  color: var(--xr-disabled-color);
-  border: 2px solid transparent !important;
-}
+<span class="nn">File /opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/pandas/core/series.py:1246,</span> in <span class="ni">Series._get_value</span><span class="nt">(self, label, takeable)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1243</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1245</span> <span class="c1"># Similar to Index.get_value, but we do not fall back to positional</span>
+<span class="ne">-&gt; </span><span class="mi">1246</span> <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1248</span> <span class="k">if</span> <span class="n">is_integer</span><span class="p">(</span><span class="n">loc</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1249</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
 
-.xr-section-item input:enabled + label {
-  cursor: pointer;
-  color: var(--xr-font-color2);
-}
+<span class="nn">File /opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/pandas/core/indexes/base.py:3819,</span> in <span class="ni">Index.get_loc</span><span class="nt">(self, key)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3814</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">casted_key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">3815</span>         <span class="nb">isinstance</span><span class="p">(</span><span class="n">casted_key</span><span class="p">,</span> <span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3816</span>         <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">casted_key</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">3817</span>     <span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">3818</span>         <span class="k">raise</span> <span class="n">InvalidIndexError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">3819</span>     <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="g g-Whitespace">   </span><span class="mi">3820</span> <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">3821</span>     <span class="c1"># If we have a listlike key, _check_indexing_error will raise</span>
+<span class="g g-Whitespace">   </span><span class="mi">3822</span>     <span class="c1">#  InvalidIndexError. Otherwise we fall through and re-raise</span>
+<span class="g g-Whitespace">   </span><span class="mi">3823</span>     <span class="c1">#  the TypeError.</span>
+<span class="g g-Whitespace">   </span><span class="mi">3824</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_check_indexing_error</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-.xr-section-item input:focus + label {
-  border: 2px solid var(--xr-font-color0) !important;
-}
-
-.xr-section-item input:enabled + label:hover {
-  color: var(--xr-font-color0);
-}
-
-.xr-section-summary {
-  grid-column: 1;
-  color: var(--xr-font-color2);
-  font-weight: 500;
-}
-
-.xr-section-summary > span {
-  display: inline-block;
-  padding-left: 0.5em;
-}
-
-.xr-section-summary-in:disabled + label {
-  color: var(--xr-font-color2);
-}
-
-.xr-section-summary-in + label:before {
-  display: inline-block;
-  content: "►";
-  font-size: 11px;
-  width: 15px;
-  text-align: center;
-}
-
-.xr-section-summary-in:disabled + label:before {
-  color: var(--xr-disabled-color);
-}
-
-.xr-section-summary-in:checked + label:before {
-  content: "▼";
-}
-
-.xr-section-summary-in:checked + label > span {
-  display: none;
-}
-
-.xr-section-summary,
-.xr-section-inline-details {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.xr-section-inline-details {
-  grid-column: 2 / -1;
-}
-
-.xr-section-details {
-  display: none;
-  grid-column: 1 / -1;
-  margin-bottom: 5px;
-}
-
-.xr-section-summary-in:checked ~ .xr-section-details {
-  display: contents;
-}
-
-.xr-array-wrap {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 20px auto;
-}
-
-.xr-array-wrap > label {
-  grid-column: 1;
-  vertical-align: top;
-}
-
-.xr-preview {
-  color: var(--xr-font-color3);
-}
-
-.xr-array-preview,
-.xr-array-data {
-  padding: 0 5px !important;
-  grid-column: 2;
-}
-
-.xr-array-data,
-.xr-array-in:checked ~ .xr-array-preview {
-  display: none;
-}
-
-.xr-array-in:checked ~ .xr-array-data,
-.xr-array-preview {
-  display: inline-block;
-}
-
-.xr-dim-list {
-  display: inline-block !important;
-  list-style: none;
-  padding: 0 !important;
-  margin: 0;
-}
-
-.xr-dim-list li {
-  display: inline-block;
-  padding: 0;
-  margin: 0;
-}
-
-.xr-dim-list:before {
-  content: "(";
-}
-
-.xr-dim-list:after {
-  content: ")";
-}
-
-.xr-dim-list li:not(:last-child):after {
-  content: ",";
-  padding-right: 5px;
-}
-
-.xr-has-index {
-  font-weight: bold;
-}
-
-.xr-var-list,
-.xr-var-item {
-  display: contents;
-}
-
-.xr-var-item > div,
-.xr-var-item label,
-.xr-var-item > .xr-var-name span {
-  background-color: var(--xr-background-color-row-even);
-  border-color: var(--xr-background-color-row-odd);
-  margin-bottom: 0;
-  padding-top: 2px;
-}
-
-.xr-var-item > .xr-var-name:hover span {
-  padding-right: 5px;
-}
-
-.xr-var-list > li:nth-child(odd) > div,
-.xr-var-list > li:nth-child(odd) > label,
-.xr-var-list > li:nth-child(odd) > .xr-var-name span {
-  background-color: var(--xr-background-color-row-odd);
-  border-color: var(--xr-background-color-row-even);
-}
-
-.xr-var-name {
-  grid-column: 1;
-}
-
-.xr-var-dims {
-  grid-column: 2;
-}
-
-.xr-var-dtype {
-  grid-column: 3;
-  text-align: right;
-  color: var(--xr-font-color2);
-}
-
-.xr-var-preview {
-  grid-column: 4;
-}
-
-.xr-index-preview {
-  grid-column: 2 / 5;
-  color: var(--xr-font-color2);
-}
-
-.xr-var-name,
-.xr-var-dims,
-.xr-var-dtype,
-.xr-preview,
-.xr-attrs dt {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding-right: 10px;
-}
-
-.xr-var-name:hover,
-.xr-var-dims:hover,
-.xr-var-dtype:hover,
-.xr-attrs dt:hover {
-  overflow: visible;
-  width: auto;
-  z-index: 1;
-}
-
-.xr-var-attrs,
-.xr-var-data,
-.xr-index-data {
-  display: none;
-  border-top: 2px dotted var(--xr-background-color);
-  padding-bottom: 20px !important;
-  padding-top: 10px !important;
-}
-
-.xr-var-attrs-in + label,
-.xr-var-data-in + label,
-.xr-index-data-in + label {
-  padding: 0 1px;
-}
-
-.xr-var-attrs-in:checked ~ .xr-var-attrs,
-.xr-var-data-in:checked ~ .xr-var-data,
-.xr-index-data-in:checked ~ .xr-index-data {
-  display: block;
-}
-
-.xr-var-data > table {
-  float: right;
-}
-
-.xr-var-data > pre,
-.xr-index-data > pre,
-.xr-var-data > table > tbody > tr {
-  background-color: transparent !important;
-}
-
-.xr-var-name span,
-.xr-var-data,
-.xr-index-name div,
-.xr-index-data,
-.xr-attrs {
-  padding-left: 25px !important;
-}
-
-.xr-attrs,
-.xr-var-attrs,
-.xr-var-data,
-.xr-index-data {
-  grid-column: 1 / -1;
-}
-
-dl.xr-attrs {
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 125px auto;
-}
-
-.xr-attrs dt,
-.xr-attrs dd {
-  padding: 0;
-  margin: 0;
-  float: left;
-  padding-right: 10px;
-  width: auto;
-}
-
-.xr-attrs dt {
-  font-weight: normal;
-  grid-column: 1;
-}
-
-.xr-attrs dt:hover span {
-  display: inline-block;
-  background: var(--xr-background-color);
-  padding-right: 10px;
-}
-
-.xr-attrs dd {
-  grid-column: 2;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.xr-icon-database,
-.xr-icon-file-text2,
-.xr-no-icon {
-  display: inline-block;
-  vertical-align: middle;
-  width: 1em;
-  height: 1.5em !important;
-  stroke-width: 0;
-  stroke: currentColor;
-  fill: currentColor;
-}
-
-.xr-var-attrs-in:checked + label > .xr-icon-file-text2,
-.xr-var-data-in:checked + label > .xr-icon-database,
-.xr-index-data-in:checked + label > .xr-icon-database {
-  color: var(--xr-font-color0);
-  filter: drop-shadow(1px 1px 5px var(--xr-font-color2));
-  stroke-width: 0.8px;
-}
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 10kB
-Dimensions:        (time: 652)
-Coordinates:
-  * time           (time) datetime64[ns] 5kB 1979-12-05T10:30:00 ... 2011-04-...
-Data variables:
-    concentration  (time) float64 5kB 1.4 0.62 1.2 1.2 ... 0.92 1.54 1.39 0.99
-Attributes:
-    id:         01491000
-    name:       CHOPTANK RIVER NEAR GREENSBORO, MD
-    latitude:   38.99719444
-    longitude:  -75.7858056</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-5c417a90-d57a-44bf-a418-bb91a8ed20aa' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-5c417a90-d57a-44bf-a418-bb91a8ed20aa' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 652</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-eb28e985-27e8-449a-b01a-9d2331bd5b3e' class='xr-section-summary-in' type='checkbox'  checked><label for='section-eb28e985-27e8-449a-b01a-9d2331bd5b3e' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>1979-12-05T10:30:00 ... 2011-04-...</div><input id='attrs-bb378d5b-a0fa-4bae-8ea8-bbe9cf3064e0' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-bb378d5b-a0fa-4bae-8ea8-bbe9cf3064e0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-63401b27-d41e-4d87-b033-58ae2d50654f' class='xr-var-data-in' type='checkbox'><label for='data-63401b27-d41e-4d87-b033-58ae2d50654f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1979-12-05T10:30:00.000000000&#x27;, &#x27;1979-10-24T10:30:00.000000000&#x27;,
-       &#x27;1979-12-21T11:30:00.000000000&#x27;, ..., &#x27;2011-08-09T10:00:00.000000000&#x27;,
-       &#x27;2011-07-13T09:30:00.000000000&#x27;, &#x27;2011-04-13T11:00:00.000000000&#x27;],
-      shape=(652,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-e73e284c-eade-4e81-a972-1874fd39becf' class='xr-section-summary-in' type='checkbox'  checked><label for='section-e73e284c-eade-4e81-a972-1874fd39becf' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>concentration</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.4 0.62 1.2 1.2 ... 1.54 1.39 0.99</div><input id='attrs-39a6e1a6-8a31-4b32-b424-1ffee9ada6a3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-39a6e1a6-8a31-4b32-b424-1ffee9ada6a3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-074d18c2-ea93-4f59-b779-6c4a4f9d5bdc' class='xr-var-data-in' type='checkbox'><label for='data-074d18c2-ea93-4f59-b779-6c4a4f9d5bdc' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>pcode :</span></dt><dd>00631</dd><dt><span>standard_name :</span></dt><dd>concentration</dd><dt><span>long_name :</span></dt><dd>Inorganic nitrogen (nitrate and nitrite)</dd><dt><span>units :</span></dt><dd>mg/l as N</dd><dt><span>suffix :</span></dt><dd></dd><dt><span>conversion :</span></dt><dd>1.0</dd></dl></div><div class='xr-var-data'><pre>array([1.4  , 0.62 , 1.2  , 1.2  , 1.1  , 0.93 , 0.62 , 1.1  , 1.   ,
-       0.84 , 1.1  , 1.   , 1.   , 0.81 , 0.69 , 0.98 , 1.3  , 1.2  ,
-       0.94 , 0.6  , 0.88 , 0.82 , 1.3  , 1.1  , 1.4  , 0.99 , 1.4  ,
-       1.2  , 1.1  , 1.2  , 1.4  , 0.56 , 1.2  , 0.83 , 1.1  , 1.   ,
-       1.3  , 1.2  , 1.1  , 1.4  , 0.72 , 0.57 , 0.29 , 0.56 , 0.83 ,
-       0.77 , 0.83 , 0.7  , 0.92 , 2.   , 0.67 , 0.78 , 0.88 , 1.4  ,
-       1.5  , 0.28 , 0.94 , 1.3  , 0.18 , 0.91 , 1.5  , 1.   , 1.2  ,
-       1.1  , 1.   , 1.5  , 1.2  , 0.88 , 0.77 , 1.   , 0.92 , 1.1  ,
-       0.54 , 0.71 , 1.4  , 1.   , 1.2  , 0.67 , 0.95 , 1.3  , 1.   ,
-       0.93 , 1.4  , 1.   , 1.2  , 1.1  , 1.1  , 0.94 , 0.97 , 0.98 ,
-       1.1  , 1.1  , 0.93 , 1.4  , 1.5  , 1.3  , 0.99 , 0.97 , 0.84 ,
-       0.8  , 0.79 , 0.77 , 1.1  , 1.1  , 0.97 , 0.67 , 1.6  , 1.1  ,
-       1.   , 0.9  , 0.86 , 1.2  , 0.95 , 1.3  , 0.23 , 1.1  , 0.78 ,
-       1.8  , 1.2  , 0.9  , 0.84 , 0.85 , 0.58 , 1.1  , 1.4  , 0.58 ,
-       0.56 , 1.4  , 1.7  , 1.3  , 0.9  , 1.3  , 0.89 , 1.5  , 0.84 ,
-       1.6  , 0.71 , 1.2  , 0.8  , 1.7  , 1.4  , 1.   , 1.   , 0.7  ,
-       1.2  , 1.8  , 1.1  , 0.93 , 1.5  , 1.1  , 1.3  , 0.98 , 1.1  ,
-       1.2  , 0.84 , 1.2  , 0.8  , 1.2  , 0.65 , 0.94 , 0.84 , 1.1  ,
-       0.91 , 0.82 , 1.1  , 0.52 , 0.94 , 1.   , 1.2  , 0.86 , 0.96 ,
-       0.97 , 0.68 , 1.6  , 0.4  , 1.4  , 0.88 , 1.   , 1.2  , 1.4  ,
-...
-       0.64 , 1.23 , 1.51 , 1.81 , 1.28 , 0.97 , 0.73 , 0.96 , 0.9  ,
-       1.06 , 0.65 , 2.09 , 1.53 , 1.47 , 1.17 , 1.76 , 1.48 , 1.38 ,
-       1.13 , 1.24 , 0.97 , 1.27 , 1.01 , 1.23 , 0.39 , 2.   , 1.76 ,
-       0.85 , 1.6  , 0.97 , 1.44 , 1.27 , 1.41 , 0.76 , 1.05 , 0.87 ,
-       0.43 , 1.42 , 1.28 , 1.51 , 1.18 , 1.27 , 0.75 , 1.42 , 0.98 ,
-       0.94 , 1.18 , 1.1  , 1.67 , 1.28 , 2.17 , 1.54 , 0.86 , 1.15 ,
-       1.13 , 1.43 , 1.72 , 0.6  , 1.54 , 1.38 , 1.32 , 1.18 , 1.23 ,
-       1.63 , 1.38 , 1.46 , 1.49 , 1.37 , 0.74 , 1.04 , 1.7  , 1.26 ,
-       1.14 , 1.34 , 0.98 , 1.93 , 1.15 , 0.97 , 1.75 , 1.75 , 1.87 ,
-       1.18 , 1.33 , 1.17 , 1.29 , 2.17 , 1.51 , 0.62 , 1.46 , 1.14 ,
-       1.68 , 1.1  , 1.35 , 1.42 , 1.66 , 1.66 , 1.29 , 2.36 , 0.56 ,
-       1.37 , 1.59 , 0.87 , 1.52 , 1.06 , 1.58 , 1.74 , 1.59 , 1.27 ,
-       1.12 , 1.46 , 0.6  , 1.56 , 1.29 , 0.93 , 1.62 , 0.7  , 1.25 ,
-       2.14 , 1.4  , 1.64 , 1.43 , 1.59 , 1.36 , 1.69 , 0.31 , 0.3  ,
-       1.54 , 0.31 , 1.59 , 0.97 , 1.29 , 0.95 , 1.49 , 1.04 , 1.22 ,
-       1.08 , 0.57 , 1.86 , 1.55 , 1.18 , 0.72 , 1.66 , 0.74 , 2.43 ,
-       1.74 , 1.78 , 0.75 , 1.43 , 1.46 , 1.21 , 1.54 , 0.69 , 1.6  ,
-       1.26 , 1.51 , 1.13 , 0.85 , 1.81 , 1.36 , 1.02 , 1.44 , 1.18 ,
-       1.8  , 0.78 , 1.23 , 0.94 , 0.57 , 1.74 , 0.2  , 0.97 , 0.8  ,
-       0.92 , 1.54 , 1.39 , 0.99 ])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-25d9c5f4-df06-422b-88b4-19ad6053938a' class='xr-section-summary-in' type='checkbox'  ><label for='section-25d9c5f4-df06-422b-88b4-19ad6053938a' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-c34ce977-a88f-49c7-a327-d0907eb3b647' class='xr-index-data-in' type='checkbox'/><label for='index-c34ce977-a88f-49c7-a327-d0907eb3b647' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;1979-12-05 10:30:00&#x27;, &#x27;1979-10-24 10:30:00&#x27;,
-               &#x27;1979-12-21 11:30:00&#x27;, &#x27;1980-02-25 11:45:00&#x27;,
-               &#x27;1980-09-08 10:30:00&#x27;, &#x27;1980-07-28 10:40:00&#x27;,
-               &#x27;1980-10-29 10:45:00&#x27;, &#x27;1980-06-24 10:45:00&#x27;,
-               &#x27;1980-05-27 10:50:00&#x27;, &#x27;1980-01-24 10:30:00&#x27;,
-               ...
-               &#x27;2011-02-03 09:45:00&#x27;, &#x27;2011-04-18 09:00:00&#x27;,
-               &#x27;2011-06-14 10:30:00&#x27;, &#x27;2011-08-30 10:00:00&#x27;,
-               &#x27;2011-03-07 11:45:00&#x27;, &#x27;2011-09-29 08:30:00&#x27;,
-               &#x27;2011-08-15 10:25:00&#x27;, &#x27;2011-08-09 10:00:00&#x27;,
-               &#x27;2011-07-13 09:30:00&#x27;, &#x27;2011-04-13 11:00:00&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=652, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-da20fcc6-681a-445f-ad76-f10172d79ed4' class='xr-section-summary-in' type='checkbox'  checked><label for='section-da20fcc6-681a-445f-ad76-f10172d79ed4' class='xr-section-summary' >Attributes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>id :</span></dt><dd>01491000</dd><dt><span>name :</span></dt><dd>CHOPTANK RIVER NEAR GREENSBORO, MD</dd><dt><span>latitude :</span></dt><dd>38.99719444</dd><dt><span>longitude :</span></dt><dd>-75.7858056</dd></dl></div></li></ul></div></div></div></div>
+<span class="ne">KeyError</span>: &#39;parameter_cd&#39;
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;concentration&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/5e9f2aba0e0b69622654006465967a41167ee20a1b79acecb95aadd77d6f262d.png" src="../_images/5e9f2aba0e0b69622654006465967a41167ee20a1b79acecb95aadd77d6f262d.png" />
 </div>
 </div>
 <p>Next, prepare the training data by performing an inner join of the target and covariates.</p>
@@ -972,12 +555,6 @@ Attributes:
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 6.99 s, sys: 701 ms, total: 7.69 s
-Wall time: 4.45 s
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -986,15 +563,6 @@ Wall time: 4.45 s
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/gpytorch/likelihoods/gaussian_likelihood.py:347: GPInputWarning: You have passed data through a FixedNoiseGaussianLikelihood that did not match the size of the fixed noise, *and* you did not specify noise. This is treated as a no-op.
-  warnings.warn(
-/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/sklearn/pipeline.py:61: FutureWarning: This Pipeline instance is not fitted yet. Call &#39;fit&#39; with appropriate arguments before using other methods such as transform, predict, etc. This will raise an error in 1.8 instead of the current warning.
-  warnings.warn(
-</pre></div>
-</div>
-<img alt="../_images/10cd349a1cebb078b70036cf50d027b446421ff2a0006165c1436a4388b92c53.png" src="../_images/10cd349a1cebb078b70036cf50d027b446421ff2a0006165c1436a4388b92c53.png" />
-</div>
 </div>
 <p>Like WRTDS, we can also plot the variable space:</p>
 <div class="cell docutils container">
@@ -1002,13 +570,6 @@ Wall time: 4.45 s
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">levels</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">y_scale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/gpytorch/likelihoods/gaussian_likelihood.py:347: GPInputWarning: You have passed data through a FixedNoiseGaussianLikelihood that did not match the size of the fixed noise, *and* you did not specify noise. This is treated as a no-op.
-  warnings.warn(
-</pre></div>
-</div>
-<img alt="../_images/a31f1140bd9cf218c219dead786f16c27da9ec472062646c9bf1b3709f458f86.png" src="../_images/a31f1140bd9cf218c219dead786f16c27da9ec472062646c9bf1b3709f458f86.png" />
 </div>
 </div>
 <p>For plotting, we don’t need to simulate the full covariance matrix. Instead, we can use its diagonal to compute confidence intervals, but for most other uses, we need to simulate predictions using full covariance, which is slower. Here, we simulate daily concentration during 1980-2010, then we will use those simulations to estimate annual fluxes with uncertainty.</p>
@@ -1029,9 +590,6 @@ Wall time: 4.45 s
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/b9deb186477dd5f6d92a00f96d9488ec8bdfd683b8d0ef313352e43d4fd63fdf.png" src="../_images/b9deb186477dd5f6d92a00f96d9488ec8bdfd683b8d0ef313352e43d4fd63fdf.png" />
-</div>
 </div>
 <p>In practice, we aren’t interested in a single simulated timeseries. Rather, we take a large sample of simulated series, then pass them through some function to simulate a probability distribution. For example, if we were interested in some annual value we would pass the simulations through that annual function to estimate a probability distribution. We demonstrate this concept for estimating the annual nutrient flux.</p>
 <p><code class="docutils literal notranslate"><span class="pre">loadest_gp</span></code> provides a couple of convenience functions just for this purpose.</p>
@@ -1043,9 +601,6 @@ Wall time: 4.45 s
 <span class="n">_</span> <span class="o">=</span> <span class="n">plot_annual_flux</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/4ad63f1034922ce269a49614f8d64a20ba82f48b45158f7716d9974c123402a7.png" src="../_images/4ad63f1034922ce269a49614f8d64a20ba82f48b45158f7716d9974c123402a7.png" />
 </div>
 </div>
 <p>In most streams, flow varies substantially from year-to-year,
@@ -1090,9 +645,6 @@ Choosing a different year should give similar results.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">plot_annual_flux</span><span class="p">(</span><span class="n">counterfactual_sim</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/1e2cf82976b3ac8325f96eb7c7fb0116ec4c0bb5b96407300abe15c0b46bf93d.png" src="../_images/1e2cf82976b3ac8325f96eb7c7fb0116ec4c0bb5b96407300abe15c0b46bf93d.png" />
 </div>
 </div>
 <p>Now, the annual fluxes should be less variable than before, and the trend becomes apparent (depending on your choice of river).</p>
