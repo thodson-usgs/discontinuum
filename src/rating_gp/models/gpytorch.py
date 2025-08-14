@@ -397,7 +397,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=5, rate=1)
+        ls = GammaPrior(concentration=2, rate=1)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
