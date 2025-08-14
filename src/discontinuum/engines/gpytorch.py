@@ -50,6 +50,7 @@ class MarginalGPyTorch(BaseModel):
         self._resume_info = None  # holds checkpoint info to resume training
         self._last_optimizer = None
         self._last_scheduler = None
+        self._current_iteration = 0  # track training iterations
 
     @classmethod
     def load(
@@ -101,7 +102,11 @@ class MarginalGPyTorch(BaseModel):
             'optimizer_lr': ckpt.get('optimizer_lr'),
             'scheduler_state_dict': ckpt.get('scheduler_state_dict'),
             'scheduler_name': ckpt.get('scheduler_name'),
+            'current_iteration': ckpt.get('current_iteration', 0),
         }
+
+        # Restore iteration count
+        model._current_iteration = ckpt.get('current_iteration', 0)
 
         # Mark as fitted (weights are loaded), but allow further training
         model.is_fitted = True
@@ -163,6 +168,7 @@ class MarginalGPyTorch(BaseModel):
             'optimizer_lr': lr_val,
             'scheduler_state_dict': scheduler.state_dict() if scheduler is not None else None,
             'scheduler_name': scheduler.__class__.__name__ if scheduler is not None else None,
+            'current_iteration': getattr(self, '_current_iteration', 0),
             'model_config': getattr(self, 'model_config', None),
             'extra': extra or {},
         }
@@ -179,6 +185,7 @@ class MarginalGPyTorch(BaseModel):
             early_stopping: bool = False,
             patience: int = 60,
             scheduler: bool = True,
+            resume: bool = False,
             penalty_callback: 'Optional[Callable[[], torch.Tensor]]' = None,
             penalty_weight: float = 0.0,
             ):
@@ -213,17 +220,26 @@ class MarginalGPyTorch(BaseModel):
         penalty_weight : float, optional
             Multiplier applied to the penalty value when added to the objective. Default 0.0.
         """
-        # setup data manager (self.dm)
-        self.dm.fit(target=target, covariates=covariates, target_unc=target_unc)
+        # Determine if we're resuming training
+        has_existing_model = (getattr(self, 'model', None) is not None and 
+                             getattr(self, 'likelihood', None) is not None and 
+                             self.is_fitted)
+        resuming_from_checkpoint = self._resume_info is not None and has_existing_model
+        resuming_from_interruption = resume and has_existing_model and not resuming_from_checkpoint
+        
+        # Only setup data manager if not resuming from interruption
+        if not resuming_from_interruption:
+            self.dm.fit(target=target, covariates=covariates, target_unc=target_unc)
 
         self.X = self.dm.X
         self.y = self.dm.y
         train_x = torch.tensor(self.X, dtype=torch.float32)
         train_y = torch.tensor(self.y, dtype=torch.float32)
 
-        resuming = self._resume_info is not None and getattr(self, 'model', None) is not None and getattr(self, 'likelihood', None) is not None
+        # Track whether we can restore optimizer/scheduler state
+        can_restore_optimizer_state = resuming_from_checkpoint or resuming_from_interruption
 
-        if not resuming:
+        if not (resuming_from_checkpoint or resuming_from_interruption):
             # fresh build
             if target_unc is None:
                 self.model = self.build_model(train_x, train_y)
@@ -232,7 +248,7 @@ class MarginalGPyTorch(BaseModel):
                 self.y_unc = self.dm.y_unc
                 train_y_unc = torch.tensor(self.y_unc, dtype=torch.float32)
                 self.model = self.build_model(train_x, train_y, train_y_unc)
-        else:
+        elif resuming_from_checkpoint:
             # Continue training with existing model/likelihood; update training data if needed
             try:
                 self.model.set_train_data(inputs=train_x, targets=train_y, strict=False)
@@ -244,15 +260,37 @@ class MarginalGPyTorch(BaseModel):
                     self.y_unc = self.dm.y_unc
                     train_y_unc = torch.tensor(self.y_unc, dtype=torch.float32)
                     self.model = self.build_model(train_x, train_y, train_y_unc)
-                resuming = False  # cannot restore optimizer state safely
+                can_restore_optimizer_state = False  # cannot restore optimizer state safely
+        # For resuming_from_interruption, we keep the existing model/likelihood as-is
 
         self.model.train()
         self.likelihood.train()
 
         # If resuming, prefer saved optimizer settings when caller uses defaults
-        resume = self._resume_info or {}
-        opt_name_saved = resume.get('optimizer_name')
-        lr_saved = resume.get('optimizer_lr')
+        resume_info = self._resume_info or {}
+        
+        # For interruption-based resume, capture current optimizer/scheduler state
+        if resuming_from_interruption and hasattr(self, '_last_optimizer') and self._last_optimizer is not None:
+            # Create resume_info from current optimizer/scheduler state
+            opt_name = None
+            lr_val = None
+            if isinstance(self._last_optimizer, torch.optim.AdamW):
+                opt_name = 'adamw'
+            elif isinstance(self._last_optimizer, torch.optim.Adam):
+                opt_name = 'adam'
+            
+            if self._last_optimizer.param_groups:
+                lr_val = self._last_optimizer.param_groups[0]['lr']
+            
+            resume_info = {
+                'optimizer_name': opt_name,
+                'optimizer_lr': lr_val,
+                'optimizer_state_dict': self._last_optimizer.state_dict(),
+                'scheduler_state_dict': self._last_scheduler.state_dict() if self._last_scheduler else None,
+            }
+        
+        opt_name_saved = resume_info.get('optimizer_name')
+        lr_saved = resume_info.get('optimizer_lr')
         opt_choice = optimizer if optimizer is not None else (opt_name_saved or 'adam')
         lr_choice = learning_rate if learning_rate is not None else (lr_saved or 0.05)
 
@@ -278,9 +316,9 @@ class MarginalGPyTorch(BaseModel):
             )
 
         # Restore optimizer state if resuming and compatible
-        if resuming and resume.get('optimizer_state_dict') is not None:
+        if can_restore_optimizer_state and resume_info.get('optimizer_state_dict') is not None:
             try:
-                optimizer_obj.load_state_dict(resume['optimizer_state_dict'])
+                optimizer_obj.load_state_dict(resume_info['optimizer_state_dict'])
             except Exception:
                 pass
 
@@ -296,9 +334,9 @@ class MarginalGPyTorch(BaseModel):
                 cooldown=10,
             )
             # Restore scheduler if resuming
-            if resuming and resume.get('scheduler_state_dict') is not None:
+            if can_restore_optimizer_state and resume_info.get('scheduler_state_dict') is not None:
                 try:
-                    scheduler_obj.load_state_dict(resume['scheduler_state_dict'])
+                    scheduler_obj.load_state_dict(resume_info['scheduler_state_dict'])
                 except Exception:
                     pass
         else:
@@ -307,8 +345,21 @@ class MarginalGPyTorch(BaseModel):
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self.model)
 
+        # Determine starting iteration and remaining iterations
+        start_iteration = 0
+        if resume and hasattr(self, '_current_iteration'):
+            start_iteration = self._current_iteration
+            if start_iteration >= iterations:
+                print(f"Model already trained for {start_iteration} iterations (>= target {iterations}). No further training needed.")
+                return None
+        
+        remaining_iterations = iterations - start_iteration
+        if remaining_iterations <= 0:
+            print(f"Model already trained for {start_iteration} iterations (>= target {iterations}). No further training needed.")
+            return None
+
         # Training loop with stability features
-        pbar = tqdm.tqdm(range(iterations), ncols=100)
+        pbar = tqdm.tqdm(range(remaining_iterations), ncols=100, desc=f"Training {start_iteration}->{iterations}")
         best_obj = float('inf')
         patience_counter = 0
         min_improvement = 1e-6
@@ -316,6 +367,8 @@ class MarginalGPyTorch(BaseModel):
         nan_loss_counter = 0
         try:
             for i in pbar:
+                # Update current iteration (absolute iteration number)
+                self._current_iteration = start_iteration + i
                 optimizer_obj.zero_grad(set_to_none=True)
                 output = self.model(train_x)
                 
