@@ -90,11 +90,13 @@ class RatingGPMarginalGPyTorch(
 
     def fit(self, covariates, target, target_unc=None, iterations=100, optimizer=None,
             learning_rate=None, early_stopping=False, patience=60, scheduler=True,
-            monotonic_penalty_weight: float = 0.0, grid_size: int = 64,
+            resume=False, monotonic_penalty_weight: float = 0.0, grid_size: int = 64,
             monotonic_penalty_interval: int = 1):
         """
         Override fit to inject a monotonicity penalty on the rating curve.
 
+        resume: if True, continue training from the last saved iteration until the total
+          number of iterations is reached. If False, start from iteration 0.
         monotonic_penalty_weight: strength of penalty on negative dQ/dStage.
           1.0 works well in practice.
         grid_size: number of random points to sample over time-stage grid
@@ -114,6 +116,7 @@ class RatingGPMarginalGPyTorch(
                 early_stopping=early_stopping,
                 patience=patience,
                 scheduler=scheduler,
+                resume=resume,
                 penalty_callback=None,
                 penalty_weight=0.0,
             )
@@ -183,6 +186,7 @@ class RatingGPMarginalGPyTorch(
             early_stopping=early_stopping,
             patience=patience,
             scheduler=scheduler,
+            resume=resume,
             penalty_callback=penalty_callback,
             penalty_weight=float(monotonic_penalty_weight),
         )
@@ -294,7 +298,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=3, rate=2),
+                lengthscale_prior=GammaPrior(concentration=1, rate=1),
                 nu=2.5,
             ) *
             MaternKernel(
@@ -318,7 +322,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=3, rate=1),
+                lengthscale_prior=GammaPrior(concentration=2, rate=1),
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
@@ -361,7 +365,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=2, rate=1)
+        ls = GammaPrior(concentration=3, rate=1)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,

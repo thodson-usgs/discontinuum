@@ -74,11 +74,15 @@ class DataManager:
         """
         self.data = Data(target, covariates, target_unc)
 
-        self.target_pipeline = self.target_pipeline().fit(target)
-        self.error_pipeline = self.error_pipeline().fit(target)
+        # Only fit pipelines if they are classes (not already fitted instances)
+        if isinstance(self.target_pipeline, type):
+            self.target_pipeline = self.target_pipeline().fit(target)
+        if isinstance(self.error_pipeline, type):
+            self.error_pipeline = self.error_pipeline().fit(target)
 
         for key, value in self.covariate_pipelines.items():
-            self.covariate_pipelines[key] = value().fit(covariates[key])
+            if isinstance(value, type):
+                self.covariate_pipelines[key] = value().fit(covariates[key])
 
     def transform_covariates(self, covariates: Dataset) -> ArrayLike:
         """Transform covariates into design matrix"""
