@@ -1,0 +1,38 @@
+{
+  "sotaGenerativeAICodeDev": {
+    "tools": [
+      "python", 
+      "pytest",
+      "black",
+      "ruff",
+      "mypy",
+      "pre-commit",
+      "docker",
+      "git",
+      "gh-cli",
+      "git-secret",
+      "jupyter",
+      "debugger",
+      "profiler",
+      "coverage",
+      "safety",
+      "bandit",
+      "dependabot",
+      "github-actions",
+      "notebook-preview",
+      "ai-search-web",
+      "codegen-model"
+    ],
+    "description": "Toolset for iterative generative-AI-assisted Python code development: linting, formatting, typing, tests, CI, security scans, and codegen helpers.",
+    "icon": "robot",
+    "recommendations": {
+      "python_version": "3.11+",
+      "venv": ".venv",
+      "precommit_hooks": ["black", "ruff", "isort"],
+      "ci": "github-actions/python-app.yml",
+      "dockerfile": "Dockerfile.dev",
+      "codegen_model": "gpt-4o-mini-code",
+      "note": "Install heavy ML deps (torch/gpytorch) in a separate extras environment to avoid CI bloat. Use caching for pip in CI."
+    }
+  }
+}

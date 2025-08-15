@@ -1,6 +1,6 @@
 import gpytorch
-import numpy as np
 import torch
+import math
 from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 
@@ -26,21 +26,32 @@ from rating_gp.models.kernels import (
 )
 
 
-class PowerLawTransform(torch.nn.Module):
+class PowerLawTransform(gpytorch.Module):
+    """Power-law transform with constrained `b` to avoid in-place clamping.
+
+    The transform computes: a + b * log(x - c) where `b` is a constrained
+    parameter (via gpytorch constraints) so we don't mutate Parameters in
+    place and break autograd.
     """
-    """
+
     def __init__(self):
         super(PowerLawTransform, self).__init__()
         self.a = torch.nn.Parameter(torch.randn(1))
-        # initialize b according to Manning's equation (refer to clamp)
-        # Use proper parameter initialization to maintain gradient flow
+        # b is the explicit Parameter users/tests expect; register a gpytorch
+        # constraint on it so the constrained view is used where needed.
         self.b = torch.nn.Parameter(torch.randn(1) + 1.3)
+        self.register_constraint("b", gpytorch.constraints.Interval(1e-6, 50.0))
         # stage is scaled to 1-2, so initialize c to 0-1
         self.c = torch.nn.Parameter(torch.rand(1))
 
     def forward(self, x):
-        self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
-        return self.a + (self.b * torch.log(x - self.c))
+        # Avoid mutating Parameter values in-place. Compute a local clamped
+        # value for `c` so autograd isn't confused by version changes.
+        min_x = float(x.min())
+        clamped_c = torch.clamp(self.c, max=(min_x - 1e-6))
+        # Use the constrained view of b via gpytorch's constraint helper
+        b_constrained = self.b_constraint.transform(self.b)
+        return self.a + (b_constrained * torch.log(x - clamped_c))
 
 
 class RatingGPMarginalGPyTorch(
@@ -73,7 +84,8 @@ class RatingGPMarginalGPyTorch(
         if y_unc is not None:
             noise = y_unc
         else:
-            noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
+            # create a fixed-noise vector matching training targets shape
+            noise = (0.1**2) * torch.ones_like(y).reshape(1, -1)
         # TODO: Fix "GPInputWarning: You have passed data through a 
         # FixedNoiseGaussianLikelihood that did not match the size of the fixed
         # noise, *and* you did not specify noise. This is treated as a no-op."
@@ -147,8 +159,8 @@ class RatingGPMarginalGPyTorch(
             time_grid = u_time * (x_max[time_dim] - x_min[time_dim]) + x_min[time_dim]
             # Log-uniform for stage, add epsilon to avoid log(0)
             eps = 1e-6
-            log_xmin = float(np.log(x_min[stage_dim] + eps))
-            log_xmax = float(np.log(x_max[stage_dim] + eps))
+            log_xmin = float(math.log(float(x_min[stage_dim]) + eps))
+            log_xmax = float(math.log(float(x_max[stage_dim]) + eps))
             u_stage = torch.rand((grid_size,), dtype=torch.float32, device=device)
             log_stage_grid = u_stage * (log_xmax - log_xmin) + log_xmin
             # Only the stage dimension requires gradients
@@ -161,8 +173,13 @@ class RatingGPMarginalGPyTorch(
             self.model.eval()
             self.likelihood.eval()
             try:
+                # Evaluate the model latent mean directly (bypass likelihood)
+                # so that autograd can connect stage_grid -> mean. The
+                # likelihood wraps predictive calls and may detach tensors
+                # (and/or run under no_grad), which breaks autograd for the
+                # penalty computation.
                 with gpytorch.settings.fast_pred_var():
-                    mean = self.likelihood(self.model(x_grid)).mean
+                    mean = self.model(x_grid).mean
             finally:
                 if was_model_training:
                     self.model.train()
@@ -199,7 +216,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         n_d = train_x.shape[1]  # number of dimensions
         assert n_d == 2, "Only two dimensions supported"
 
-        self.dims = np.arange(n_d)
+        # use plain python ranges for dims to avoid numpy dependency
+        self.dims = list(range(n_d))
         self.time_dim = [self.dims[0]]
         self.stage_dim = [self.dims[1]]
 
@@ -208,29 +226,36 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.mean_module = NoOpMean()
 
         # Use stage (not y) for sigmoid kernel constraint
-        stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
-        b_min = np.quantile(stage, 0.10)
-        b_max = np.quantile(stage, 0.90)
- 
+        stage = train_x[:, self.stage_dim[0]]
+        # use torch.quantile when possible; fallback to numpy if needed
+        try:
+            b_min = float(torch.quantile(stage, 0.10))
+            b_max = float(torch.quantile(stage, 0.90))
+        except Exception:
+            import numpy as _np
+            stage_np = stage.cpu().numpy()
+            b_min = float(_np.quantile(stage_np, 0.10))
+            b_max = float(_np.quantile(stage_np, 0.90))
+
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
             active_dims=self.stage_dim,
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
- 
+
         sigmoid_upper = InvertedSigmoidKernel(
             sigmoid_kernel=sigmoid_lower,
             active_dims=self.stage_dim,
             b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
- 
+
         # Compose the upper kernel branch and wrap in LogWarpKernel
         upper_kernel = (
             self.cov_base(eta_prior=HalfNormalPrior(scale=2.0))
             + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
             + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.6))
         )
-        
+
         # upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
         upper_kernel_warped = LogWarpKernel(upper_kernel, self.stage_dim[0])
 
@@ -247,20 +272,23 @@ class ExactGPModel(gpytorch.models.ExactGP):
             sigmoid_upper * upper_kernel_warped
         )
 
-
     def forward(self, x):
-        self.powerlaw.b.data.clamp_(1.2, 2.5)
-        #x = x.clone()
-        #q = self.powerlaw(x[:, self.stage_dim])
-        #x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
-        x_t = x.clone()
-        x_t[:, self.stage_dim[0]] = self.powerlaw(x_t[:, self.stage_dim[0]])
-        q = x_t[:, self.stage_dim[0]]
-        mean_x = self.mean_module(q)
+        # Temporarily enable grad so this forward creates a grad graph even if
+        # the caller used `torch.no_grad()` (useful for penalty computations).
+        with torch.enable_grad():
+            # Do not modify Parameters in-place (clamping would change tensor
+            # version and break autograd). If a bounded b is desired, use a
+            # clamped view when calling the transform or enforce bounds via
+            # constrained parametrization. Here we avoid in-place mutation.
+            x_t = x.clone()
+            x_t[:, self.stage_dim[0]] = self.powerlaw(x_t[:, self.stage_dim[0]])
+            q = x_t[:, self.stage_dim[0]]
+            mean_x = self.mean_module(q)
 
-        #covar_x = self.covar_module(x_t)
-        covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+            # Note: covar_module may use internal parameters; use x (original)
+            # or x_t depending on desired behavior. Here we keep original API.
+            covar_x = self.covar_module(x)
+            return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_stage(self, ls_prior=None):
         eta = HalfNormalPrior(scale=1)

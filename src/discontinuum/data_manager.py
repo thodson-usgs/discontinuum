@@ -78,11 +78,21 @@ class DataManager:
         if isinstance(self.target_pipeline, type):
             self.target_pipeline = self.target_pipeline().fit(target)
         if isinstance(self.error_pipeline, type):
-            self.error_pipeline = self.error_pipeline().fit(target)
+            # Fit error pipeline on target uncertainty if available; fall
+            # back to fitting on the primary target if not provided to
+            # preserve legacy behavior.
+            if target_unc is not None:
+                self.error_pipeline = self.error_pipeline().fit(target_unc)
+            else:
+                self.error_pipeline = self.error_pipeline().fit(target)
 
         for key, value in self.covariate_pipelines.items():
             if isinstance(value, type):
                 self.covariate_pipelines[key] = value().fit(covariates[key])
+
+        # Mark as initialized so callers can safely access convenience
+        # properties and transforms.
+        self.is_initialized = True
 
     def transform_covariates(self, covariates: Dataset) -> ArrayLike:
         """Transform covariates into design matrix"""
@@ -90,7 +100,16 @@ class DataManager:
         for coord in covariates.coords:
             coords_shape += covariates.coords[coord].shape
         X = np.empty(coords_shape + (len(self.covariate_pipelines), ))
-        for i, (key, value) in enumerate(self.covariate_pipelines.items()):
+        for i, (key, value) in enumerate(list(self.covariate_pipelines.items())):
+            # Lazily instantiate and fit pipeline classes if the user passed
+            # the class instead of an already-fitted instance. This avoids
+            # calling transform() on an unfitted Pipeline and the resulting
+            # FutureWarning from scikit-learn.
+            if isinstance(value, type):
+                fitted = value().fit(covariates[key])
+                self.covariate_pipelines[key] = fitted
+                value = fitted
+
             X[..., i] = value.transform(covariates[key]).flatten()
         return X
 
@@ -106,11 +125,19 @@ class DataManager:
     @cached_property
     def y(self, dtype="float32") -> ArrayLike:
         """Convenience function for DataManager.target.transform"""
+        # Ensure target_pipeline is an instance and fitted before transforming
+        if isinstance(self.target_pipeline, type):
+            self.target_pipeline = self.target_pipeline().fit(self.data.target)
+
         return self.target_pipeline.transform(self.data.target).flatten()
 
     @cached_property
     def y_unc(self, dtype="float32") -> ArrayLike:
         """Convenience function for DataManager.target.transform"""
+        # Ensure error_pipeline is an instance and fitted before transforming
+        if isinstance(self.error_pipeline, type):
+            self.error_pipeline = self.error_pipeline().fit(self.data.target_unc)
+
         return self.error_pipeline.transform(self.data.target_unc).flatten()
 
     @cached_property
