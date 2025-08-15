@@ -68,9 +68,12 @@ class BaseModel(ABC):
         """
         pass
 
-    @abstractmethod
     def build_datamanager(self):
-        """Build DataManager for the model."""
+        """Build a default DataManager for the model.
+
+        Subclasses may override to provide custom pipelines. Providing a
+        concrete default avoids forcing trivial overrides in tests.
+        """
         self.dm = DataManager(
             target_pipeline=StandardPipeline,
             error_pipeline=StandardErrorPipeline,

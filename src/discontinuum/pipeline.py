@@ -69,11 +69,22 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
 
 
 class BaseTransformer(TransformerMixin, BaseEstimator):
-    """Base class for transformers."""
+    """Base class for transformers.
+
+    The simple transformers in this module are often stateless, but
+    scikit-learn's pipeline machinery checks for fitted attributes. To
+    avoid FutureWarnings about calling `transform` on an unfitted
+    Pipeline, `fit` sets a small marker attribute `fitted_`.
+    """
     def __init__(self):
-        pass
+        super().__init__()
 
     def fit(self, X, y=None):
+        # Mark as fitted for sklearn's check_is_fitted. Many of our simple
+        # transformers are stateless but scikit-learn expects fitted
+        # attributes; setting a generic `fitted_` attribute satisfies this
+        # check and avoids FutureWarnings when calling transform().
+        self.fitted_ = True
         return self
 
 
@@ -94,7 +105,8 @@ class ClipTransformer(BaseTransformer):
         self.max = max
 
     def transform(self, X):
-        return np.clip(X, a_min=self.min, a_max=self.max)
+        arr = np.asarray(X)
+        return np.clip(arr, a_min=self.min, a_max=self.max)
 
     def inverse_transform(self, X):
         return self.transform(X)
@@ -103,19 +115,23 @@ class ClipTransformer(BaseTransformer):
 class LogTransformer(BaseTransformer):
     """Log-transform a variable."""
     def transform(self, X):
-        return np.log(X)
+        arr = np.asarray(X)
+        return np.log(arr)
 
     def inverse_transform(self, X):
-        return np.exp(X)
+        arr = np.asarray(X)
+        return np.exp(arr)
 
 
 class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
     """Square a variable."""
     def transform(self, X):
-        return X**2
+        arr = np.asarray(X)
+        return arr**2
 
     def inverse_transform(self, X):
-        return np.sqrt(X)
+        arr = np.asarray(X)
+        return np.sqrt(arr)
 
 class UnitScaler(BaseTransformer):
     """Rescale a variable to have a minimum of 0 and a maximum of 1."""
@@ -123,15 +139,18 @@ class UnitScaler(BaseTransformer):
         self.zero = zero_value    
 
     def fit(self, X, y=None):
-        self.min_ = X.min()
-        self.max_ = X.max()
+        arr = np.asarray(X)
+        self.min_ = arr.min()
+        self.max_ = arr.max()
         return self
     
     def transform(self, X):
-        return self.zero + (X - self.min_) / (self.max_ - self.min_)
+        arr = np.asarray(X)
+        return self.zero + (arr - self.min_) / (self.max_ - self.min_)
     
     def inverse_transform(self, X):
-        return self.min_ + (X - self.zero) * (self.max_ - self.min_)    
+        arr = np.asarray(X)
+        return self.min_ + (arr - self.zero) * (self.max_ - self.min_)    
 
 
 class StandardScaler(BaseTransformer):
@@ -145,25 +164,28 @@ class StandardScaler(BaseTransformer):
         self.with_std = with_std
 
     def fit(self, X, y=None):
+        arr = np.asarray(X)
         if self.with_mean:
-            self.mean_ = X.mean(axis=0)
+            self.mean_ = arr.mean(axis=0)
         if self.with_std:
-            self.scale_ = X.std(axis=0)
+            self.scale_ = arr.std(axis=0)
         return self
 
     def transform(self, X):
+        arr = np.asarray(X)
         if self.with_mean:
-            X = X - self.mean_
+            arr = arr - self.mean_
         if self.with_std:
-            X = X / self.scale_
-        return X
+            arr = arr / self.scale_
+        return arr
 
     def inverse_transform(self, X):
+        arr = np.asarray(X)
         if self.with_std:
-            X = X * self.scale_
+            arr = arr * self.scale_
         if self.with_mean:
-            X = X + self.mean_
-        return X
+            arr = arr + self.mean_
+        return arr
 
 
 class TimeTransformer(BaseTransformer):
@@ -190,10 +212,14 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         y : None
             Ignored.
         """
+        # Extract and store metadata from xarray DataArray
         self.attrs = X.attrs
         self.name = X.name
         self.dims = X.dims
 
+        # Mark as fitted so sklearn's pipeline recognizes this step as
+        # fitted and does not emit FutureWarnings when transform is called.
+        self.fitted_ = True
         return self
 
     def transform(self, X):

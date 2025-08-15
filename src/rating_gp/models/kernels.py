@@ -1,10 +1,6 @@
 import gpytorch
-import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-from linear_operator.operators import MatmulLinearOperator, to_dense
+from linear_operator.operators import MatmulLinearOperator
 
 
 class TanhWarp(torch.nn.Module):
@@ -93,25 +89,24 @@ class StageTimeKernel(gpytorch.kernels.Kernel):
 
     # create a RBF Kernel that has a stage dependent scale length
     def forward(self, x1, x2, **params):
-        dims = np.arange(x1.shape[1])
-        time_dim = [dims[0]]
-        stage_dim = [dims[1]]
+        # assume 2D inputs: [time, stage]
+        time_dim = 0
+        stage_dim = 1
 
-        # make the scale length for the time dimension dependent on stage
-        # shift stage to have a minimum value of 1
-        x1_stage = x1[:, stage_dim] - x1[:, stage_dim].min() + 1
-        x2_stage = x2[:, stage_dim] - x2[:, stage_dim].min() + 1
-        
-        x1_stage_dep_time_lengthscale = self.lengthscale * x1_stage ** self.a
-        x2_stage_dep_time_lengthscale = self.lengthscale * x2_stage ** self.a
+        # Shift stage to have a minimum value of 1 and compute stage-dep lengthscales
+        x1_stage = x1[:, stage_dim] - x1[:, stage_dim].min() + 1.0
+        x2_stage = x2[:, stage_dim] - x2[:, stage_dim].min() + 1.0
 
-        # apply lengthscale
-        x1_ = x1[:, time_dim].div(x1_stage_dep_time_lengthscale)
-        x2_ = x2[:, time_dim].div(x2_stage_dep_time_lengthscale)
+        x1_stage_dep_time_lengthscale = self.lengthscale * (x1_stage ** self.a)
+        x2_stage_dep_time_lengthscale = self.lengthscale * (x2_stage ** self.a)
 
-        # calculate the distance between inputs
-        diff = self.covar_dist(x1_, x2_, square_dist=True, **params)
-        return diff.div_(-2).exp_()
+        # Apply lengthscale to the time dimension (avoid in-place ops)
+        x1_time = x1[:, time_dim] / x1_stage_dep_time_lengthscale
+        x2_time = x2[:, time_dim] / x2_stage_dep_time_lengthscale
+
+        # compute squared distances using gpytorch helper and return RBF-like kernel
+        diff = self.covar_dist(x1_time, x2_time, square_dist=True, **params)
+        return diff.div(-2).exp()
 
 
 class PowerLawKernel(gpytorch.kernels.Kernel):
