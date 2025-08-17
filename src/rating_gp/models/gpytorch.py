@@ -23,6 +23,7 @@ from rating_gp.models.kernels import (
     SigmoidKernel,
     InvertedSigmoidKernel,
     LogWarpKernel,
+    HeteroskedasticWhiteNoiseKernel,
 )
 
 
@@ -69,23 +70,27 @@ class RatingGPMarginalGPyTorch(
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
         """
-        # assume a constant measurement error for testing
+        # Always flatten target
+        y = torch.as_tensor(y, dtype=torch.float32).reshape(-1)
+
         if y_unc is not None:
-            noise = y_unc
+            # Fallback to homoscedastic GaussianLikelihood using the mean of provided uncertainties
+            # to avoid potential indexing issues with FixedNoise in some environments.
+            noise_vec = torch.as_tensor(y_unc, dtype=torch.float32).reshape(-1)
+            init_noise = float(torch.clamp(noise_vec.mean(), min=1e-6).item())
+            self.likelihood = gpytorch.likelihoods.GaussianLikelihood(
+                noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
+            )
+            # Initialize to a reasonable value based on provided uncertainties
+            with torch.no_grad():
+                self.likelihood.noise.copy_(torch.tensor(init_noise, dtype=torch.float32))
         else:
-            noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
-        # TODO: Fix "GPInputWarning: You have passed data through a 
-        # FixedNoiseGaussianLikelihood that did not match the size of the fixed
-        # noise, *and* you did not specify noise. This is treated as a no-op."
-        self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
-            noise=noise,
-            #learn_additional_noise=False,
-            learn_additional_noise=True,
-            noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
-        )
+            # Default small homoscedastic noise
+            self.likelihood = gpytorch.likelihoods.GaussianLikelihood(
+                noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
+            )
 
         model = ExactGPModel(X, y, self.likelihood)
-
         return model
 
     def fit(self, covariates, target, target_unc=None, iterations=100, optimizer=None,
@@ -242,9 +247,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
 
         self.covar_module = (
-            sigmoid_lower * lower_kernel
+            sigmoid_lower * lower_kernel + HeteroskedasticWhiteNoiseKernel(num_data=train_x.size(0))
             +
             sigmoid_upper * upper_kernel_warped
+            #+
+            #HeteroskedasticWhiteNoiseKernel(num_data=train_x.size(0))
         )
 
 
@@ -365,7 +372,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=3, rate=1)
+        ls = GammaPrior(concentration=2, rate=1)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,

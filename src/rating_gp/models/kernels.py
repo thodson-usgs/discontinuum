@@ -1,5 +1,10 @@
 import gpytorch
+from gpytorch.kernels import Kernel
+from gpytorch.constraints import Positive
+from gpytorch.priors import GammaPrior
+
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,7 +12,7 @@ import torch.nn.functional as F
 from linear_operator.operators import MatmulLinearOperator, to_dense
 
 
-class TanhWarp(torch.nn.Module):
+class TanhWarp(nn.Module):
 
     def __init__(self):
         super(TanhWarp, self).__init__()
@@ -19,7 +24,7 @@ class TanhWarp(torch.nn.Module):
         return x + (self.a * torch.tanh(self.b * (x - self.c)))
 
 
-class LogWarp(torch.nn.Module):
+class LogWarp(nn.Module):
     """Logarithmic Warp
 
     Note: good smoother
@@ -32,7 +37,7 @@ class LogWarp(torch.nn.Module):
         return self.a * torch.log(x)
 
 
-class StageTimeKernel(gpytorch.kernels.Kernel):
+class StageTimeKernel(Kernel):
     """A time RBF kernel with a stage-variable length scale.
 
     A scalar length scale is multiplied by the stage, which is taken to a
@@ -114,7 +119,7 @@ class StageTimeKernel(gpytorch.kernels.Kernel):
         return diff.div_(-2).exp_()
 
 
-class PowerLawKernel(gpytorch.kernels.Kernel):
+class PowerLawKernel(Kernel):
     """Power Law Kernel
 
     This kernel is the rating curve power law equivalent to the linear kernel.
@@ -247,7 +252,7 @@ class PowerLawKernel(gpytorch.kernels.Kernel):
             return prod
 
 
-class SigmoidKernel(gpytorch.kernels.Kernel):
+class SigmoidKernel(Kernel):
     """Sigmoid Kernel
 
     This kernel can be multiplied by another kernel to give a breakpoint in the
@@ -371,7 +376,7 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 class InvertedSigmoidKernel(SigmoidKernel):
     def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
         # Properly initialize as a Kernel without registering a separate raw_b
-        gpytorch.kernels.Kernel.__init__(self)
+        Kernel.__init__(self)
         self.sigmoid_kernel = sigmoid_kernel
         if active_dims is not None:
             self.register_buffer('active_dims', torch.tensor(active_dims, dtype=torch.long))
@@ -417,7 +422,7 @@ class InvertedSigmoidKernel(SigmoidKernel):
             return prod
 
 
-class LogWarpKernel(gpytorch.kernels.Kernel):
+class LogWarpKernel(Kernel):
     """
     Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).
     """
@@ -438,7 +443,7 @@ class LogWarpKernel(gpytorch.kernels.Kernel):
         return self.base_kernel(x1_, x2_, **params)
 
 
-class PowerLawWarpKernel(gpytorch.kernels.Kernel):
+class PowerLawWarpKernel(Kernel):
     """
     Wraps a base kernel and applies a PowerLawTransform to the stage input.
     """
@@ -457,3 +462,63 @@ class PowerLawWarpKernel(gpytorch.kernels.Kernel):
         else:
             x2_ = None
         return self.base_kernel(x1_, x2_, **params)
+
+
+class HeteroskedasticWhiteNoiseKernel(Kernel):
+    """
+    A heteroskedastic white noise kernel with one learnable noise parameter per training point.
+    - Active automatically in training mode
+    - Inactive automatically in eval (prediction) mode
+    """
+
+    is_stationary = False
+
+    def __init__(self, num_data, **kwargs):
+        super().__init__(has_lengthscale=False)
+
+        # one learnable noise parameter per datapoint
+        self.register_parameter(
+            name="raw_noise",
+            parameter=torch.nn.Parameter(torch.zeros(num_data))
+        )
+
+        # constraint: positive
+        noise_constraint = Positive()
+
+        # add Gamma prior on noise
+        prior = GammaPrior(concentration=1.1, rate=0.05)
+        self.register_constraint("raw_noise", noise_constraint)
+        self.register_prior(
+            "noise_prior", prior, lambda m: m.noise, lambda m, v: m._set_noise(v)
+        )
+
+    @property
+    def noise(self):
+        return self.raw_noise_constraint.transform(self.raw_noise)
+
+    def _set_noise(self, value):
+        if not torch.is_tensor(value):
+            value = torch.as_tensor(value).to(self.raw_noise.device)
+        self.initialize(raw_noise=self.raw_noise_constraint.inverse_transform(value))
+
+    def forward(self, x1, x2, diag=False, **params):
+        # If model is in eval mode, disable this kernel
+        if not self.training:
+            if diag:
+                return torch.zeros(x1.shape[:-1], device=x1.device)
+            return torch.zeros(x1.size(0), x2.size(0), device=x1.device)
+
+        # Otherwise, heteroskedastic noise is active
+        # Important: Don't index noise using input values. Align by row position.
+        n1 = x1.size(-2)
+        if diag:
+            # Return per-datapoint noise for the first n1 rows
+            return self.noise[:n1]
+        else:
+            n2 = x2.size(-2)
+            if torch.equal(x1, x2):
+                # Square case: place noise on the diagonal
+                return torch.diag(self.noise[:n1])
+            else:
+                # Off-diagonal blocks are zero for pure white noise
+                return torch.zeros(n1, n2, device=x1.device)
