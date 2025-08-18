@@ -23,6 +23,8 @@ from rating_gp.models.kernels import (
     SigmoidKernel,
     InvertedSigmoidKernel,
     LogWarpKernel,
+    RFFNoiseKernel,
+    RFFNoiseModel,
 )
 
 
@@ -79,9 +81,9 @@ class RatingGPMarginalGPyTorch(
         # noise, *and* you did not specify noise. This is treated as a no-op."
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
-            #learn_additional_noise=False,
-            learn_additional_noise=True,
-            noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
+            learn_additional_noise=False,
+            # learn_additional_noise=True,
+            # noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
         )
 
         model = ExactGPModel(X, y, self.likelihood)
@@ -211,6 +213,12 @@ class ExactGPModel(gpytorch.models.ExactGP):
         stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
         b_min = np.quantile(stage, 0.10)
         b_max = np.quantile(stage, 0.90)
+
+        self.noise_model = RFFNoiseModel(n_d, num_features=64, min_noise=1e-6,
+                                         # was 1,1 and it worked with chalk, i think
+                                         # 1,3 was good but didnt hit shift
+                                         scale_prior=GammaPrior(1.0, 3.0))
+        self.hetero_kernel = RFFNoiseKernel(self.noise_model)
  
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
@@ -259,8 +267,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
         mean_x = self.mean_module(q)
 
         #covar_x = self.covar_module(x_t)
-        covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+        Kf = self.covar_module(x)
+        Kh = self.hetero_kernel(x, x)
+
+        return gpytorch.distributions.MultivariateNormal(mean_x, Kf + Kh)
 
     def cov_stage(self, ls_prior=None):
         eta = HalfNormalPrior(scale=1)

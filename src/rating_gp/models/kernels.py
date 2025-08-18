@@ -1,10 +1,20 @@
 import gpytorch
+import math
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from linear_operator.operators import MatmulLinearOperator, to_dense
+
+from gpytorch.constraints import Positive
+from gpytorch.priors import GammaPrior
+
+try:
+    from linear_operator.operators import DiagLinearOperator, ZeroLinearOperator
+except ImportError:
+    from gpytorch.lazy import DiagLazyTensor as DiagLinearOperator
+    from gpytorch.lazy import ZeroLazyTensor as ZeroLinearOperator
 
 
 class TanhWarp(torch.nn.Module):
@@ -248,82 +258,46 @@ class PowerLawKernel(gpytorch.kernels.Kernel):
 
 
 class SigmoidKernel(gpytorch.kernels.Kernel):
-    """Sigmoid Kernel
+    """Sigmoid gating kernel for switchpoints.
 
-    This kernel can be multiplied by another kernel to give a breakpoint in the
-    data using a sigmoid
+    K(x1, x2) = s(x1) s(x2)^T, where s(x) = 1 / (1 + exp(sharpness * (x - b))).
 
-    Note: The strength of the slope of the sigmoid is currently fixed to a steep
-    slope. This can be turned back into a parameter, but it cause numerical
-    instabilities during fitting.
+    The "sharpness" is fixed (non-trainable) for stability; the location parameter b
+    is constrained and can carry an optional prior.
     """
+
     def __init__(
         self,
-        # a_prior=None,
-        # a_constraint=None,
         b_constraint,
         b_prior=None,
-        #b_constraint=gpytorch.constraints.Positive(),
+        sharpness: float = 20.0,
         **kwargs,
-        ):
-        """Initialize the kernel
-
-        Parameters
-        ----------
-        b_prior : Prior
-            The prior to impose on `b`.
-        b_constraint : Constraint
-            The constraint to impose on `b`
-        """
+    ):
         super().__init__(**kwargs)
 
-        self.a = 20
-        # self.a = torch.nn.Parameter(torch.ones(*self.batch_shape, 1, 1) * 40)
-        # self.register_parameter(
-        #     name='raw_a',
-        #     parameter=self.a)
-        
-        # initialize raw_b parameter such that b starts within [l, u]
+        # Fixed sharpness as a buffer for device/dtype consistency
+        self.register_buffer("sharpness", torch.tensor(float(sharpness)))
+
+        # register raw_b parameter with an initial value within [l, u]
         u = b_constraint.upper_bound
         l = b_constraint.lower_bound
         init_b = l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
-        # register raw_b parameter
         self.register_parameter(
-            name='raw_b',
-            parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1)))
+            name="raw_b",
+            parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1))),
         )
 
-        b_prior = gpytorch.priors.NormalPrior(0, 1)
-
-        #self.register_prior(
-        #    "b_prior",
-        #    gpytorch.priors.NormalPrior(0, 1),
-        #    lambda module: module.b,
-        #)
-
-        # register the constraints
-        # if a_constraint is None:
-        #     a_constraint = gpytorch.constraints.Positive()
-        # self.register_constraint("raw_a", a_constraint)
         if b_constraint is not None:
             self.register_constraint("raw_b", b_constraint)
-        # set initial value using inverse transform of the constraint
         self.initialize(raw_b=self.raw_b_constraint.inverse_transform(init_b))
 
-        # set the parameter prior
-        # if a_prior is not None:
-        #     self.register_prior(
-        #         "a_prior",
-        #         a_prior,
-        #         lambda m: m.a,
-        #         lambda m, v : m._set_a(v),
-        #     )
+        # Attach prior if provided
         if b_prior is not None:
             self.register_prior(
                 "b_prior",
                 b_prior,
                 lambda m: m.b,
-                lambda m, v : m._set_b(v),
+                lambda m, v: m._set_b(v),
             )
 
     # set the 'actual' paramters
@@ -353,13 +327,15 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
             value = torch.as_tensor(value).to(self.raw_b)
         self.initialize(raw_b=self.raw_b_constraint.inverse_transform(value))
 
-    def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
+    def forward(self, x1, x2=None, last_dim_is_batch=False, diag=False, **params):
+        if x2 is None:
+            x2 = x1
         # sigmoid = 1/(1+exp(-a(x-b)))
         # `a` is the sharpness of the slope, larger absolute values = sharper slope
         # the sign of `a` determines which side of the curve is 0 and the other is 1
         # `b` is the offset of of the curve at a sigmoid value of 0.5
-        x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
-        x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
+        x1_ = torch.sigmoid(-self.sharpness * (x1 - self.b))
+        x2_ = torch.sigmoid(-self.sharpness * (x2 - self.b))
         
         prod = MatmulLinearOperator(x1_, x2_.transpose(-2, -1))
         if diag:
@@ -367,31 +343,15 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         else:
             return prod
 
-# Inverted sigmoid kernel as a proper GPyTorch kernel
-class InvertedSigmoidKernel(SigmoidKernel):
-    def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
-        # Properly initialize as a Kernel without registering a separate raw_b
-        gpytorch.kernels.Kernel.__init__(self)
+class InvertedSigmoidKernel(gpytorch.kernels.Kernel):
+    """Inverted sigmoid kernel using a shared SigmoidKernel's parameters.
+
+    K(x1, x2) = (1 - s(x1)) (1 - s(x2))^T, where s(x) is from the provided SigmoidKernel.
+    """
+
+    def __init__(self, sigmoid_kernel: SigmoidKernel, active_dims=None, **kwargs):
+        super().__init__(active_dims=active_dims, **kwargs)
         self.sigmoid_kernel = sigmoid_kernel
-        if active_dims is not None:
-            self.register_buffer('active_dims', torch.tensor(active_dims, dtype=torch.long))
-
-    @property
-    def a(self):
-        return self.sigmoid_kernel.a
-
-    @a.setter
-    def a(self, value):
-        self.sigmoid_kernel.a = value
-
-    # @property
-    # def a(self):
-    #     """Delegate a parameter to the original SigmoidKernel."""
-    #     return self.sigmoid_kernel.a
-
-    # @a.setter
-    # def a(self, value):
-    #     self.sigmoid_kernel.a = value 
 
     @property
     def b(self):
@@ -402,10 +362,14 @@ class InvertedSigmoidKernel(SigmoidKernel):
     def b(self, value):
         self.sigmoid_kernel.b = value
 
-    def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
-        # Compute standard sigmoid using shared b
-        x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
-        x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
+    def forward(self, x1, x2=None, last_dim_is_batch=False, diag=False, **params):
+        if x2 is None:
+            x2 = x1
+        # Compute standard sigmoid using shared b and shared sharpness from base kernel
+        sharpness = self.sigmoid_kernel.sharpness
+        b = self.sigmoid_kernel.b
+        x1_ = torch.sigmoid(-sharpness * (x1 - b))
+        x2_ = torch.sigmoid(-sharpness * (x2 - b))
         # Invert: 1 - sigmoid
         x1_inv = 1.0 - x1_
         x2_inv = 1.0 - x2_
@@ -457,3 +421,103 @@ class PowerLawWarpKernel(gpytorch.kernels.Kernel):
         else:
             x2_ = None
         return self.base_kernel(x1_, x2_, **params)
+
+# ---- Random Fourier Features ----
+class RFFFeatures(torch.nn.Module):
+    def __init__(self, in_dim, num_features=128, lengthscale=1.0):
+        super().__init__()
+        self.register_buffer("omega", torch.randn(in_dim, num_features) / float(lengthscale))
+        self.register_buffer("b", 2 * math.pi * torch.rand(num_features))
+
+    def forward(self, x):  # [n,d] -> [n,D]
+        proj = x @ self.omega
+        return math.sqrt(2.0 / self.omega.shape[1]) * torch.cos(proj + self.b)
+
+
+# ---- Heteroskedastic noise via RFF + global (positive) scale with a Gamma prior ----
+class RFFNoiseModel(gpytorch.Module):
+    """Heteroskedastic noise model using Random Fourier Features.
+
+    Produces per-sample noise variances via:
+        var(x) = min_noise + noise_scale * softplus(w^T phi(x) + b)
+
+    Parameters are registered following gpytorch conventions (raw_*, constraint, property).
+    An optional prior can be attached to the positive ``noise_scale``.
+
+    Args:
+        in_dim: Input dimensionality (D).
+        num_features: Number of random Fourier features to use.
+        min_noise: Non-zero variance floor for stability.
+        scale_prior: Optional prior on the positive ``noise_scale``.
+        init_scale: Optional initial value for ``noise_scale``.
+    """
+
+    def __init__(self, in_dim: int, num_features: int = 128, min_noise: float = 1e-6,
+                 scale_prior: GammaPrior | None = None, init_scale: float | None = None):
+        super().__init__()
+        self.rff = RFFFeatures(in_dim, num_features)
+        self.linear = torch.nn.Linear(num_features, 1)
+        self.min_noise = float(min_noise)
+        self.softplus = torch.nn.Softplus(beta=1.0, threshold=20.0)
+
+        # Global positive scale parameter on the heteroskedastic variance
+        self.register_parameter("raw_noise_scale", torch.nn.Parameter(torch.tensor(0.0)))
+        self.register_constraint("raw_noise_scale", Positive())
+
+        # Optionally initialize the scale
+        if init_scale is not None:
+            self._set_noise_scale(torch.as_tensor(init_scale))
+
+        # Initialize to produce near-constant variance initially
+        torch.nn.init.zeros_(self.linear.weight)
+        torch.nn.init.zeros_(self.linear.bias)
+
+        if scale_prior is not None:
+            self.register_prior(
+                "noise_scale_prior",
+                scale_prior,
+                lambda m: m.noise_scale,
+                lambda m, v: m._set_noise_scale(v),
+            )
+
+    @property
+    def noise_scale(self):
+        return self.raw_noise_scale_constraint.transform(self.raw_noise_scale)
+
+    def _set_noise_scale(self, value):
+        self.raw_noise_scale.data = self.raw_noise_scale_constraint.inverse_transform(value)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Return per-sample variance σ(x)^2.
+
+        Accepts (N, D) or (..., N, D) and returns (N) or (..., N).
+        """
+        z = self.rff(x)
+        raw = self.linear(z).squeeze(-1)
+        var = self.noise_scale * self.softplus(raw)
+        return var + self.min_noise
+
+
+# ---- Kernel that adds heteroskedastic variance only on K(X, X) ----
+class RFFNoiseKernel(gpytorch.kernels.Kernel):
+    def __init__(self, noise_model: RFFNoiseModel):
+        super().__init__(has_lengthscale=False)
+        self.noise_model = noise_model
+
+    def forward(self, x1, x2=None, diag: bool = False, **params):
+        # Treat x2=None as x1
+        if x2 is None:
+            x2 = x1
+        same = (x1.shape == x2.shape) and torch.equal(x1, x2)
+        if same:
+            d = self.noise_model(x1)
+            if diag:
+                return d
+            return DiagLinearOperator(d)
+        else:
+            if diag:
+                return x1.new_zeros(x1.shape[:-2] + (x1.shape[-2],))
+            # Return a low-rank zero operator using only Tensor arguments to satisfy representation constraints
+            left = x1.new_zeros(x1.shape[:-2] + (x1.shape[-2], 1))
+            right_t = x2.new_zeros(x2.shape[:-2] + (1, x2.shape[-2]))
+            return MatmulLinearOperator(left, right_t)

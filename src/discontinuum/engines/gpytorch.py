@@ -183,7 +183,7 @@ class MarginalGPyTorch(BaseModel):
             optimizer: Optional[str] = None,
             learning_rate: float = None,
             early_stopping: bool = False,
-            patience: int = 60,
+            patience: int = 200,
             scheduler: bool = True,
             resume: bool = False,
             penalty_callback: 'Optional[Callable[[], torch.Tensor]]' = None,
@@ -210,7 +210,7 @@ class MarginalGPyTorch(BaseModel):
         early_stopping : bool, optional
             Whether to use early stopping. The default is False.
         patience : int, optional
-            Number of iterations to wait without improvement before stopping. The default is 60.
+            Number of iterations to wait without improvement before stopping. The default is 200.
         scheduler : bool, optional
             Whether to use a learning rate scheduler. The default is True.
         penalty_callback : callable, optional
@@ -326,12 +326,12 @@ class MarginalGPyTorch(BaseModel):
             scheduler_obj = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer_obj,
                 mode='min',
-                factor=0.7,
-                patience=max(20, patience // 2),
-                threshold=1e-4,
+                factor=0.8,  # Less aggressive reduction
+                patience=max(50, patience // 3),  # Much more patient
+                threshold=1e-5,  # Require larger improvements to avoid reduction
                 threshold_mode='rel',
-                min_lr=1e-6,
-                cooldown=10,
+                min_lr=1e-7,  # Allow lower learning rates
+                cooldown=20,  # Longer cooldown period
             )
             # Restore scheduler if resuming
             if can_restore_optimizer_state and resume_info.get('scheduler_state_dict') is not None:
@@ -362,7 +362,7 @@ class MarginalGPyTorch(BaseModel):
         pbar = tqdm.tqdm(range(remaining_iterations), ncols=100, desc=f"Training {start_iteration}->{iterations}")
         best_obj = float('inf')
         patience_counter = 0
-        min_improvement = 1e-6
+        min_improvement = 1e-8  # More stringent improvement threshold
         
         nan_loss_counter = 0
         try:
@@ -431,13 +431,6 @@ class MarginalGPyTorch(BaseModel):
                     optimizer_obj.step()
                     if scheduler_obj is not None:
                         scheduler_obj.step(obj_item)
-
-                    # Early stopping logic (independent of scheduler)
-                    if obj_item < best_obj - min_improvement:
-                        best_obj = obj_item
-                        patience_counter = 0
-                    else:
-                        patience_counter += 1
                     
                     current_lr = optimizer_obj.param_groups[0]['lr']
                     if early_stopping and patience_counter >= patience:
