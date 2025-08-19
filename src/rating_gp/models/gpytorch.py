@@ -214,11 +214,21 @@ class ExactGPModel(gpytorch.models.ExactGP):
         b_min = np.quantile(stage, 0.10)
         b_max = np.quantile(stage, 0.90)
 
-        self.noise_model = RFFNoiseModel(n_d, num_features=64, min_noise=1e-6,
-                                         # was 1,1 and it worked with chalk, i think
-                                         # 1,3 was good but didnt hit shift
-                                         scale_prior=GammaPrior(1.0, 3.0))
-        self.hetero_kernel = RFFNoiseKernel(self.noise_model)
+        num_features = 4 * train_x.shape[0] // n_d
+        self.noise_model = RFFNoiseModel(
+            n_d,
+            num_features=num_features,
+            min_noise=1e-6,
+            # was 1,1 and it worked with chalk, i think
+            # 1,3 was good but didnt hit shift
+            #scale_prior=HalfNormalPrior(0.01),
+            # scale_prior=GammaPrior(0.5, 0.5),
+            scale_prior=GammaPrior(0.5, 2.0),
+        )
+        self.hetero_kernel = ScaleKernel(
+            RFFNoiseKernel(self.noise_model),
+            eta_prior=HalfNormalPrior(scale=0.0001),
+        )
  
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
