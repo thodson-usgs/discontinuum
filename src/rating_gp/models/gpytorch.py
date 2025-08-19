@@ -29,20 +29,30 @@ from rating_gp.models.kernels import (
 
 
 class PowerLawTransform(torch.nn.Module):
+    """Stable power-law transform: a + b * log(x - c_eff).
+
+    - Ensures the log argument stays positive even when stage/flow is ~0.
+    - Avoids .data mutations; uses functional clamping that preserves gradients.
+    - Clamps c below the minimum of x values.
     """
-    """
+
     def __init__(self):
         super(PowerLawTransform, self).__init__()
         self.a = torch.nn.Parameter(torch.randn(1))
-        # initialize b according to Manning's equation (refer to clamp)
-        # Use proper parameter initialization to maintain gradient flow
+        # initialize b around Manning-like regime (~1.3) while keeping it learnable
         self.b = torch.nn.Parameter(torch.randn(1) + 1.3)
-        # stage is scaled to 1-2, so initialize c to 0-1
+        # c is a learned offset; will be clamped below median of x each forward
         self.c = torch.nn.Parameter(torch.rand(1))
+        # Small epsilon for numerical stability (log argument > 0)
+        self.register_buffer("eps", torch.tensor(1e-6))
 
-    def forward(self, x):
-        self.c.data = torch.clamp(self.c.data, max=x.min()-1e-6)
-        return self.a + (self.b * torch.log(x - self.c))
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Clamp c below minimum of x (old style but functional)
+        eps = self.eps.to(dtype=x.dtype, device=x.device)
+        c_eff = torch.clamp(self.c, max=x.min() - eps)
+        # Clamp slope b functionally to a sane range (no .data mutation)
+        b_eff = self.b.clamp(1.2, 2.5)
+        return self.a + b_eff * torch.log(x - c_eff)
 
 
 class RatingGPMarginalGPyTorch(
@@ -267,7 +277,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
 
     def forward(self, x):
-        self.powerlaw.b.data.clamp_(1.2, 2.5)
         #x = x.clone()
         #q = self.powerlaw(x[:, self.stage_dim])
         #x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
