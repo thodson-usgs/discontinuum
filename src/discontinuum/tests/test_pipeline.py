@@ -1,5 +1,13 @@
+import sys
+from pathlib import Path
+
 import numpy as np
-from discontinuum.pipeline import TimeTransformer
+from scipy.stats import norm
+
+# Ensure local package is imported before any installed version
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from discontinuum.pipeline import TimeTransformer, LogErrorPipeline
 
 
 def test_time_transform():
@@ -26,3 +34,20 @@ def test_time_transform():
 
     # Check if the inverse transformed data matches the original data
     np.testing.assert_equal(data, inverse_transformed_data)
+
+
+def test_log_error_pipeline_ci():
+    """Ensure LogErrorPipeline.ci computes multiplicative CI correctly."""
+    pipeline = LogErrorPipeline()
+    mean = 100.0
+    se = 0.1
+    lower, upper = pipeline.ci(mean, se, ci=0.95)
+
+    alpha = (1 - 0.95) / 2
+    zscore = norm.ppf(1 - alpha)
+    cb = np.exp(zscore * se)
+    expected_lower = mean / cb
+    expected_upper = mean * cb
+
+    np.testing.assert_allclose(lower, expected_lower)
+    np.testing.assert_allclose(upper, expected_upper)

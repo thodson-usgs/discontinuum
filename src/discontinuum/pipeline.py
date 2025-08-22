@@ -393,7 +393,7 @@ class LogErrorPipeline(ErrorPipeline):
         """
         alpha = (1 - ci)/2
         zscore = norm.ppf(1-alpha)
-        cb = se**zscore
+        cb = np.exp(zscore * se)
         lower = mean / cb
         upper = mean * cb
         return lower, upper
