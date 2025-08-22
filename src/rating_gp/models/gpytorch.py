@@ -25,7 +25,10 @@ from rating_gp.models.kernels import (
     InvertedSigmoidKernel,
     LogWarpKernel,
 )
-from rating_gp.models.noise import HeteroskedasticGaussianLikelihood
+from rating_gp.models.noise import (
+    HeteroskedasticGaussianLikelihood,
+    GaussianProcessGaussianLikelihood,
+)
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -71,17 +74,20 @@ class RatingGPMarginalGPyTorch(
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
         """
-        # Learn a per-observation noise term to handle occasional large noise spikes
-        if y_unc is not None:
-            noise = y_unc.reshape(-1).clamp_min(1e-4)
+        if getattr(self.model_config, "noise_model", "heteroskedastic") == "gp":
+            self.likelihood = GaussianProcessGaussianLikelihood()
         else:
-            noise = (0.1 ** 2) * torch.ones(y.shape[0])
+            # Learn a per-observation noise term to handle occasional large noise spikes
+            if y_unc is not None:
+                noise = y_unc.reshape(-1).clamp_min(1e-4)
+            else:
+                noise = (0.1 ** 2) * torch.ones(y.shape[0])
 
-        self.likelihood = HeteroskedasticGaussianLikelihood(
-            noise=noise,
-            noise_prior=HorseshoePrior(scale=0.1),
-            noise_constraint=gpytorch.constraints.Interval(1e-4, 1.0),
-        )
+            self.likelihood = HeteroskedasticGaussianLikelihood(
+                noise=noise,
+                noise_prior=HorseshoePrior(scale=0.1),
+                noise_constraint=gpytorch.constraints.Interval(1e-4, 1.0),
+            )
 
         model = ExactGPModel(X, y, self.likelihood)
 

@@ -3,6 +3,7 @@ import gpytorch
 from gpytorch.likelihoods import _GaussianLikelihoodBase
 from gpytorch.likelihoods.noise_models import Noise
 from gpytorch.constraints import GreaterThan
+from gpytorch.kernels import ScaleKernel, RBFKernel
 from linear_operator.operators import DiagLinearOperator
 
 
@@ -74,3 +75,33 @@ class HeteroskedasticGaussianLikelihood(_GaussianLikelihoodBase):
     @noise.setter
     def noise(self, value):
         self.noise_covar._set_noise(value)
+
+
+class GaussianProcessNoise(Noise):
+    """Noise model using a Gaussian process over time and stage.
+
+    Uses a two-dimensional RBF kernel to allow the noise level to vary
+    smoothly across the input space. The resulting covariance can be
+    marginalized analytically with ExactGP models.
+    """
+
+    def __init__(self, kernel: gpytorch.kernels.Kernel | None = None):
+        super().__init__()
+        if kernel is None:
+            kernel = ScaleKernel(RBFKernel(ard_num_dims=2))
+        self.covar_module = kernel
+
+    def forward(self, x, shape=None, noise=None, **kwargs):
+        return self.covar_module(x)
+
+
+class GaussianProcessGaussianLikelihood(_GaussianLikelihoodBase):
+    """Gaussian likelihood with a Gaussian process noise covariance."""
+
+    def __init__(self, kernel: gpytorch.kernels.Kernel | None = None):
+        noise_covar = GaussianProcessNoise(kernel=kernel)
+        super().__init__(noise_covar=noise_covar)
+
+    @property
+    def covar_module(self):
+        return self.noise_covar.covar_module

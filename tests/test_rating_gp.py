@@ -7,6 +7,7 @@ from matplotlib.colorbar import Colorbar
 
 from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP
+from rating_gp.models.base import ModelConfig
 
 
 @pytest.fixture
@@ -62,5 +63,17 @@ def test_rating_gp_with_monotonic_penalty(training_data):
         monotonic_penalty_weight=0.5,
         # keep grid small for speed
         grid_size=16,
+    )
+    assert model.is_fitted
+
+
+def test_rating_gp_with_gp_noise(training_data):
+    config = ModelConfig(noise_model="gp")
+    model = RatingGP(model_config=config)
+    model.fit(
+        target=training_data['discharge'],
+        covariates=training_data[['stage']],
+        iterations=5,
+        scheduler=False,
     )
     assert model.is_fitted
