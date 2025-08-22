@@ -213,21 +213,21 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.mean_module = NoOpMean()
 
-        # Use stage (not y) for sigmoid kernel constraint
-        stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
-        b_min = np.quantile(stage, 0.10)
-        b_max = np.quantile(stage, 0.90)
- 
+        # Use stage (not y) to derive a prior range for the sigmoid switch point
+        stage = train_x[:, self.stage_dim[0]]
+        b_min = float(np.quantile(stage, 0.10))
+        b_max = float(np.quantile(stage, 0.90))
+        b_prior = SmoothedBoxPrior(b_min, b_max, sigma=0.05)
+
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
             active_dims=self.stage_dim,
-            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
+            b_prior=b_prior,
         )
- 
+
         sigmoid_upper = InvertedSigmoidKernel(
             sigmoid_kernel=sigmoid_lower,
             active_dims=self.stage_dim,
-            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
  
         # Compose the upper kernel branch and wrap in LogWarpKernel
