@@ -15,6 +15,7 @@ from gpytorch.priors import (
     GammaPrior,
     HalfNormalPrior,
     NormalPrior,
+    SmoothedBoxPrior,
 )
 from rating_gp.models.priors import HorseshoePrior
 
@@ -242,7 +243,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         lower_kernel = (
             self.cov_shift(
                 eta_prior=HalfNormalPrior(scale=2.0),
-                time_prior=GammaPrior(concentration=1, rate=7),
             )
         )
 
@@ -283,6 +283,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         if eta_prior is None:
             eta_prior = HalfNormalPrior(scale=1)
 
+        if ls_prior is None:
+            ls_prior = SmoothedBoxPrior(0.1, 5.0)
+
         # Base Matern kernel for long-term trends
         return ScaleKernel(
             MaternKernel(
@@ -295,10 +298,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
     
     def cov_shift(self, eta_prior=None, time_prior=None):
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.3) 
+            eta_prior = HalfNormalPrior(scale=0.3)
 
         if time_prior is None:
-            time_prior = GammaPrior(concentration=1, rate=7)
+            time_prior = SmoothedBoxPrior(0.1, 1.0, sigma=0.05)
 
         return ScaleKernel(
             MaternKernel(
