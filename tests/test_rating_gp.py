@@ -1,9 +1,15 @@
+import sys
+from pathlib import Path
+
 import pytest
 import numpy as np
 import pandas as pd
 import xarray as xr
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
+
+# Ensure local packages are imported before any installed versions
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP

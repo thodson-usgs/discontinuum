@@ -1,8 +1,14 @@
+import sys
+from pathlib import Path
+
 import pytest
 import xarray as xr
 import pandas as pd
 import numpy as np
 from matplotlib.axes import Axes
+
+# Ensure local packages are imported before any installed versions
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 
 from loadest_gp.providers import usgs
