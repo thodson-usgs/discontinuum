@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Literal
 
 from dataclasses import dataclass
 
@@ -14,9 +14,6 @@ from discontinuum.pipeline import (
     UnitPipeline,
 )
 # from rating_gp.pipeline import LogUncertaintyPipeline
-
-if TYPE_CHECKING:
-    from typing import Literal
 
 @dataclass
 class ModelConfig:

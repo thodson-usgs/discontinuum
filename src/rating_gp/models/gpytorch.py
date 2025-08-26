@@ -15,6 +15,7 @@ from gpytorch.priors import (
     GammaPrior,
     HalfNormalPrior,
     NormalPrior,
+    SmoothedBoxPrior,
 )
 
 from rating_gp.models.base import RatingDataMixin, ModelConfig
@@ -73,13 +74,10 @@ class RatingGPMarginalGPyTorch(
         if y_unc is not None:
             noise = y_unc
         else:
-            noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
-        # TODO: Fix "GPInputWarning: You have passed data through a 
-        # FixedNoiseGaussianLikelihood that did not match the size of the fixed
-        # noise, *and* you did not specify noise. This is treated as a no-op."
+            noise = 0.1 ** 2 * torch.ones(y.shape[0]).reshape(1, -1)
+
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
-            #learn_additional_noise=False,
             learn_additional_noise=True,
             noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
         )
@@ -162,7 +160,7 @@ class RatingGPMarginalGPyTorch(
             self.likelihood.eval()
             try:
                 with gpytorch.settings.fast_pred_var():
-                    mean = self.likelihood(self.model(x_grid)).mean
+                    mean = self.likelihood(self.model(x_grid), x_grid).mean
             finally:
                 if was_model_training:
                     self.model.train()
@@ -207,21 +205,21 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.mean_module = NoOpMean()
 
-        # Use stage (not y) for sigmoid kernel constraint
-        stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
-        b_min = np.quantile(stage, 0.10)
-        b_max = np.quantile(stage, 0.90)
- 
+        # Use stage (not y) to derive a prior range for the sigmoid switch point
+        stage = train_x[:, self.stage_dim[0]]
+        b_min = float(np.quantile(stage, 0.10))
+        b_max = float(np.quantile(stage, 0.90))
+        b_prior = SmoothedBoxPrior(b_min, b_max, sigma=0.05)
+
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
             active_dims=self.stage_dim,
-            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
+            b_prior=b_prior,
         )
- 
+
         sigmoid_upper = InvertedSigmoidKernel(
             sigmoid_kernel=sigmoid_lower,
             active_dims=self.stage_dim,
-            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
  
         # Compose the upper kernel branch and wrap in LogWarpKernel
@@ -237,7 +235,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         lower_kernel = (
             self.cov_shift(
                 eta_prior=HalfNormalPrior(scale=2.0),
-                time_prior=GammaPrior(concentration=1, rate=7),
             )
         )
 
@@ -278,6 +275,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         if eta_prior is None:
             eta_prior = HalfNormalPrior(scale=1)
 
+        if ls_prior is None:
+            ls_prior = SmoothedBoxPrior(0.1, 5.0)
+
         # Base Matern kernel for long-term trends
         return ScaleKernel(
             MaternKernel(
@@ -290,10 +290,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
     
     def cov_shift(self, eta_prior=None, time_prior=None):
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.3) 
+            eta_prior = HalfNormalPrior(scale=0.3)
 
         if time_prior is None:
-            time_prior = GammaPrior(concentration=1, rate=7)
+            time_prior = SmoothedBoxPrior(0.1, 1.0, sigma=0.05)
 
         return ScaleKernel(
             MaternKernel(

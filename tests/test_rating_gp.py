@@ -5,7 +5,6 @@ import xarray as xr
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
 
-from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP
 
 
@@ -64,3 +63,5 @@ def test_rating_gp_with_monotonic_penalty(training_data):
         grid_size=16,
     )
     assert model.is_fitted
+
+
