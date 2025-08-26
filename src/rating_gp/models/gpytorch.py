@@ -12,7 +12,6 @@ from gpytorch.kernels import (
     PeriodicKernel,
 )
 from gpytorch.priors import (
-    GammaPrior,
     HalfNormalPrior,
     NormalPrior,
     SmoothedBoxPrior,
@@ -275,8 +274,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_stage(self, ls_prior=None):
-        eta = HalfNormalPrior(scale=1)
-        
+        eta = HalfNormalPrior(scale=0.5)
+        if ls_prior is None:
+            ls_prior = SmoothedBoxPrior(0.2, 5.0)
+
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
@@ -288,10 +289,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
     def cov_time(self, ls_prior=None, eta_prior=None):
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=1)
+            eta_prior = HalfNormalPrior(scale=0.5)
 
         if ls_prior is None:
-            ls_prior = SmoothedBoxPrior(0.1, 5.0)
+            ls_prior = SmoothedBoxPrior(0.3, 10.0)
 
         # Base Matern kernel for long-term trends
         return ScaleKernel(
@@ -310,16 +311,16 @@ class ExactGPModel(gpytorch.models.ExactGP):
         if time_prior is None:
             time_prior = SmoothedBoxPrior(0.1, 1.0, sigma=0.05)
 
+        stage_prior = SmoothedBoxPrior(0.2, 4.0)
+
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=1, rate=1),
+                lengthscale_prior=stage_prior,
                 nu=2.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                # extreme prior for fast shift at 12413470
-                #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
                 lengthscale_prior=time_prior,
                 nu=1.5,
             ),
@@ -332,16 +333,19 @@ class ExactGPModel(gpytorch.models.ExactGP):
         Smooth, time-dependent bending kernel for switchpoint.
         """
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.2) 
+            eta_prior = HalfNormalPrior(scale=0.2)
+
+        stage_prior = SmoothedBoxPrior(0.2, 4.0)
+        time_prior = SmoothedBoxPrior(0.1, 2.0)
 
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=2, rate=1),
+                lengthscale_prior=stage_prior,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                lengthscale_prior=GammaPrior(concentration=3, rate=2),
+                lengthscale_prior=time_prior,
             ),
             outputscale_prior=eta_prior,
         )
@@ -351,10 +355,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
         Smooth, time-dependent periodic kernel for seasonal effects.
         """
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.5) 
+            eta_prior = HalfNormalPrior(scale=0.3)
 
         if ls_prior is None:
-            ls_prior = GammaPrior(concentration=2, rate=4)
+            ls_prior = SmoothedBoxPrior(0.2, 2.0)
 
         return ScaleKernel(
             PeriodicKernel(
@@ -376,11 +380,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
         Smooth, time-independent base rating curve using a Matern kernel on stage.
         """
         if eta_prior is None:
-            eta = HalfNormalPrior(scale=1.0)
+            eta = HalfNormalPrior(scale=0.5)
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=3, rate=1)
+        ls = SmoothedBoxPrior(0.3, 10.0)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,

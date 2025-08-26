@@ -19,7 +19,7 @@ from discontinuum.pipeline import (
 class ModelConfig:
     """ """
     transform: Literal["log", "standard"] = "log"
-    noise_model: Literal["heteroskedastic", "gp", "fixed"] = "heteroskedastic"
+    noise_model: Literal["heteroskedastic", "gp", "fixed"] = "gp"
 
 
 class RatingDataMixin:

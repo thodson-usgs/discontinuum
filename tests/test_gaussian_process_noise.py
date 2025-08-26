@@ -29,6 +29,6 @@ def test_gaussian_process_gaussian_likelihood_has_priors():
     assert isinstance(covar.outputscale_prior, gpytorch.priors.SmoothedBoxPrior)
     # priors should keep lengthscale and outputscale within reasonable bounds
     assert float(base.lengthscale_prior.a) > 0.0
-    assert float(base.lengthscale_prior.b) <= 0.5
+    assert float(base.lengthscale_prior.b) <= 0.25
     assert float(covar.outputscale_prior.a) > 0.0
-    assert float(covar.outputscale_prior.b) <= 0.25
+    assert float(covar.outputscale_prior.b) <= 4.0

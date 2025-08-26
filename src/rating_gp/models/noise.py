@@ -96,14 +96,17 @@ class GaussianProcessNoise(Noise):
         super().__init__()
         if kernel is None:
             if lengthscale_prior is None:
-                lengthscale_prior = SmoothedBoxPrior(0.05, 0.5)
+                lengthscale_prior = SmoothedBoxPrior(0.01, 0.25)
             if outputscale_prior is None:
-                outputscale_prior = SmoothedBoxPrior(1e-6, 0.25)
+                outputscale_prior = SmoothedBoxPrior(1e-6, 4.0)
             base_kernel = RBFKernel(ard_num_dims=2, lengthscale_prior=lengthscale_prior)
             kernel = ScaleKernel(base_kernel, outputscale_prior=outputscale_prior)
         self.covar_module = kernel
 
     def forward(self, x, shape=None, noise=None, **kwargs):
+        # some call sites provide inputs as a singleton list/tuple
+        if isinstance(x, (list, tuple)):
+            x = x[0]
         return self.covar_module(x)
 
 
