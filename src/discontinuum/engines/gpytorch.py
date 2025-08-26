@@ -373,7 +373,7 @@ class MarginalGPyTorch(BaseModel):
                 output = self.model(train_x)
                 
                 try:
-                    nll = -mll(output, train_y)
+                    nll = -mll(output, train_y, train_x)
                 except Exception as e:
                     nan_loss_counter += 1
                     if nan_loss_counter > 10:
@@ -667,7 +667,7 @@ class MarginalGPyTorch(BaseModel):
         self.likelihood.eval()
 
         with torch.no_grad(), gpytorch.settings.fast_pred_var():
-            observed_pred = self.likelihood(self.model(x))
+            observed_pred = self.likelihood(self.model(x), x)
             mu = observed_pred.mean
             var = observed_pred.variance
 

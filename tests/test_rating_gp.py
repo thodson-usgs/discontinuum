@@ -5,8 +5,12 @@ import xarray as xr
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
 
-from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP
+from rating_gp.models.base import ModelConfig
+from rating_gp.models.noise import (
+    HeteroskedasticGaussianLikelihood,
+    GaussianProcessGaussianLikelihood,
+)
 
 
 @pytest.fixture
@@ -32,12 +36,13 @@ def training_data():
 
 def test_rating_gp(training_data):
 
-    model = RatingGP()
+    model = RatingGP(model_config=ModelConfig())
     model.fit(target=training_data['discharge'],
               covariates=training_data[['stage']],
               target_unc=training_data['discharge_unc'],
               iterations=10)
     assert model.is_fitted
+    assert isinstance(model.likelihood, GaussianProcessGaussianLikelihood)
 
     assert isinstance(model.plot_stage(), Axes)
     assert isinstance(model.plot_discharge(), Axes)
@@ -51,7 +56,7 @@ def test_rating_gp(training_data):
 
 
 def test_rating_gp_with_monotonic_penalty(training_data):
-    model = RatingGP()
+    model = RatingGP(model_config=ModelConfig(noise_model="heteroskedastic"))
     # Run a short training with the monotonicity penalty enabled to ensure it integrates
     model.fit(
         target=training_data['discharge'],
@@ -64,3 +69,6 @@ def test_rating_gp_with_monotonic_penalty(training_data):
         grid_size=16,
     )
     assert model.is_fitted
+    assert isinstance(model.likelihood, HeteroskedasticGaussianLikelihood)
+
+

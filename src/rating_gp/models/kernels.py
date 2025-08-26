@@ -259,71 +259,34 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
     """
     def __init__(
         self,
-        # a_prior=None,
-        # a_constraint=None,
-        b_constraint,
-        b_prior=None,
-        #b_constraint=gpytorch.constraints.Positive(),
+        b_prior,
         **kwargs,
-        ):
-        """Initialize the kernel
+    ):
+        """Initialize the kernel.
 
         Parameters
         ----------
         b_prior : Prior
-            The prior to impose on `b`.
-        b_constraint : Constraint
-            The constraint to impose on `b`
+            The prior to impose on ``b``. Typically a ``SmoothedBoxPrior`` that
+            softly restricts the switch point to lie within the observed data
+            range.
         """
         super().__init__(**kwargs)
 
         self.a = 20
-        # self.a = torch.nn.Parameter(torch.ones(*self.batch_shape, 1, 1) * 40)
-        # self.register_parameter(
-        #     name='raw_a',
-        #     parameter=self.a)
-        
-        # initialize raw_b parameter such that b starts within [l, u]
-        u = b_constraint.upper_bound
-        l = b_constraint.lower_bound
-        init_b = l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
-        # register raw_b parameter
-        self.register_parameter(
-            name='raw_b',
-            parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1)))
-        )
 
-        b_prior = gpytorch.priors.NormalPrior(0, 1)
+        # Initialize ``b`` at the center of the prior's support
+        init_b = (b_prior.a + b_prior.b) / 2.0
+        init_b = init_b.view(1).expand(*self.batch_shape, 1, 1).clone()
+        self.register_parameter("raw_b", torch.nn.Parameter(init_b))
 
-        #self.register_prior(
-        #    "b_prior",
-        #    gpytorch.priors.NormalPrior(0, 1),
-        #    lambda module: module.b,
-        #)
-
-        # register the constraints
-        # if a_constraint is None:
-        #     a_constraint = gpytorch.constraints.Positive()
-        # self.register_constraint("raw_a", a_constraint)
-        if b_constraint is not None:
-            self.register_constraint("raw_b", b_constraint)
-        # set initial value using inverse transform of the constraint
-        self.initialize(raw_b=self.raw_b_constraint.inverse_transform(init_b))
-
-        # set the parameter prior
-        # if a_prior is not None:
-        #     self.register_prior(
-        #         "a_prior",
-        #         a_prior,
-        #         lambda m: m.a,
-        #         lambda m, v : m._set_a(v),
-        #     )
+        # Set the parameter prior
         if b_prior is not None:
             self.register_prior(
                 "b_prior",
                 b_prior,
                 lambda m: m.b,
-                lambda m, v : m._set_b(v),
+                lambda m, v: m._set_b(v),
             )
 
     # set the 'actual' paramters
@@ -342,7 +305,7 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 
     @property
     def b(self):
-        return self.raw_b_constraint.transform(self.raw_b)
+        return self.raw_b
 
     @b.setter
     def b(self, value):
@@ -351,7 +314,7 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
     def _set_b(self, value):
         if not torch.is_tensor(value):
             value = torch.as_tensor(value).to(self.raw_b)
-        self.initialize(raw_b=self.raw_b_constraint.inverse_transform(value))
+        self.initialize(raw_b=value)
 
     def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
         # sigmoid = 1/(1+exp(-a(x-b)))
@@ -369,8 +332,8 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 
 # Inverted sigmoid kernel as a proper GPyTorch kernel
 class InvertedSigmoidKernel(SigmoidKernel):
-    def __init__(self, sigmoid_kernel, active_dims=None, b_constraint=None):
-        # Properly initialize as a Kernel without registering a separate raw_b
+    def __init__(self, sigmoid_kernel, active_dims=None):
+        # Properly initialize as a Kernel without registering a separate ``b``
         gpytorch.kernels.Kernel.__init__(self)
         self.sigmoid_kernel = sigmoid_kernel
         if active_dims is not None:

@@ -12,9 +12,9 @@ from gpytorch.kernels import (
     PeriodicKernel,
 )
 from gpytorch.priors import (
-    GammaPrior,
     HalfNormalPrior,
     NormalPrior,
+    SmoothedBoxPrior,
 )
 
 from rating_gp.models.base import RatingDataMixin, ModelConfig
@@ -24,6 +24,11 @@ from rating_gp.models.kernels import (
     InvertedSigmoidKernel,
     LogWarpKernel,
 )
+from rating_gp.models.noise import (
+    HeteroskedasticGaussianLikelihood,
+    GaussianProcessGaussianLikelihood,
+)
+from rating_gp.models.priors import HorseshoePrior
 
 
 class PowerLawTransform(torch.nn.Module):
@@ -69,20 +74,27 @@ class RatingGPMarginalGPyTorch(
     def build_model(self, X, y, y_unc=None) -> gpytorch.models.ExactGP:
         """Build marginal likelihood version of RatingGP
         """
-        # assume a constant measurement error for testing
+        # derive initial noise, clamping to keep positive
         if y_unc is not None:
             noise = y_unc
         else:
-            noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
-        # TODO: Fix "GPInputWarning: You have passed data through a 
-        # FixedNoiseGaussianLikelihood that did not match the size of the fixed
-        # noise, *and* you did not specify noise. This is treated as a no-op."
-        self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
-            noise=noise,
-            #learn_additional_noise=False,
-            learn_additional_noise=True,
-            noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
-        )
+            noise = 0.1 ** 2 * torch.ones(y.shape[0])
+        noise = torch.clamp(noise.reshape(-1), min=1e-4)
+
+        nm = getattr(self.model_config, "noise_model", "heteroskedastic")
+        if nm == "gp":
+            self.likelihood = GaussianProcessGaussianLikelihood()
+        elif nm == "fixed":
+            self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
+                noise=noise,
+                learn_additional_noise=True,
+                noise_prior=HorseshoePrior(scale=0.03),
+            )
+        else:
+            self.likelihood = HeteroskedasticGaussianLikelihood(
+                noise=noise,
+                noise_prior=HorseshoePrior(scale=0.03),
+            )
 
         model = ExactGPModel(X, y, self.likelihood)
 
@@ -162,7 +174,7 @@ class RatingGPMarginalGPyTorch(
             self.likelihood.eval()
             try:
                 with gpytorch.settings.fast_pred_var():
-                    mean = self.likelihood(self.model(x_grid)).mean
+                    mean = self.likelihood(self.model(x_grid), x_grid).mean
             finally:
                 if was_model_training:
                     self.model.train()
@@ -207,21 +219,21 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.mean_module = NoOpMean()
 
-        # Use stage (not y) for sigmoid kernel constraint
-        stage = train_x[:, self.stage_dim[0]]#.cpu().numpy()
-        b_min = np.quantile(stage, 0.10)
-        b_max = np.quantile(stage, 0.90)
- 
+        # Use stage (not y) to derive a prior range for the sigmoid switch point
+        stage = train_x[:, self.stage_dim[0]]
+        b_min = float(np.quantile(stage, 0.10))
+        b_max = float(np.quantile(stage, 0.90))
+        b_prior = SmoothedBoxPrior(b_min, b_max, sigma=0.05)
+
         # Create sigmoid kernel for gating (shared switchpoint)
         sigmoid_lower = SigmoidKernel(
             active_dims=self.stage_dim,
-            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
+            b_prior=b_prior,
         )
- 
+
         sigmoid_upper = InvertedSigmoidKernel(
             sigmoid_kernel=sigmoid_lower,
             active_dims=self.stage_dim,
-            b_constraint=gpytorch.constraints.Interval(b_min, b_max),
         )
  
         # Compose the upper kernel branch and wrap in LogWarpKernel
@@ -237,7 +249,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         lower_kernel = (
             self.cov_shift(
                 eta_prior=HalfNormalPrior(scale=2.0),
-                time_prior=GammaPrior(concentration=1, rate=7),
             )
         )
 
@@ -263,8 +274,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
     def cov_stage(self, ls_prior=None):
-        eta = HalfNormalPrior(scale=1)
-        
+        eta = HalfNormalPrior(scale=0.5)
+        if ls_prior is None:
+            ls_prior = SmoothedBoxPrior(0.2, 5.0)
+
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
@@ -276,7 +289,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
     def cov_time(self, ls_prior=None, eta_prior=None):
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=1)
+            eta_prior = HalfNormalPrior(scale=0.5)
+
+        if ls_prior is None:
+            ls_prior = SmoothedBoxPrior(0.3, 10.0)
 
         # Base Matern kernel for long-term trends
         return ScaleKernel(
@@ -290,21 +306,21 @@ class ExactGPModel(gpytorch.models.ExactGP):
     
     def cov_shift(self, eta_prior=None, time_prior=None):
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.3) 
+            eta_prior = HalfNormalPrior(scale=0.3)
 
         if time_prior is None:
-            time_prior = GammaPrior(concentration=1, rate=7)
+            time_prior = SmoothedBoxPrior(0.1, 1.0, sigma=0.05)
+
+        stage_prior = SmoothedBoxPrior(0.2, 4.0)
 
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=1, rate=1),
+                lengthscale_prior=stage_prior,
                 nu=2.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                # extreme prior for fast shift at 12413470
-                #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
                 lengthscale_prior=time_prior,
                 nu=1.5,
             ),
@@ -317,16 +333,19 @@ class ExactGPModel(gpytorch.models.ExactGP):
         Smooth, time-dependent bending kernel for switchpoint.
         """
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.2) 
+            eta_prior = HalfNormalPrior(scale=0.2)
+
+        stage_prior = SmoothedBoxPrior(0.2, 4.0)
+        time_prior = SmoothedBoxPrior(0.1, 2.0)
 
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=2, rate=1),
+                lengthscale_prior=stage_prior,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                lengthscale_prior=GammaPrior(concentration=3, rate=2),
+                lengthscale_prior=time_prior,
             ),
             outputscale_prior=eta_prior,
         )
@@ -336,10 +355,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
         Smooth, time-dependent periodic kernel for seasonal effects.
         """
         if eta_prior is None:
-            eta_prior = HalfNormalPrior(scale=0.5) 
+            eta_prior = HalfNormalPrior(scale=0.3)
 
         if ls_prior is None:
-            ls_prior = GammaPrior(concentration=2, rate=4)
+            ls_prior = SmoothedBoxPrior(0.2, 2.0)
 
         return ScaleKernel(
             PeriodicKernel(
@@ -361,11 +380,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
         Smooth, time-independent base rating curve using a Matern kernel on stage.
         """
         if eta_prior is None:
-            eta = HalfNormalPrior(scale=1.0)
+            eta = HalfNormalPrior(scale=0.5)
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=3, rate=1)
+        ls = SmoothedBoxPrior(0.3, 10.0)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
