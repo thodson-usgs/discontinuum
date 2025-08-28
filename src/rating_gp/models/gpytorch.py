@@ -14,6 +14,7 @@ from gpytorch.kernels import (
 from gpytorch.priors import (
     GammaPrior,
     HalfNormalPrior,
+    HalfCauchyPrior,
     NormalPrior,
 )
 
@@ -225,26 +226,32 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
  
         # Compose the upper kernel branch and wrap in LogWarpKernel
-        upper_kernel = (
-            self.cov_base(eta_prior=HalfNormalPrior(scale=2.0))
-            + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.2))
-            + self.cov_bend(eta_prior=HalfNormalPrior(scale=0.6))
+        kernel = (
+            self.cov_base(eta_prior=HalfNormalPrior(scale=1.0))
+            + self.cov_periodic(eta_prior=HalfNormalPrior(scale=0.4))
         )
-        
-        # upper_kernel_warped = PowerLawWarpKernel(upper_kernel, self.powerlaw, self.stage_dim[0])
-        upper_kernel_warped = LogWarpKernel(upper_kernel, self.stage_dim[0])
+
+        upper_kernel = (
+            self.cov_bend(eta_prior=HalfNormalPrior(scale=0.6))
+        )
 
         lower_kernel = (
             self.cov_shift(
-                eta_prior=HalfNormalPrior(scale=2.0),
-                time_prior=GammaPrior(concentration=1, rate=7),
+                eta_prior=HalfNormalPrior(scale=0.6),
+                #time_prior=GammaPrior(concentration=1, rate=7),
+                time_prior=GammaPrior(concentration=10, rate=30),
             )
         )
+
+        upper_kernel_warped = LogWarpKernel(upper_kernel, self.stage_dim[0])
+        kernel_warped = LogWarpKernel(kernel, self.stage_dim[0])
 
         self.covar_module = (
             sigmoid_lower * lower_kernel
             +
             sigmoid_upper * upper_kernel_warped
+            +
+            kernel_warped
         )
 
 
@@ -298,7 +305,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=1, rate=1),
+                lengthscale_prior=GammaPrior(concentration=2., rate=1.),
                 nu=2.5,
             ) *
             MaternKernel(
@@ -322,11 +329,13 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=2, rate=1),
+                #lengthscale_prior=GammaPrior(concentration=2, rate=1),
+                lengthscale_prior=GammaPrior(concentration=3, rate=2),
+                #lengthscale_prior=GammaPrior(concentration=5, rate=5),
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                lengthscale_prior=GammaPrior(concentration=3, rate=2),
+                lengthscale_prior=GammaPrior(concentration=4, rate=2),
             ),
             outputscale_prior=eta_prior,
         )
@@ -339,20 +348,16 @@ class ExactGPModel(gpytorch.models.ExactGP):
             eta_prior = HalfNormalPrior(scale=0.5) 
 
         if ls_prior is None:
-            ls_prior = GammaPrior(concentration=2, rate=4)
+            #ls_prior = GammaPrior(concentration=2, rate=4)
+            ls_prior = GammaPrior(concentration=9, rate=10)
+
 
         return ScaleKernel(
             PeriodicKernel(
                 active_dims=self.time_dim,
-                period_length_prior=NormalPrior(loc=1.0, scale=0.1),  # ~1 year
+                period_length_prior=NormalPrior(loc=1.0, scale=0.05),  # ~1 year
                 lengthscale_prior=ls_prior,
             ),
-            # *
-            # MaternKernel(
-            #     active_dims=self.stage_dim,
-            #     lengthscale_prior=ls_prior,
-            #     nu=2.5,  # Smoother kernel (was nu=1.5)
-            # ),
             outputscale_prior=eta_prior,
         )
     
@@ -365,7 +370,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         else:
             eta = eta_prior
 
-        ls = GammaPrior(concentration=3, rate=1)
+        #ls = GammaPrior(concentration=3, rate=1)
+        ls = GammaPrior(concentration=4., rate=4.)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
