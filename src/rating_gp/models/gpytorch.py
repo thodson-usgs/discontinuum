@@ -239,7 +239,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
             self.cov_shift(
                 eta_prior=HalfNormalPrior(scale=0.6),
                 #time_prior=GammaPrior(concentration=1, rate=7),
-                time_prior=GammaPrior(concentration=10, rate=30),
+                time_prior=GammaPrior(concentration=1, rate=30),
             )
         )
 
@@ -305,8 +305,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                lengthscale_prior=GammaPrior(concentration=2., rate=1.),
-                nu=2.5,
+                #lengthscale_prior=GammaPrior(concentration=3., rate=1.),
+                lengthscale_prior=GammaPrior(concentration=3., rate=1.),
+                nu=1.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
