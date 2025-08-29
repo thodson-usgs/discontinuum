@@ -330,9 +330,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                #lengthscale_prior=GammaPrior(concentration=2, rate=1),
-                lengthscale_prior=GammaPrior(concentration=3, rate=2),
-                #lengthscale_prior=GammaPrior(concentration=5, rate=5),
+                lengthscale_prior=GammaPrior(concentration=2, rate=1),
+                #lengthscale_prior=GammaPrior(concentration=3, rate=2),
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
@@ -358,7 +357,13 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 active_dims=self.time_dim,
                 period_length_prior=NormalPrior(loc=1.0, scale=0.05),  # ~1 year
                 lengthscale_prior=ls_prior,
-            ),
+            ) 
+            *
+            MaternKernel(
+                active_dims=self.time_dim,
+                nu=2.5,
+            )
+            ,
             outputscale_prior=eta_prior,
         )
     
