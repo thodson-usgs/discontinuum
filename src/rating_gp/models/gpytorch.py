@@ -249,11 +249,12 @@ class ExactGPModel(gpytorch.models.ExactGP):
             )
         )
 
+        lower_kernel_warped = LogWarpKernel(lower_kernel, self.stage_dim[0])
         upper_kernel_warped = LogWarpKernel(upper_kernel, self.stage_dim[0])
         kernel_warped = LogWarpKernel(kernel, self.stage_dim[0])
 
         self.covar_module = (
-            sigmoid_lower * lower_kernel
+            sigmoid_lower * lower_kernel_warped
             +
             sigmoid_upper * upper_kernel_warped
             +
