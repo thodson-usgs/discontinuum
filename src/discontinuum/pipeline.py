@@ -74,6 +74,7 @@ class BaseTransformer(TransformerMixin, BaseEstimator):
         pass
 
     def fit(self, X, y=None):
+        self.is_fitted_ = True
         return self
 
 
