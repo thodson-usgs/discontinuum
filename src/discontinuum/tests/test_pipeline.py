@@ -1,5 +1,6 @@
 import numpy as np
-from discontinuum.pipeline import TimeTransformer
+import xarray as xr
+from discontinuum.pipeline import LogErrorPipeline, TimeTransformer
 
 
 def test_time_transform():
@@ -26,3 +27,15 @@ def test_time_transform():
 
     # Check if the inverse transformed data matches the original data
     np.testing.assert_equal(data, inverse_transformed_data)
+
+
+def test_log_error_pipeline_transform_after_fit():
+    """Ensure LogErrorPipeline is recognized as fitted by sklearn."""
+    x = xr.DataArray(
+        np.array([1.1, 1.2, 1.4], dtype=float),
+        dims=("time",),
+        name="discharge_unc",
+    )
+    pipeline = LogErrorPipeline().fit(x)
+    transformed = pipeline.transform(x)
+    assert transformed.shape == (x.shape[0], 1)
