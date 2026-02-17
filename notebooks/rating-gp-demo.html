@@ -39,8 +39,8 @@
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -436,9 +436,7 @@ This model seeks to expand the typical rating curve fitting process to include s
 </symbol>
 </defs>
 </svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<style>/* CSS stylesheet for displaying xarray objects in notebooks */
 
 :root {
   --xr-font-color0: var(
@@ -517,6 +515,8 @@ body.vscode-dark {
   display: block !important;
   min-width: 300px;
   max-width: 700px;
+  line-height: 1.6;
+  padding-bottom: 4px;
 }
 
 .xr-text-repr-fallback {
@@ -527,8 +527,11 @@ body.vscode-dark {
 .xr-header {
   padding-top: 6px;
   padding-bottom: 6px;
-  margin-bottom: 4px;
+}
+
+.xr-header {
   border-bottom: solid 1px var(--xr-border-color);
+  margin-bottom: 4px;
 }
 
 .xr-header > div,
@@ -539,46 +542,62 @@ body.vscode-dark {
 }
 
 .xr-obj-type,
-.xr-array-name {
+.xr-obj-name {
   margin-left: 2px;
   margin-right: 10px;
 }
 
-.xr-obj-type {
+.xr-obj-type,
+.xr-group-box-contents > label {
   color: var(--xr-font-color2);
+  display: block;
 }
 
 .xr-sections {
   padding-left: 0 !important;
   display: grid;
   grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .xr-section-item {
   display: contents;
 }
 
-.xr-section-item input {
-  display: inline-block;
+.xr-section-item > input,
+.xr-group-box-contents > input,
+.xr-array-wrap > input {
+  display: block;
   opacity: 0;
   height: 0;
+  margin: 0;
 }
 
-.xr-section-item input + label {
+.xr-section-item > input + label,
+.xr-var-item > input + label {
   color: var(--xr-disabled-color);
-  border: 2px solid transparent !important;
 }
 
-.xr-section-item input:enabled + label {
+.xr-section-item > input:enabled + label,
+.xr-var-item > input:enabled + label,
+.xr-array-wrap > input:enabled + label,
+.xr-group-box-contents > input:enabled + label {
   cursor: pointer;
   color: var(--xr-font-color2);
 }
 
-.xr-section-item input:focus + label {
-  border: 2px solid var(--xr-font-color0) !important;
+.xr-section-item > input:focus-visible + label,
+.xr-var-item > input:focus-visible + label,
+.xr-array-wrap > input:focus-visible + label,
+.xr-group-box-contents > input:focus-visible + label {
+  outline: auto;
 }
 
-.xr-section-item input:enabled + label:hover {
+.xr-section-item > input:enabled + label:hover,
+.xr-var-item > input:enabled + label:hover,
+.xr-array-wrap > input:enabled + label:hover,
+.xr-group-box-contents > input:enabled + label:hover {
   color: var(--xr-font-color0);
 }
 
@@ -586,11 +605,25 @@ body.vscode-dark {
   grid-column: 1;
   color: var(--xr-font-color2);
   font-weight: 500;
+  white-space: nowrap;
+}
+
+.xr-section-summary > em {
+  font-weight: normal;
+}
+
+.xr-span-grid {
+  grid-column-end: -1;
 }
 
 .xr-section-summary > span {
   display: inline-block;
-  padding-left: 0.5em;
+  padding-left: 0.3em;
+}
+
+.xr-group-box-contents > input:checked + label > span {
+  display: inline-block;
+  padding-left: 0.6em;
 }
 
 .xr-section-summary-in:disabled + label {
@@ -618,9 +651,9 @@ body.vscode-dark {
 }
 
 .xr-section-summary,
-.xr-section-inline-details {
+.xr-section-inline-details,
+.xr-group-box-contents > label {
   padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .xr-section-inline-details {
@@ -628,13 +661,79 @@ body.vscode-dark {
 }
 
 .xr-section-details {
-  display: none;
   grid-column: 1 / -1;
+  margin-top: 4px;
   margin-bottom: 5px;
+}
+
+.xr-section-summary-in ~ .xr-section-details {
+  display: none;
 }
 
 .xr-section-summary-in:checked ~ .xr-section-details {
   display: contents;
+}
+
+.xr-children {
+  display: inline-grid;
+  grid-template-columns: 100%;
+  grid-column: 1 / -1;
+  padding-top: 4px;
+}
+
+.xr-group-box {
+  display: inline-grid;
+  grid-template-columns: 0px 30px auto;
+}
+
+.xr-group-box-vline {
+  grid-column-start: 1;
+  border-right: 0.2em solid;
+  border-color: var(--xr-border-color);
+  width: 0px;
+}
+
+.xr-group-box-hline {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 1em;
+  width: 26px;
+  border-bottom: 0.2em solid;
+  border-color: var(--xr-border-color);
+}
+
+.xr-group-box-contents {
+  grid-column-start: 3;
+  padding-bottom: 4px;
+}
+
+.xr-group-box-contents > label::before {
+  content: "📂";
+  padding-right: 0.3em;
+}
+
+.xr-group-box-contents > input:checked + label::before {
+  content: "📁";
+}
+
+.xr-group-box-contents > input:checked + label {
+  padding-bottom: 0px;
+}
+
+.xr-group-box-contents > input:checked ~ .xr-sections {
+  display: none;
+}
+
+.xr-group-box-contents > input + label > span {
+  display: none;
+}
+
+.xr-group-box-ellipsis {
+  font-size: 1.4em;
+  font-weight: 900;
+  color: var(--xr-font-color2);
+  letter-spacing: 0.15em;
+  cursor: default;
 }
 
 .xr-array-wrap {
@@ -872,10 +971,10 @@ Data variables:
     stage            (time) float64 3kB 0.4694 0.4938 0.5243 ... 0.765 0.6706
     discharge        (time) float64 3kB 1.07 1.116 1.54 ... 17.98 1.682 0.7447
     discharge_unc    (time) float64 3kB 1.025 1.025 1.025 ... 1.04 1.025 1.04
-    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-f2c9a931-9b1b-4246-a9c7-c1b9cbf27759' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-f2c9a931-9b1b-4246-a9c7-c1b9cbf27759' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-f8a1dd0c-368b-4017-b459-10071d35644d' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f8a1dd0c-368b-4017-b459-10071d35644d' class='xr-section-summary' >Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>1988-10-04T08:35:00 ... 2021-08-...</div><input id='attrs-c94e6479-04f1-49c3-9a7f-e3eed795ab52' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c94e6479-04f1-49c3-9a7f-e3eed795ab52' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5330a77c-6555-4581-b838-b7c05cdcc9b9' class='xr-var-data-in' type='checkbox'><label for='data-5330a77c-6555-4581-b838-b7c05cdcc9b9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T08:35:00.000000000&#x27;, &#x27;1988-11-16T11:50:00.000000000&#x27;,
+    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-a488cfcc-3f28-49ff-a77a-6351a46c8fcb' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-a488cfcc-3f28-49ff-a77a-6351a46c8fcb' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div></li><li class='xr-section-item'><input id='section-2ed0c3ca-82b3-4dac-9ced-21ea6e3e0f19' class='xr-section-summary-in' type='checkbox' checked /><label for='section-2ed0c3ca-82b3-4dac-9ced-21ea6e3e0f19' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>1988-10-04T08:35:00 ... 2021-08-...</div><input id='attrs-53de67b3-fd54-4213-8787-a7a5a8338db6' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-53de67b3-fd54-4213-8787-a7a5a8338db6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-656b997d-2a9b-4f92-8664-389dc2282184' class='xr-var-data-in' type='checkbox'><label for='data-656b997d-2a9b-4f92-8664-389dc2282184' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T08:35:00.000000000&#x27;, &#x27;1988-11-16T11:50:00.000000000&#x27;,
        &#x27;1989-01-03T14:15:00.000000000&#x27;, ..., &#x27;2021-05-19T11:11:07.000000000&#x27;,
        &#x27;2021-07-02T08:12:50.000000000&#x27;, &#x27;2021-08-17T13:45:31.000000000&#x27;],
-      shape=(319,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-5b1df8eb-3686-4045-bb23-0da9b0a2d0cf' class='xr-section-summary-in' type='checkbox'  checked><label for='section-5b1df8eb-3686-4045-bb23-0da9b0a2d0cf' class='xr-section-summary' >Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-a16a1efb-bfd5-479b-9ebc-b165ffa00a5f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a16a1efb-bfd5-479b-9ebc-b165ffa00a5f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b5c46cea-084f-4770-9b70-2f286cf00413' class='xr-var-data-in' type='checkbox'><label for='data-b5c46cea-084f-4770-9b70-2f286cf00413' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>gage_height_va</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
+      shape=(319,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-fd01d907-af8d-4654-b909-c77158242b7e' class='xr-section-summary-in' type='checkbox' checked /><label for='section-fd01d907-af8d-4654-b909-c77158242b7e' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-3f5b6cab-5224-4cc9-b517-b126b277a6f4' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3f5b6cab-5224-4cc9-b517-b126b277a6f4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-00c19c08-ee4f-4b18-b4b4-75cb37e7be25' class='xr-var-data-in' type='checkbox'><label for='data-00c19c08-ee4f-4b18-b4b4-75cb37e7be25' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>gage_height_va</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
        1.057656, 0.646176, 0.505968, 0.521208, 0.493776, 0.530352,
        0.524256, 0.530352, 0.896112, 1.335024, 1.338072, 1.55448 ,
        1.030224, 0.536448, 0.466344, 0.554736, 0.505968, 0.499872,
@@ -915,7 +1014,7 @@ Data variables:
        0.728472, 0.740664, 0.765048, 0.771144, 1.594104, 1.344168,
        0.969264, 0.813816, 0.783336, 0.694944, 0.6858  , 0.691896,
        0.710184, 0.688848, 0.865632, 0.862584, 1.32588 , 0.765048,
-       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-cd362ed2-3d8d-4b27-b939-ebf65c6b8493' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-cd362ed2-3d8d-4b27-b939-ebf65c6b8493' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f1629e4d-75d2-4f3b-976c-f988eb754071' class='xr-var-data-in' type='checkbox'><label for='data-f1629e4d-75d2-4f3b-976c-f988eb754071' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge_va</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
+       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-d323743f-b56b-4390-a735-00d34da624fa' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d323743f-b56b-4390-a735-00d34da624fa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-31e24b08-04f5-45e6-8fa5-d22c20eacd4f' class='xr-var-data-in' type='checkbox'><label for='data-31e24b08-04f5-45e6-8fa5-d22c20eacd4f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge_va</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
        17.0467136 , 14.299984  ,  3.0298976 ,  1.3025728 ,  1.4016816 ,
         1.10718688,  1.46114688,  1.3167312 ,  1.6140576 ,  8.1835552 ,
        27.6938304 , 26.6461088 , 40.209856  , 12.600976  ,  1.80378016,
@@ -955,7 +1054,7 @@ Data variables:
         0.95144448,  1.05338496,  1.46681024,  1.76130496, 33.413824  ,
        18.122752  ,  5.4651424 ,  2.22853216,  1.77829504,  0.91463264,
         0.83817728,  0.91180096,  1.1185136 ,  0.94011776,  3.114848  ,
-        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-04b5cebf-36a4-4b1f-9478-7ecaddc650b5' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-04b5cebf-36a4-4b1f-9478-7ecaddc650b5' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5126b83c-b1af-435b-8687-f6102fc1cfe7' class='xr-var-data-in' type='checkbox'><label for='data-5126b83c-b1af-435b-8687-f6102fc1cfe7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measured_rating_diff</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
+        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-e06a4c75-651b-42d1-83a9-25d27eb28696' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e06a4c75-651b-42d1-83a9-25d27eb28696' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6e7b3698-1eb7-4937-87eb-4b00e0f4223d' class='xr-var-data-in' type='checkbox'><label for='data-6e7b3698-1eb7-4937-87eb-4b00e0f4223d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measured_rating_diff</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
        1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025,
        1.025, 1.025, 1.025, 1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.04 ,
@@ -990,20 +1089,9 @@ Data variables:
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.06 , 1.06 , 1.06 , 1.04 , 1.04 , 1.025, 1.04 ,
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
-       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-39f8ce61-d74d-4ceb-848c-fd42161f4f5a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-39f8ce61-d74d-4ceb-848c-fd42161f4f5a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-817dbd5f-61e4-439f-987f-b17e2a0ff6bd' class='xr-var-data-in' type='checkbox'><label for='data-817dbd5f-61e4-439f-987f-b17e2a0ff6bd' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
+       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-a7129db7-e4db-4ef7-88f2-e85e463f3080' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a7129db7-e4db-4ef7-88f2-e85e463f3080' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-bccae8a8-c4e0-4afb-9d50-2b8be8d4ef4a' class='xr-var-data-in' type='checkbox'><label for='data-bccae8a8-c4e0-4afb-9d50-2b8be8d4ef4a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
 Length: 319
-Categories (7, object): [&#x27;Clear&#x27;, &#x27;DebrisHeavy&#x27;, &#x27;DebrisLight&#x27;, &#x27;IceShore&#x27;, &#x27;Unspecifed&#x27;, &#x27;Unspecified&#x27;, &#x27;VegetationLight&#x27;]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-b991f320-48a5-49c5-b086-8de2bcac2867' class='xr-section-summary-in' type='checkbox'  ><label for='section-b991f320-48a5-49c5-b086-8de2bcac2867' class='xr-section-summary' >Indexes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-64525971-71ad-45f9-bc0d-9f382c6fb284' class='xr-index-data-in' type='checkbox'/><label for='index-64525971-71ad-45f9-bc0d-9f382c6fb284' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;1988-10-04 08:35:00&#x27;, &#x27;1988-11-16 11:50:00&#x27;,
-               &#x27;1989-01-03 14:15:00&#x27;, &#x27;1989-02-17 10:50:00&#x27;,
-               &#x27;1989-03-31 09:30:00&#x27;, &#x27;1989-04-25 13:20:00&#x27;,
-               &#x27;1989-06-08 13:30:00&#x27;, &#x27;1989-07-12 10:30:00&#x27;,
-               &#x27;1989-08-25 09:45:00&#x27;, &#x27;1989-10-04 09:00:00&#x27;,
-               ...
-               &#x27;2020-09-29 11:29:00&#x27;, &#x27;2020-11-13 09:15:00&#x27;,
-               &#x27;2020-12-30 12:23:30&#x27;, &#x27;2021-02-08 11:07:30&#x27;,
-               &#x27;2021-03-22 11:41:00&#x27;, &#x27;2021-04-29 11:32:36&#x27;,
-               &#x27;2021-04-29 12:39:11&#x27;, &#x27;2021-05-19 11:11:07&#x27;,
-               &#x27;2021-07-02 08:12:50&#x27;, &#x27;2021-08-17 13:45:31&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=319, freq=None))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-a65c6148-d6f2-4bef-aceb-1feeda92c03b' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-a65c6148-d6f2-4bef-aceb-1feeda92c03b' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div></div></div>
+Categories (7, object): [&#x27;Clear&#x27;, &#x27;DebrisHeavy&#x27;, &#x27;DebrisLight&#x27;, &#x27;IceShore&#x27;, &#x27;Unspecifed&#x27;, &#x27;Unspecified&#x27;, &#x27;VegetationLight&#x27;]</pre></div></li></ul></div></li></ul></div></div></div></div>
 </div>
 <p>With the training data, we’re now ready to fit a model to the site. Depending on your hardware, this should take about 10s.</p>
 <div class="cell docutils container">
@@ -1023,22 +1111,18 @@ Categories (7, object): [&#x27;Clear&#x27;, &#x27;DebrisHeavy&#x27;, &#x27;Debri
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.13.7/x64/lib/python3.13/site-packages/sklearn/pipeline.py:61: FutureWarning: This Pipeline instance is not fitted yet. Call &#39;fit&#39; with appropriate arguments before using other methods such as transform, predict, etc. This will raise an error in 1.8 instead of the current warning.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-06 to the diagonal
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-05 to the diagonal
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-04 to the diagonal
   warnings.warn(
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.13.7/x64/lib/python3.13/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-06 to the diagonal
-  warnings.warn(
-/opt/hostedtoolcache/Python/3.13.7/x64/lib/python3.13/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-05 to the diagonal
-  warnings.warn(
-/opt/hostedtoolcache/Python/3.13.7/x64/lib/python3.13/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-04 to the diagonal
-  warnings.warn(
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1924 iterations
-Best objective: -1.189253
-CPU times: user 2min 54s, sys: 1.3 s, total: 2min 56s
-Wall time: 1min 29s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1892 iterations
+Best objective: -1.189258
+CPU times: user 2min 50s, sys: 904 ms, total: 2min 51s
+Wall time: 1min 27s
 </pre></div>
 </div>
 </div>
@@ -1056,7 +1140,7 @@ Wall time: 1min 29s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4dd4918a1803cfd05105a9e257f6bbb7c65c218e77829a3a483074a3946790dd.png" src="../_images/4dd4918a1803cfd05105a9e257f6bbb7c65c218e77829a3a483074a3946790dd.png" />
+<img alt="../_images/59c050c45315aed5112e5d14d14b58e9d35c32d71c0310065dac3c4e5225a907.png" src="../_images/59c050c45315aed5112e5d14d14b58e9d35c32d71c0310065dac3c4e5225a907.png" />
 </div>
 </div>
 <p>One major advantage of <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> is that the resulting model can be used to make predictions of a rating curve at any moment in time. To see how well our model can predict a rating curve across time, let’s plot the rating curves at an interval of every 5 years at the start of a water year (i.e., October 1st). This way we can see how well the model accounts for any shift in the rating with time.</p>
@@ -1075,7 +1159,7 @@ Wall time: 1min 29s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/f4c588eac9bd1d6db895c70486a6d981e62107d198507ec00b2dce34a541241f.png" src="../_images/f4c588eac9bd1d6db895c70486a6d981e62107d198507ec00b2dce34a541241f.png" />
+<img alt="../_images/164d1c99f175946d7322d9daea96ceb39b7c10296c688dc5947f7270be384f82.png" src="../_images/164d1c99f175946d7322d9daea96ceb39b7c10296c688dc5947f7270be384f82.png" />
 </div>
 </div>
 <p>Nice! The shifts with time are clearly predicted by the model. These results are are promising for <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> to be able to model shift in rating curves effectively.</p>
@@ -1121,22 +1205,22 @@ Wall time: 1min 29s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1057 iterations
-Best objective: -0.611725
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1117 iterations
+Best objective: -0.611775
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 824 iterations
-Best objective: -1.057212
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 681 iterations
+Best objective: -1.059183
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1026 iterations
-Best objective: -1.519354
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1055 iterations
+Best objective: -1.519340
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1840 iterations
-Best objective: -1.189240
-CPU times: user 7min 2s, sys: 2.2 s, total: 7min 4s
-Wall time: 3min 33s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1822 iterations
+Best objective: -1.189207
+CPU times: user 6min 51s, sys: 2.28 s, total: 6min 54s
+Wall time: 3min 30s
 </pre></div>
 </div>
 </div>
@@ -1158,7 +1242,7 @@ Wall time: 3min 33s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/667b97316ddd705f7248e285106a9cda3513b4127e817817039576405cc9b390.png" src="../_images/667b97316ddd705f7248e285106a9cda3513b4127e817817039576405cc9b390.png" />
+<img alt="../_images/a3f5a274875f134500d726351f3f4a49c327e366a36e4f90b182d16b8734ac16.png" src="../_images/a3f5a274875f134500d726351f3f4a49c327e366a36e4f90b182d16b8734ac16.png" />
 </div>
 </div>
 </section>

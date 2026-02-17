@@ -39,8 +39,8 @@
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -392,7 +392,7 @@ document.write(`
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="rating_gp.pipeline.LogPropagation">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.pipeline.</span></span><span class="sig-name descname"><span class="pre">LogPropagation</span></span><a class="headerlink" href="#rating_gp.pipeline.LogPropagation" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rating_gp.pipeline.</span></span><span class="sig-name descname"><span class="pre">LogPropagation</span></span><a class="headerlink" href="#rating_gp.pipeline.LogPropagation" title="Link to this definition">#</a></dt>
 <dd><p>Transformer for proper uncertainty propagation of log transforms</p>
 <p>Eq: f = ln(A) -&gt; sigma_f = sigma_A / A</p>
 <dl class="py method">
@@ -410,8 +410,7 @@ document.write(`
 <dt class="sig sig-object py" id="rating_gp.pipeline.LogPropagation.set_fit_request">
 <span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rating_gp.pipeline.LogPropagation" title="rating_gp.pipeline.LogPropagation"><span class="pre">LogPropagation</span></a></span></span><a class="headerlink" href="#rating_gp.pipeline.LogPropagation.set_fit_request" title="Link to this definition">#</a></dt>
 <dd><p>Configure whether metadata should be requested to be passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p>
-<blockquote>
-<div><p>Note that this method is only relevant when this estimator is used as a
+<p>Note that this method is only relevant when this estimator is used as a
 sub-estimator within a <span class="xref std std-term">meta-estimator</span> and metadata routing is enabled
 with <code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
 Please check the <span class="xref std std-ref">User Guide</span> on how the routing
@@ -429,15 +428,17 @@ parameters and not others.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.3.</span></p>
 </div>
-<dl class="simple">
-<dt>A<span class="classifier">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">A</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>A</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">A</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>self<span class="classifier">object</span></dt><dd><p>The updated object.</p>
-</dd>
-</dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -458,14 +459,13 @@ parameters and not others.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="rating_gp.pipeline.LogUncertaintyPipeline">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rating_gp.pipeline.</span></span><span class="sig-name descname"><span class="pre">LogUncertaintyPipeline</span></span><a class="headerlink" href="#rating_gp.pipeline.LogUncertaintyPipeline" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rating_gp.pipeline.</span></span><span class="sig-name descname"><span class="pre">LogUncertaintyPipeline</span></span><a class="headerlink" href="#rating_gp.pipeline.LogUncertaintyPipeline" title="Link to this definition">#</a></dt>
 <dd><p>Pipeline to transform (propagate) uncertainty to log space</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="rating_gp.pipeline.LogUncertaintyPipeline.set_score_request">
 <span class="sig-name descname"><span class="pre">set_score_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rating_gp.pipeline.LogUncertaintyPipeline" title="rating_gp.pipeline.LogUncertaintyPipeline"><span class="pre">LogUncertaintyPipeline</span></a></span></span><a class="headerlink" href="#rating_gp.pipeline.LogUncertaintyPipeline.set_score_request" title="Link to this definition">#</a></dt>
 <dd><p>Configure whether metadata should be requested to be passed to the <code class="docutils literal notranslate"><span class="pre">score</span></code> method.</p>
-<blockquote>
-<div><p>Note that this method is only relevant when this estimator is used as a
+<p>Note that this method is only relevant when this estimator is used as a
 sub-estimator within a <span class="xref std std-term">meta-estimator</span> and metadata routing is enabled
 with <code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
 Please check the <span class="xref std std-ref">User Guide</span> on how the routing
@@ -483,15 +483,17 @@ parameters and not others.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.3.</span></p>
 </div>
-<dl class="simple">
-<dt>sample_weight<span class="classifier">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample_weight</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">sample_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
 </dd>
 </dl>
-<dl class="simple">
-<dt>self<span class="classifier">object</span></dt><dd><p>The updated object.</p>
-</dd>
-</dl>
-</div></blockquote>
 </dd></dl>
 
 </dd></dl>
