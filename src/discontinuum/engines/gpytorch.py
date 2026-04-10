@@ -8,7 +8,6 @@ import gpytorch
 import numpy as np
 import torch
 import tqdm
-import xarray as xr
 from xarray import DataArray, Dataset
 
 from discontinuum.engines.base import BaseModel, is_fitted
@@ -16,7 +15,6 @@ from discontinuum.engines.base import BaseModel, is_fitted
 if TYPE_CHECKING:
     from os import PathLike
     from typing import IO, Union
-    from numpy.typing import ArrayLike
     from typing import Dict, Optional, Tuple, Callable
     from xarray import Dataset
 

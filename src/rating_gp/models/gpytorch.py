@@ -6,15 +6,12 @@ from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 from gpytorch.kernels import (
     MaternKernel,
-    RBFKernel,
-    RQKernel,
     ScaleKernel,
     PeriodicKernel,
 )
 from gpytorch.priors import (
     GammaPrior,
     HalfNormalPrior,
-    HalfCauchyPrior,
     NormalPrior,
 )
 
@@ -31,7 +28,7 @@ class PowerLawTransform(torch.nn.Module):
     """
     """
     def __init__(self):
-        super(PowerLawTransform, self).__init__()
+        super().__init__()
         self.a = torch.nn.Parameter(torch.randn(1))
         # initialize b according to Manning's equation (refer to clamp)
         # Use proper parameter initialization to maintain gradient flow
@@ -50,12 +47,9 @@ class RatingGPMarginalGPyTorch(
     # comes last b/c it conflics with Mixin
     MarginalGPyTorch,
 ):
-    """
-    Gaussian Process implementation of the LOAD ESTimation (LOADEST) model
+    """Gaussian Process model for stage-discharge rating curves.
 
-    This model currrently uses the marginal likelihood implementation, which is
-    fast but does not account for censored data. Censored data require a slower
-    latent variable implementation.
+    Uses the marginal likelihood implementation for fast fitting.
     """
     def __init__(
             self,
@@ -164,13 +158,21 @@ class RatingGPMarginalGPyTorch(
             try:
                 with gpytorch.settings.fast_pred_var():
                     mean = self.likelihood(self.model(x_grid)).mean
+
+                    # Use finite differences for the stage derivative to avoid
+                    # second-order derivatives through torch.cdist in the kernel,
+                    # which does not support higher-order autograd.
+                    fd_eps = 1e-3
+                    x_grid_plus = x_grid.clone()
+                    x_grid_plus[:, stage_dim] = x_grid[:, stage_dim] + fd_eps
+                    mean_plus = self.likelihood(self.model(x_grid_plus)).mean
             finally:
                 if was_model_training:
                     self.model.train()
                 if was_likelihood_training:
                     self.likelihood.train()
 
-            d_mean_d_stage = torch.autograd.grad(mean.sum(), stage_grid, create_graph=True)[0]
+            d_mean_d_stage = (mean_plus - mean) / fd_eps
             neg = torch.clamp(-d_mean_d_stage, min=0.0)
             pen = neg.mean()
             if monotonic_penalty_interval > 1:
@@ -195,7 +197,7 @@ class RatingGPMarginalGPyTorch(
 
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood):
-        super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
+        super().__init__(train_x, train_y, likelihood)
 
         n_d = train_x.shape[1]  # number of dimensions
         assert n_d == 2, "Only two dimensions supported"

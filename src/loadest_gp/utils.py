@@ -38,19 +38,22 @@ def concentration_to_flux(
 
     if len(time_delta) != 1:
         warn("Time delta is not constant",
-             stacklevel=UserWarning,)
+             UserWarning,
+             stacklevel=2)
 
     if flow.units != "cubic meters per second":
         warn(
-            "Check that flow is 'cubic meters per second'.",
+            "Check that flow is 'cubic meters per second'. "
             "Set flow.units = 'cubic meters per second' to silence.",
-            stacklevel=UserWarning,
+            UserWarning,
+            stacklevel=2,
             )
 
     if "mg/l" not in concentration.units:
-        warn("Check that concentration is in 'mg/l'.",
+        warn("Check that concentration is in 'mg/l'. "
              "Set concentration.units = 'mg/l' to silence.",
-             stacklevel=UserWarning,
+             UserWarning,
+             stacklevel=2,
              )
 
     flux = concentration * flow * time_delta * mg_l_to_kg_m3

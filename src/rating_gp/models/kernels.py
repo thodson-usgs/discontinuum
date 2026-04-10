@@ -1,16 +1,14 @@
 import gpytorch
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
-from linear_operator.operators import MatmulLinearOperator, to_dense
+from linear_operator.operators import MatmulLinearOperator
 
 
 class TanhWarp(torch.nn.Module):
 
     def __init__(self):
-        super(TanhWarp, self).__init__()
+        super().__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
         self.b = torch.nn.Parameter(torch.rand(1))
         self.c = torch.nn.Parameter(torch.rand(1))
@@ -25,7 +23,7 @@ class LogWarp(torch.nn.Module):
     Note: good smoother
     """
     def __init__(self):
-        super(LogWarp, self).__init__()
+        super().__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
 
     def forward(self, x):
@@ -259,35 +257,29 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
     """
     def __init__(
         self,
-        # a_prior=None,
-        # a_constraint=None,
         b_constraint,
         b_prior=None,
-        #b_constraint=gpytorch.constraints.Positive(),
         **kwargs,
         ):
         """Initialize the kernel
 
         Parameters
         ----------
-        b_prior : Prior
-            The prior to impose on `b`.
         b_constraint : Constraint
-            The constraint to impose on `b`
+            The constraint to impose on `b` (the switchpoint location).
+        b_prior : Prior, optional
+            The prior to impose on `b`.
         """
         super().__init__(**kwargs)
 
+        # Fixed sigmoid sharpness (learnable `a` causes numerical instabilities)
         self.a = 20
-        # self.a = torch.nn.Parameter(torch.ones(*self.batch_shape, 1, 1) * 40)
-        # self.register_parameter(
-        #     name='raw_a',
-        #     parameter=self.a)
-        
-        # initialize raw_b parameter such that b starts within [l, u]
+
+        # Initialize raw_b within the constraint bounds
         u = b_constraint.upper_bound
         l = b_constraint.lower_bound
         init_b = l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
-        # register raw_b parameter
+
         self.register_parameter(
             name='raw_b',
             parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1)))
@@ -295,50 +287,17 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
 
         b_prior = gpytorch.priors.NormalPrior(0, 1)
 
-        #self.register_prior(
-        #    "b_prior",
-        #    gpytorch.priors.NormalPrior(0, 1),
-        #    lambda module: module.b,
-        #)
-
-        # register the constraints
-        # if a_constraint is None:
-        #     a_constraint = gpytorch.constraints.Positive()
-        # self.register_constraint("raw_a", a_constraint)
         if b_constraint is not None:
             self.register_constraint("raw_b", b_constraint)
-        # set initial value using inverse transform of the constraint
         self.initialize(raw_b=self.raw_b_constraint.inverse_transform(init_b))
 
-        # set the parameter prior
-        # if a_prior is not None:
-        #     self.register_prior(
-        #         "a_prior",
-        #         a_prior,
-        #         lambda m: m.a,
-        #         lambda m, v : m._set_a(v),
-        #     )
         if b_prior is not None:
             self.register_prior(
                 "b_prior",
                 b_prior,
                 lambda m: m.b,
-                lambda m, v : m._set_b(v),
+                lambda m, v: m._set_b(v),
             )
-
-    # set the 'actual' paramters
-    # @property
-    # def a(self):
-    #     return self.raw_a_constraint.transform(self.raw_a)
-
-    # @a.setter
-    # def a(self, value):
-    #     return self._set_a(value)
-
-    # def _set_a(self, value):
-    #     if not torch.is_tensor(value):
-    #         value = torch.as_tensor(value).to(self.raw_a)
-    #     self.initialize(raw_a=self.raw_a_constraint.inverse_transform(value))
 
     @property
     def b(self):
@@ -383,15 +342,6 @@ class InvertedSigmoidKernel(SigmoidKernel):
     @a.setter
     def a(self, value):
         self.sigmoid_kernel.a = value
-
-    # @property
-    # def a(self):
-    #     """Delegate a parameter to the original SigmoidKernel."""
-    #     return self.sigmoid_kernel.a
-
-    # @a.setter
-    # def a(self, value):
-    #     self.sigmoid_kernel.a = value 
 
     @property
     def b(self):

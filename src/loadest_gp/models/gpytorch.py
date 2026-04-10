@@ -61,7 +61,7 @@ class LoadestGPMarginalGPyTorch(
 
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood):
-        super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
+        super().__init__(train_x, train_y, likelihood)
 
         n_d = train_x.shape[1]  # number of dimensions
         self.dims = np.arange(n_d)

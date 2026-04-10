@@ -1,34 +1,17 @@
-import sys
 import warnings
 
-__all_gpytorch__ = [
-    # Sub-packages in models.gpytorch
-    "LoadestGPMarginalGPyTorch",
-]
+from .models.gpytorch import LoadestGPMarginalGPyTorch
 
-__all_pymc__ = [
-    # PyMC sub-packages in models.pymc
-    "LoadestGPMarginalPyMC",
-]
+__all__ = ["LoadestGPMarginalGPyTorch"]
 
-for name in __all_gpytorch__:
-    exec(f"from .models.gpytorch import {name}")
-
-__all__ = __all_gpytorch__.copy()
-
-
-# check if pymc is installed, then import the sub-packages
 try:
-    import pymc
-    __all__.extend(__all_pymc__)
+    import pymc  # noqa: F401
+    from .models.pymc import LoadestGPMarginalPyMC  # noqa: F401
 
-    for name in __all_pymc__:
-        exec(f"from .models.pymc import {name}")
-
+    __all__.append("LoadestGPMarginalPyMC")
 except ModuleNotFoundError:
-    # if pymc is not installed, raise a warning
     warnings.warn(
-        f"`pymc` is not installed: {', '.join(__all_pymc__)}"
-        " will not be available.",
+        "`pymc` is not installed: LoadestGPMarginalPyMC will not be available.",
         UserWarning,
+        stacklevel=2,
     )
