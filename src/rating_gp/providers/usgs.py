@@ -2,25 +2,23 @@
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pandas as pd
 import xarray as xr
 from dataretrieval import waterdata
-from discontinuum.providers.base import MetaData
 from loadest_gp.providers.usgs import get_metadata
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Union
+    from typing import Optional
 
     from xarray import Dataset
 
 FT_TO_M = 0.3048
 FT3_TO_M3 = 0.0283168
 
-    # Quantitative values of "measured_rating_diff"
+# Quantitative values of "measured_rating_diff"
 USGS_QUALITY_CODES = {
     'Excellent': '0.02',
     'Good': '0.05',
@@ -34,15 +32,13 @@ USGS_QUALITY_CODES = {
 class NWISColumn:
     column_name: str
     standard_name: str
-    long_name: [Optional[str]] = None
-    units: [Optional[str]] = None
+    long_name: Optional[str] = None
+    units: Optional[str] = None
     conversion: float = 1.0
 
     @property
     def name(self):
-        """
-        Alias for standard_name.
-        """
+        """Alias for standard_name."""
         return self.standard_name
 
 
@@ -52,22 +48,11 @@ class USGSParameter:
     standard_name: str
     long_name: Optional[str] = ""
     units: Optional[str] = ""
-    suffix: Optional[str] = ""
     conversion: Optional[float] = 1.0
 
     @property
-    def ppcode(self):
-        """
-        Return the parameter code with a 'p' prefix, which is used by the QWData service.
-
-        """
-        return "p" + self.pcode
-
-    @property
     def name(self):
-        """
-        Alias for standard_name.
-        """
+        """Alias for standard_name."""
         return self.standard_name
 
 
@@ -76,7 +61,6 @@ USGSStage = USGSParameter(
     standard_name="stage",
     long_name="Stream stage",
     units="meters",
-    suffix="_Mean",
     conversion=FT_TO_M,
 )
 

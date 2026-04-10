@@ -6,15 +6,12 @@ from discontinuum.engines.gpytorch import MarginalGPyTorch, NoOpMean
 
 from gpytorch.kernels import (
     MaternKernel,
-    RBFKernel,
-    RQKernel,
     ScaleKernel,
     PeriodicKernel,
 )
 from gpytorch.priors import (
     GammaPrior,
     HalfNormalPrior,
-    HalfCauchyPrior,
     NormalPrior,
 )
 
@@ -31,7 +28,7 @@ class PowerLawTransform(torch.nn.Module):
     """
     """
     def __init__(self):
-        super(PowerLawTransform, self).__init__()
+        super().__init__()
         self.a = torch.nn.Parameter(torch.randn(1))
         # initialize b according to Manning's equation (refer to clamp)
         # Use proper parameter initialization to maintain gradient flow
@@ -50,12 +47,9 @@ class RatingGPMarginalGPyTorch(
     # comes last b/c it conflics with Mixin
     MarginalGPyTorch,
 ):
-    """
-    Gaussian Process implementation of the LOAD ESTimation (LOADEST) model
+    """Gaussian Process model for stage-discharge rating curves.
 
-    This model currrently uses the marginal likelihood implementation, which is
-    fast but does not account for censored data. Censored data require a slower
-    latent variable implementation.
+    Uses the marginal likelihood implementation for fast fitting.
     """
     def __init__(
             self,
@@ -203,7 +197,7 @@ class RatingGPMarginalGPyTorch(
 
 class ExactGPModel(gpytorch.models.ExactGP):
     def __init__(self, train_x, train_y, likelihood):
-        super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
+        super().__init__(train_x, train_y, likelihood)
 
         n_d = train_x.shape[1]  # number of dimensions
         assert n_d == 2, "Only two dimensions supported"

@@ -104,13 +104,13 @@ class DataManager:
         return Dataset(covariates)
 
     @cached_property
-    def y(self, dtype="float32") -> ArrayLike:
+    def y(self) -> ArrayLike:
         """Convenience function for DataManager.target.transform"""
         return self.target_pipeline.transform(self.data.target).flatten()
 
     @cached_property
-    def y_unc(self, dtype="float32") -> ArrayLike:
-        """Convenience function for DataManager.target.transform"""
+    def y_unc(self) -> ArrayLike:
+        """Convenience function for DataManager.error_pipeline.transform"""
         return self.error_pipeline.transform(self.data.target_unc).flatten()
 
     @cached_property

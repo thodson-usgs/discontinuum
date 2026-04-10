@@ -26,23 +26,11 @@ class USGSParameter:
     standard_name: str
     long_name: Optional[str] = ""
     units: Optional[str] = ""
-    suffix: Optional[str] = ""
     conversion: Optional[float] = 1.0
 
     @property
-    def ppcode(self):
-        """
-        Return the parameter code with a 'p' prefix, which is used by the QWData
-        service.
-
-        """
-        return "p" + self.pcode
-
-    @property
     def name(self):
-        """
-        Alias for standard_name.
-        """
+        """Alias for standard_name."""
         return self.standard_name
 
 
@@ -51,7 +39,6 @@ USGSFlow = USGSParameter(
     standard_name="flow",
     long_name="Streamflow",
     units="cubic meters per second",
-    suffix="_Mean",
     conversion=0.0283168,
 )
 
@@ -176,11 +163,6 @@ def get_daily(
     )
 
     return format_daily(df, site, params)
-
-
-def format_wqp_date(date: str) -> str:
-    """Reformat date from 'YYYY-MM-DD' to 'MM-DD-YYYY'."""
-    return "-".join(date.split("-")[1:] + [date.split("-")[0]])
 
 
 def format_daily(

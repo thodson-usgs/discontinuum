@@ -11,14 +11,11 @@ import numpy as np
 import pandas as pd
 from discontinuum.engines.base import is_fitted
 from discontinuum.plot import BasePlotMixin
-from scipy.stats import norm
-from rating_gp.models.kernels import SigmoidKernel
 import xarray as xr
 from xarray import DataArray
-from xarray.plot.utils import label_from_attrs
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional, Union
+    from typing import Optional, Union
     from datetime import datetime
     from matplotlib.pyplot import Axes
     from xarray import Dataset

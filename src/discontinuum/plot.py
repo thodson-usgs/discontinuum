@@ -5,14 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-import numpy as np
 from discontinuum.engines.base import is_fitted
-from scipy.stats import norm
 from xarray import DataArray
-from xarray.plot.utils import label_from_attrs
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
+    from typing import Optional
 
     from matplotlib.pyplot import Axes
     from xarray import Dataset
