@@ -74,6 +74,7 @@ class BaseTransformer(TransformerMixin, BaseEstimator):
         pass
 
     def fit(self, X, y=None):
+        self.is_fitted_ = True
         return self
 
 
@@ -120,11 +121,12 @@ class SquareTransformer(OneToOneFeatureMixin, BaseTransformer):
 class UnitScaler(BaseTransformer):
     """Rescale a variable to have a minimum of 0 and a maximum of 1."""
     def __init__(self, zero_value=0):
-        self.zero = zero_value    
+        self.zero = zero_value
 
     def fit(self, X, y=None):
         self.min_ = X.min()
         self.max_ = X.max()
+        self.is_fitted_ = True
         return self
     
     def transform(self, X):
@@ -149,6 +151,7 @@ class StandardScaler(BaseTransformer):
             self.mean_ = X.mean(axis=0)
         if self.with_std:
             self.scale_ = X.std(axis=0)
+        self.is_fitted_ = True
         return self
 
     def transform(self, X):
@@ -178,7 +181,7 @@ class TimeTransformer(BaseTransformer):
 class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
     def __init__(self):
         """Store xarray metadata (attrs)."""
-        self.attrs = None
+        pass
 
     def fit(self, X, y=None):
         """Store metadata from a xarray DataArray.
@@ -190,9 +193,9 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         y : None
             Ignored.
         """
-        self.attrs = X.attrs
-        self.name = X.name
-        self.dims = X.dims
+        self.attrs_ = X.attrs
+        self.name_ = X.name
+        self.dims_ = X.dims
 
         return self
 
@@ -222,9 +225,9 @@ class MetadataManager(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         """
         return DataArray(
             X.squeeze(),
-            attrs=self.attrs,
-            name=self.name,
-            dims=self.dims,
+            attrs=self.attrs_,
+            name=self.name_,
+            dims=self.dims_,
         )
 
 

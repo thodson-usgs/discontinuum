@@ -8,12 +8,11 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 import xarray as xr
-from dataretrieval import nwis, wqp
+from dataretrieval import waterdata
 from discontinuum.providers.base import MetaData
 from loadest_gp.providers.usgs import get_metadata
 
 if TYPE_CHECKING:
-    # from pandas import DataFrame
     from typing import Dict, List, Optional, Union
 
     from xarray import Dataset
@@ -82,7 +81,7 @@ USGSStage = USGSParameter(
 )
 
 NWISStage = NWISColumn(
-    column_name="gage_height_va",
+    column_name="stage",
     standard_name="stage",
     long_name="Stream stage",
     units="meters",
@@ -90,7 +89,7 @@ NWISStage = NWISColumn(
 )
 
 NWISDischarge = NWISColumn(
-    column_name="discharge_va",
+    column_name="discharge",
     standard_name="discharge",
     long_name="Stream discharge",
     units="cubic meters per second",
@@ -98,7 +97,7 @@ NWISDischarge = NWISColumn(
 )
 
 NWISDischargeUnc = NWISColumn(
-    column_name="measured_rating_diff",
+    column_name="measurement_rated",
     standard_name="discharge_unc",
     long_name=("Stream discharge uncertainty estimated from qualitative "
                "measurement rating codes"),
@@ -112,7 +111,7 @@ def get_daily_stage(
     start_date: str,
     end_date: str,
 ) -> Dataset:
-    """Get daily data from the USGS NWIS API.
+    """Get daily data from the USGS Water Data API.
 
     Parameters
     ----------
@@ -122,8 +121,6 @@ def get_daily_stage(
         Start date in the format 'yyyy-mm-dd'.
     end_date : str
         End date in the format 'yyyy-mm-dd'.
-    params : List[USGSParameter], optional
-        List of parameters to retrieve. The default is flow only `[USGSFlow]`.
 
     Returns
     -------
@@ -131,27 +128,34 @@ def get_daily_stage(
         Dataset with the requested data.
     """
     param = USGSStage
-    df, _ = nwis.get_dv(
-        sites=site,
-        start=start_date,
-        end=end_date,
-        parameterCd=param.pcode,
-        )
+
+    if not site.startswith("USGS-"):
+        monitoring_location_id = "USGS-" + site
+    else:
+        monitoring_location_id = site
+
+    time_range = f"{start_date}/{end_date}"
+
+    df, _ = waterdata.get_daily(
+        monitoring_location_id=monitoring_location_id,
+        parameter_code=param.pcode,
+        time=time_range,
+    )
 
     if len(df) == 0:
         raise ValueError("No daily stage data is available for USGS site "
                          f"number: {site}")
 
-    # rename columns
-    df = df.rename(columns={param.pcode + param.suffix: param.name})
-    # drop columns
-    df = df[[param.name]]
+    # waterdata returns long format with 'time' and 'value' columns
+    df = df[["time", "value"]].copy()
+    df = df.rename(columns={"value": param.name})
+    df = df.set_index("time")
+
     # remove timezone for xarray compatibility
-    df.index = df.index.tz_localize(None)
+    if hasattr(df.index, "tz") and df.index.tz is not None:
+        df.index = df.index.tz_localize(None)
 
     ds = xr.Dataset.from_dataframe(df)
-    # rename "datetime" to "time", which is xarray convention
-    ds = ds.rename({"datetime": "time"})
 
     # set metadata
     ds.attrs = get_metadata(site).__dict__
@@ -168,31 +172,31 @@ def get_measurements(
         start_date: str,
         end_date: str,
 ):
-    """Get discharge measurements from the USGS NWIS API.
+    """Get discharge measurements from the USGS Water Data API.
 
     Parameters
     ----------
     site : str
-        Water Quality Portal site id; e.g., 'USGS-12345678'.
+        USGS site number; e.g., '03339000'.
     start_date : str
         Start date in the format 'YYYY-MM-DD'.
     end_date : str
         End date in the format 'YYYY-MM-DD'.
     """
-    # df, _ = nwis.get_discharge_measurements(
-    #     sites=site,
-    #     start=start_date,
-    #     end=end_date,
-    #     format="rdb_expanded",
-    # )
-    # Need this till get_discharge_measurements update is uploaded
-    response = nwis.query_waterdata(
-        'measurements', ssl_check=True, format="rdb_expanded",
-        site_no=site, begin_date=start_date, end_date=end_date,
-    )
-    df = nwis._read_rdb(response.text)
+    if not site.startswith("USGS-"):
+        monitoring_location_id = "USGS-" + site
+    else:
+        monitoring_location_id = site
 
-    return read_measurements_df(df)    
+    time_range = f"{start_date}/{end_date}"
+
+    df, _ = waterdata.get_field_measurements(
+        monitoring_location_id=monitoring_location_id,
+        parameter_code="00060,00065",
+        time=time_range,
+    )
+
+    return read_measurements_df(df)
 
 
 def read_measurements_df(df: pd.DataFrame) -> xr.Dataset:
@@ -201,106 +205,94 @@ def read_measurements_df(df: pd.DataFrame) -> xr.Dataset:
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe from `dataretrieval.nwis.get_discharge_measurements()`
+        Dataframe from `waterdata.get_field_measurements()`
 
     Returns
     -------
     xr.Dataset
-    
+
     Example
     -------
-    >>> from dataretrieval import nwis
+    >>> from dataretrieval import waterdata
     >>> from rating_gp.providers.usgs import read_measurements_df
-    >>> df, _ = nwis.get_discharge_measurements(
-        sites='03339000',
-        start='2020-01-01',
-        end='2020-12-31',
-        format='rdb_expanded',
+    >>> df, _ = waterdata.get_field_measurements(
+        monitoring_location_id='USGS-03339000',
+        parameter_code='00060,00065',
+        time='2020-01-01/2020-12-31',
         )
     >>> ds = read_measurements_df(df)
     """
+    # The waterdata API returns a long-format DataFrame with columns:
+    # time, parameter_code, value, measurement_rated, control_condition, etc.
 
-    # assert the correct columns are present
-    required_columns = [
-        "measurement_dt",
-        "gage_height_va",
-        "discharge_va",
-        "q_meas_used_fg",
-        "control_type_cd",
-        "measured_rating_diff",
-        "streamflow_method",
-        NWISStage.column_name,
-        NWISDischarge.column_name,
-    ]
+    # Pivot from long to wide format, aligning stage and discharge by time
+    pivot_values = ["value", "measurement_rated"]
+    if "control_condition" in df.columns:
+        pivot_values.append("control_condition")
 
-    missing_columns = set(required_columns) - set(df.columns)
-    if missing_columns:
-        raise ValueError(
-            f"Missing required columns in the DataFrame: {missing_columns}"
-        )
-
-    # covert timezone to UTC? ignore for now
-    df.index = pd.to_datetime(
-        df["measurement_dt"],
-        format="ISO8601",
+    pivot_df = df.pivot_table(
+        index="time",
+        columns="parameter_code",
+        values=pivot_values,
+        aggfunc="first",
     )
-    df.index.name = "time"
-    # df.index = df.index.tz_localize(None)
-    df = df.rename(
-        columns={
-            NWISStage.column_name: NWISStage.standard_name,
-            NWISDischarge.column_name: NWISDischarge.standard_name,
-            }
-        )
-    
-    # Process the control_type_cd column
-    df["control_type_cd"] = (
-        df["control_type_cd"]
-        .fillna("Unspecified")
-        .astype("category")
-        )
-    
-    # Filter any measurements that are not used in the rating
-    mask = df["q_meas_used_fg"].str.lower().isin(['yes', 'y'])
-    df = df[mask]
 
-    num_not_used = (~mask).sum()
-    if num_not_used > 0:
-        warnings.warn(
-            f"{num_not_used} measurements were not used in the rating and "
-            "will be dropped from the dataset.",
-            UserWarning,
+    # Flatten MultiIndex columns: ('value', '00060') -> 'value_00060'
+    pivot_df.columns = [f"{c[0]}_{c[1]}" for c in pivot_df.columns]
+
+    # Rename columns to standard names
+    rename_map = {
+        "value_00065": "stage",
+        "value_00060": "discharge",
+        "measurement_rated_00060": "measured_rating_diff",
+        "control_condition_00060": "control_type_cd",
+    }
+    pivot_df = pivot_df.rename(columns=rename_map)
+
+    # Timezone handling
+    if hasattr(pivot_df.index, "tz") and pivot_df.index.tz is not None:
+        pivot_df.index = pivot_df.index.tz_convert("UTC").tz_localize(None)
+    pivot_df.index.name = "time"
+
+    # Ensure required columns exist
+    for col in ["stage", "discharge"]:
+        if col not in pivot_df.columns:
+            raise ValueError(f"Missing required column: {col}")
+
+    # Process the control_type_cd column
+    if "control_type_cd" in pivot_df.columns:
+        pivot_df["control_type_cd"] = (
+            pivot_df["control_type_cd"]
+            .fillna("Unspecified")
+            .astype("category")
         )
 
     # Replace other values with 'Unspecified'
-    df['measured_rating_diff'] = df['measured_rating_diff'].where(
-        df['measured_rating_diff'].isin(USGS_QUALITY_CODES.keys()),
-        'Unspecified'
-    )
+    if "measured_rating_diff" in pivot_df.columns:
+        pivot_df['measured_rating_diff'] = pivot_df['measured_rating_diff'].where(
+            pivot_df['measured_rating_diff'].isin(USGS_QUALITY_CODES.keys()),
+            'Unspecified'
+        )
 
-    df['discharge_unc_frac'] = (df['measured_rating_diff']
-                                .replace(USGS_QUALITY_CODES)
-                                .astype(float))
-
-    # Set indirect measurements as 20% uncertain regardless of quality code
-    df.loc[df['streamflow_method'] == 'QIDIR', 'discharge_unc_frac'] = 0.2
+        pivot_df['discharge_unc_frac'] = (pivot_df['measured_rating_diff']
+                                          .replace(USGS_QUALITY_CODES)
+                                          .astype(float))
+    else:
+        pivot_df['discharge_unc_frac'] = float(USGS_QUALITY_CODES['Unspecified'])
 
     # Convert fractional uncertainty to uncertainty assuming the uncertainty
     # fraction is a 2 sigma gse interval. (GSE = frac + 1)
     # (GSE -> exp(sigma_ln(Q)))
-    df['discharge_unc'] = df['discharge_unc_frac'] / 2 + 1
+    pivot_df['discharge_unc'] = pivot_df['discharge_unc_frac'] / 2 + 1
 
     # drop data that is <= 0 as we need all positive data
-    df = df[(df['stage'] > 0) & (df['discharge'] > 0)]
+    pivot_df = pivot_df[(pivot_df['stage'] > 0) & (pivot_df['discharge'] > 0)]
 
-    ds = xr.Dataset.from_dataframe(
-        df[[
-            "stage",
-            "discharge",
-            "discharge_unc",
-            "control_type_cd",
-        ]]
-        )
+    data_cols = ["stage", "discharge", "discharge_unc"]
+    if "control_type_cd" in pivot_df.columns:
+        data_cols.append("control_type_cd")
+
+    ds = xr.Dataset.from_dataframe(pivot_df[data_cols])
 
     for param in [NWISStage, NWISDischarge]:
         ds[param.name] = ds[param.name] * param.conversion

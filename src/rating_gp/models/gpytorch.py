@@ -164,13 +164,21 @@ class RatingGPMarginalGPyTorch(
             try:
                 with gpytorch.settings.fast_pred_var():
                     mean = self.likelihood(self.model(x_grid)).mean
+
+                    # Use finite differences for the stage derivative to avoid
+                    # second-order derivatives through torch.cdist in the kernel,
+                    # which does not support higher-order autograd.
+                    fd_eps = 1e-3
+                    x_grid_plus = x_grid.clone()
+                    x_grid_plus[:, stage_dim] = x_grid[:, stage_dim] + fd_eps
+                    mean_plus = self.likelihood(self.model(x_grid_plus)).mean
             finally:
                 if was_model_training:
                     self.model.train()
                 if was_likelihood_training:
                     self.likelihood.train()
 
-            d_mean_d_stage = torch.autograd.grad(mean.sum(), stage_grid, create_graph=True)[0]
+            d_mean_d_stage = (mean_plus - mean) / fd_eps
             neg = torch.clamp(-d_mean_d_stage, min=0.0)
             pen = neg.mean()
             if monotonic_penalty_interval > 1:
