@@ -77,6 +77,9 @@ class BaseTransformer(TransformerMixin, BaseEstimator):
         self.is_fitted_ = True
         return self
 
+    def __sklearn_is_fitted__(self):
+        return getattr(self, "is_fitted_", False)
+
 
 class ClipTransformer(BaseTransformer):
     """Clip a variable."""
@@ -126,9 +129,9 @@ class UnitScaler(BaseTransformer):
     def fit(self, X, y=None):
         self.min_ = X.min()
         self.max_ = X.max()
-        self.is_fitted_ = True
+        super().fit(X, y)
         return self
-    
+
     def transform(self, X):
         return self.zero + (X - self.min_) / (self.max_ - self.min_)
     
@@ -151,7 +154,7 @@ class StandardScaler(BaseTransformer):
             self.mean_ = X.mean(axis=0)
         if self.with_std:
             self.scale_ = X.std(axis=0)
-        self.is_fitted_ = True
+        super().fit(X, y)
         return self
 
     def transform(self, X):
