@@ -16,34 +16,37 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=f281be69"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/rating-gp-demo';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +54,7 @@
     <link rel="prev" title="loadest-gp (prototype)" href="loadest-gp-demo.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
   </head>
   
   
@@ -66,19 +70,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -86,7 +79,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search..."
          aria-label="Search..."
          autocomplete="off"
@@ -94,8 +86,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -111,7 +103,8 @@
       
       
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -141,15 +134,11 @@
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <ul class="current nav bd-sidenav">
@@ -215,9 +204,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -300,7 +294,7 @@
 
 
 <button onclick="toggleFullScreen()"
-  class="btn btn-sm btn-fullscreen-button"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
   title="Fullscreen mode"
   data-bs-placement="bottom" data-bs-toggle="tooltip"
 >
@@ -314,25 +308,17 @@
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <span class="fa-solid fa-list"></span>
 </button>
 </div></div>
@@ -421,6 +407,9 @@ This model seeks to expand the typical rating curve fitting process to include s
 </div>
 </div>
 <div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Geopandas not installed. Geometries will be flattened into pandas DataFrames.
+</pre></div>
+</div>
 <div class="output text_html"><div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
 <defs>
 <symbol id="icon-database" viewBox="0 0 32 32">
@@ -966,15 +955,15 @@ dl.xr-attrs {
 </style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 11kB
 Dimensions:          (time: 319)
 Coordinates:
-  * time             (time) datetime64[ns] 3kB 1988-10-04T08:35:00 ... 2021-0...
+  * time             (time) datetime64[us] 3kB 1988-10-04T14:35:00 ... 2021-0...
 Data variables:
     stage            (time) float64 3kB 0.4694 0.4938 0.5243 ... 0.765 0.6706
     discharge        (time) float64 3kB 1.07 1.116 1.54 ... 17.98 1.682 0.7447
     discharge_unc    (time) float64 3kB 1.025 1.025 1.025 ... 1.04 1.025 1.04
-    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-a488cfcc-3f28-49ff-a77a-6351a46c8fcb' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-a488cfcc-3f28-49ff-a77a-6351a46c8fcb' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div></li><li class='xr-section-item'><input id='section-2ed0c3ca-82b3-4dac-9ced-21ea6e3e0f19' class='xr-section-summary-in' type='checkbox' checked /><label for='section-2ed0c3ca-82b3-4dac-9ced-21ea6e3e0f19' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>1988-10-04T08:35:00 ... 2021-08-...</div><input id='attrs-53de67b3-fd54-4213-8787-a7a5a8338db6' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-53de67b3-fd54-4213-8787-a7a5a8338db6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-656b997d-2a9b-4f92-8664-389dc2282184' class='xr-var-data-in' type='checkbox'><label for='data-656b997d-2a9b-4f92-8664-389dc2282184' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T08:35:00.000000000&#x27;, &#x27;1988-11-16T11:50:00.000000000&#x27;,
-       &#x27;1989-01-03T14:15:00.000000000&#x27;, ..., &#x27;2021-05-19T11:11:07.000000000&#x27;,
-       &#x27;2021-07-02T08:12:50.000000000&#x27;, &#x27;2021-08-17T13:45:31.000000000&#x27;],
-      shape=(319,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-fd01d907-af8d-4654-b909-c77158242b7e' class='xr-section-summary-in' type='checkbox' checked /><label for='section-fd01d907-af8d-4654-b909-c77158242b7e' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-3f5b6cab-5224-4cc9-b517-b126b277a6f4' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3f5b6cab-5224-4cc9-b517-b126b277a6f4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-00c19c08-ee4f-4b18-b4b4-75cb37e7be25' class='xr-var-data-in' type='checkbox'><label for='data-00c19c08-ee4f-4b18-b4b4-75cb37e7be25' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>gage_height_va</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
+    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-1dd101c2-60bd-4bc3-b9cd-e65c3beccd07' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-1dd101c2-60bd-4bc3-b9cd-e65c3beccd07' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div></li><li class='xr-section-item'><input id='section-d89a01e7-0792-44c5-b011-52c47fe908ae' class='xr-section-summary-in' type='checkbox' checked /><label for='section-d89a01e7-0792-44c5-b011-52c47fe908ae' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[us]</div><div class='xr-var-preview xr-preview'>1988-10-04T14:35:00 ... 2021-08-...</div><input id='attrs-a5cf37da-c802-4b46-a02c-49e6ffee8830' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a5cf37da-c802-4b46-a02c-49e6ffee8830' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a29ad7fa-bee1-4a14-bfd5-374df5e170b6' class='xr-var-data-in' type='checkbox'><label for='data-a29ad7fa-bee1-4a14-bfd5-374df5e170b6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T14:35:00.000000&#x27;, &#x27;1988-11-16T18:50:00.000000&#x27;,
+       &#x27;1989-01-03T21:15:00.000000&#x27;, ..., &#x27;2021-05-19T17:11:07.000000&#x27;,
+       &#x27;2021-07-02T14:12:50.000000&#x27;, &#x27;2021-08-17T19:45:31.000000&#x27;],
+      shape=(319,), dtype=&#x27;datetime64[us]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-dc470265-96ec-414e-ad4d-8c0fed081a43' class='xr-section-summary-in' type='checkbox' checked /><label for='section-dc470265-96ec-414e-ad4d-8c0fed081a43' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-728d3a18-345d-4eeb-9f73-df17cf6ef38f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-728d3a18-345d-4eeb-9f73-df17cf6ef38f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-231b68bd-f8a1-4ea7-b3ad-da91f209f2a7' class='xr-var-data-in' type='checkbox'><label for='data-231b68bd-f8a1-4ea7-b3ad-da91f209f2a7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>stage</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
        1.057656, 0.646176, 0.505968, 0.521208, 0.493776, 0.530352,
        0.524256, 0.530352, 0.896112, 1.335024, 1.338072, 1.55448 ,
        1.030224, 0.536448, 0.466344, 0.554736, 0.505968, 0.499872,
@@ -1014,7 +1003,7 @@ Data variables:
        0.728472, 0.740664, 0.765048, 0.771144, 1.594104, 1.344168,
        0.969264, 0.813816, 0.783336, 0.694944, 0.6858  , 0.691896,
        0.710184, 0.688848, 0.865632, 0.862584, 1.32588 , 0.765048,
-       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-d323743f-b56b-4390-a735-00d34da624fa' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-d323743f-b56b-4390-a735-00d34da624fa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-31e24b08-04f5-45e6-8fa5-d22c20eacd4f' class='xr-var-data-in' type='checkbox'><label for='data-31e24b08-04f5-45e6-8fa5-d22c20eacd4f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge_va</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
+       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-f5d26e21-dc43-4ba6-ba48-1ad8d12e9ca6' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f5d26e21-dc43-4ba6-ba48-1ad8d12e9ca6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0e3832b4-33f3-4d0f-b252-631531404a83' class='xr-var-data-in' type='checkbox'><label for='data-0e3832b4-33f3-4d0f-b252-631531404a83' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
        17.0467136 , 14.299984  ,  3.0298976 ,  1.3025728 ,  1.4016816 ,
         1.10718688,  1.46114688,  1.3167312 ,  1.6140576 ,  8.1835552 ,
        27.6938304 , 26.6461088 , 40.209856  , 12.600976  ,  1.80378016,
@@ -1054,7 +1043,7 @@ Data variables:
         0.95144448,  1.05338496,  1.46681024,  1.76130496, 33.413824  ,
        18.122752  ,  5.4651424 ,  2.22853216,  1.77829504,  0.91463264,
         0.83817728,  0.91180096,  1.1185136 ,  0.94011776,  3.114848  ,
-        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-e06a4c75-651b-42d1-83a9-25d27eb28696' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-e06a4c75-651b-42d1-83a9-25d27eb28696' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6e7b3698-1eb7-4937-87eb-4b00e0f4223d' class='xr-var-data-in' type='checkbox'><label for='data-6e7b3698-1eb7-4937-87eb-4b00e0f4223d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measured_rating_diff</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
+        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-4cc94e64-2d85-4711-bc97-b862c5662bcb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4cc94e64-2d85-4711-bc97-b862c5662bcb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-313f241f-18df-4d16-893e-babe0c70f600' class='xr-var-data-in' type='checkbox'><label for='data-313f241f-18df-4d16-893e-babe0c70f600' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measurement_rated</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
        1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025,
        1.025, 1.025, 1.025, 1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.04 ,
@@ -1084,14 +1073,14 @@ Data variables:
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
        1.025, 1.025, 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.025, 1.04 ,
        1.025, 1.025, 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.025, 1.025,
-       1.04 , 1.025, 1.025, 1.04 , 1.04 , 1.025, 1.025, 1.04 , 1.025,
+       1.04 , 1.025, 1.025, 1.04 , 1.04 , 1.025, 1.025, 1.025, 1.025,
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.06 , 1.06 , 1.06 , 1.04 , 1.04 , 1.025, 1.04 ,
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
-       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-a7129db7-e4db-4ef7-88f2-e85e463f3080' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a7129db7-e4db-4ef7-88f2-e85e463f3080' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-bccae8a8-c4e0-4afb-9d50-2b8be8d4ef4a' class='xr-var-data-in' type='checkbox'><label for='data-bccae8a8-c4e0-4afb-9d50-2b8be8d4ef4a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
+       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-8db77177-52b5-43f4-b8d3-92185131a16c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8db77177-52b5-43f4-b8d3-92185131a16c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8b710a35-bd22-4366-821a-5d88b755daa0' class='xr-var-data-in' type='checkbox'><label for='data-8b710a35-bd22-4366-821a-5d88b755daa0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
 Length: 319
-Categories (7, object): [&#x27;Clear&#x27;, &#x27;DebrisHeavy&#x27;, &#x27;DebrisLight&#x27;, &#x27;IceShore&#x27;, &#x27;Unspecifed&#x27;, &#x27;Unspecified&#x27;, &#x27;VegetationLight&#x27;]</pre></div></li></ul></div></li></ul></div></div></div></div>
+Categories (7, str): [&#x27;Clear&#x27;, &#x27;Debris - Heavy&#x27;, &#x27;Debris - Light&#x27;, &#x27;Ice - Shore&#x27;, &#x27;Unspecifed&#x27;, &#x27;Unspecified&#x27;, &#x27;Vegetation - Light&#x27;]</pre></div></li></ul></div></li></ul></div></div></div></div>
 </div>
 <p>With the training data, we’re now ready to fit a model to the site. Depending on your hardware, this should take about 10s.</p>
 <div class="cell docutils container">
@@ -1111,18 +1100,18 @@ Categories (7, object): [&#x27;Clear&#x27;, &#x27;DebrisHeavy&#x27;, &#x27;Debri
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-06 to the diagonal
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:41: NumericalWarning: A not p.d., added jitter of 1.0e-06 to the diagonal
   warnings.warn(
-/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-05 to the diagonal
+/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:41: NumericalWarning: A not p.d., added jitter of 1.0e-05 to the diagonal
   warnings.warn(
-/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:40: NumericalWarning: A not p.d., added jitter of 1.0e-04 to the diagonal
+/opt/hostedtoolcache/Python/3.14.3/x64/lib/python3.14/site-packages/linear_operator/utils/cholesky.py:41: NumericalWarning: A not p.d., added jitter of 1.0e-04 to the diagonal
   warnings.warn(
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1892 iterations
-Best objective: -1.189258
-CPU times: user 2min 50s, sys: 904 ms, total: 2min 51s
-Wall time: 1min 27s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1821 iterations
+Best objective: -1.189443
+CPU times: user 2min 26s, sys: 884 ms, total: 2min 27s
+Wall time: 1min 18s
 </pre></div>
 </div>
 </div>
@@ -1140,7 +1129,7 @@ Wall time: 1min 27s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/59c050c45315aed5112e5d14d14b58e9d35c32d71c0310065dac3c4e5225a907.png" src="../_images/59c050c45315aed5112e5d14d14b58e9d35c32d71c0310065dac3c4e5225a907.png" />
+<img alt="../_images/c97b1a97473cdf086dd44f5420fb3f574fa2e53fb333274e54635e114e293503.png" src="../_images/c97b1a97473cdf086dd44f5420fb3f574fa2e53fb333274e54635e114e293503.png" />
 </div>
 </div>
 <p>One major advantage of <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> is that the resulting model can be used to make predictions of a rating curve at any moment in time. To see how well our model can predict a rating curve across time, let’s plot the rating curves at an interval of every 5 years at the start of a water year (i.e., October 1st). This way we can see how well the model accounts for any shift in the rating with time.</p>
@@ -1159,7 +1148,7 @@ Wall time: 1min 27s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/164d1c99f175946d7322d9daea96ceb39b7c10296c688dc5947f7270be384f82.png" src="../_images/164d1c99f175946d7322d9daea96ceb39b7c10296c688dc5947f7270be384f82.png" />
+<img alt="../_images/8f81ed01b97c7c408ad4b6ffc18877b9f7abf2dad415d5710294325ef7ea2915.png" src="../_images/8f81ed01b97c7c408ad4b6ffc18877b9f7abf2dad415d5710294325ef7ea2915.png" />
 </div>
 </div>
 <p>Nice! The shifts with time are clearly predicted by the model. These results are are promising for <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> to be able to model shift in rating curves effectively.</p>
@@ -1186,6 +1175,20 @@ Wall time: 1min 27s
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Geopandas not installed. Geometries will be flattened into pandas DataFrames.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Geopandas not installed. Geometries will be flattened into pandas DataFrames.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Geopandas not installed. Geometries will be flattened into pandas DataFrames.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Geopandas not installed. Geometries will be flattened into pandas DataFrames.
+</pre></div>
+</div>
+</div>
 </div>
 <p>With the training data, we’re now ready to fit a model to each site. Depending on your hardware, this should take about 10-20s for each site.</p>
 <div class="cell docutils container">
@@ -1205,22 +1208,22 @@ Wall time: 1min 27s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1117 iterations
-Best objective: -0.611775
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1291 iterations
+Best objective: -0.613948
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 681 iterations
-Best objective: -1.059183
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 994 iterations
+Best objective: -1.059047
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1055 iterations
-Best objective: -1.519340
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 934 iterations
+Best objective: -1.481605
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1822 iterations
-Best objective: -1.189207
-CPU times: user 6min 51s, sys: 2.28 s, total: 6min 54s
-Wall time: 3min 30s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1935 iterations
+Best objective: -1.189452
+CPU times: user 7min 26s, sys: 1.8 s, total: 7min 28s
+Wall time: 3min 54s
 </pre></div>
 </div>
 </div>
@@ -1242,7 +1245,7 @@ Wall time: 3min 30s
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/a3f5a274875f134500d726351f3f4a49c327e366a36e4f90b182d16b8734ac16.png" src="../_images/a3f5a274875f134500d726351f3f4a49c327e366a36e4f90b182d16b8734ac16.png" />
+<img alt="../_images/5776ded286f1276314141becc37a81ef9e4b4323d93dc7417a7e7cbb7bfa3ae8.png" src="../_images/5776ded286f1276314141becc37a81ef9e4b4323d93dc7417a7e7cbb7bfa3ae8.png" />
 </div>
 </div>
 </section>
@@ -1284,14 +1287,16 @@ Wall time: 3min 30s
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
 
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usgs-site-10154200">USGS site 10154200</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-site-example">Multi-site Example</a></li>
@@ -1336,8 +1341,8 @@ By Timothy Hodson and Keith Doore
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>
