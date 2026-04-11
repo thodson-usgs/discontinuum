@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import xarray as xr
 from dataretrieval import waterdata
+from discontinuum.providers.base import MetaData, USGSParameter
 from loadest_gp.providers.usgs import get_metadata
 
 if TYPE_CHECKING:
@@ -18,7 +19,6 @@ if TYPE_CHECKING:
 FT_TO_M = 0.3048
 FT3_TO_M3 = 0.0283168
 
-# Quantitative values of "measured_rating_diff"
 USGS_QUALITY_CODES = {
     'Excellent': '0.02',
     'Good': '0.05',
@@ -30,25 +30,12 @@ USGS_QUALITY_CODES = {
 
 @dataclass
 class NWISColumn:
+    """Column definition for NWIS field measurement data."""
     column_name: str
     standard_name: str
     long_name: Optional[str] = None
     units: Optional[str] = None
     conversion: float = 1.0
-
-    @property
-    def name(self):
-        """Alias for standard_name."""
-        return self.standard_name
-
-
-@dataclass
-class USGSParameter:
-    pcode: str
-    standard_name: str
-    long_name: Optional[str] = ""
-    units: Optional[str] = ""
-    conversion: Optional[float] = 1.0
 
     @property
     def name(self):

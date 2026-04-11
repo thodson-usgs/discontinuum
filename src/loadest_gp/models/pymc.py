@@ -2,7 +2,8 @@ import numpy as np
 import pymc as pm
 from discontinuum.engines.pymc import MarginalPyMC
 
-from loadest_gp.models.base import LoadestDataMixin, ModelConfig
+from discontinuum.engines.base import ModelConfig
+from loadest_gp.models.base import LoadestDataMixin
 from loadest_gp.plot import LoadestPlotMixin
 
 
@@ -19,7 +20,7 @@ class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
             model_config: ModelConfig = ModelConfig(),
     ):
         """ """
-        super(MarginalPyMC, self).__init__(model_config=model_config)
+        super().__init__(model_config=model_config)
         self.build_datamanager(model_config)
 
     def build_model(self, X, y) -> pm.Model:

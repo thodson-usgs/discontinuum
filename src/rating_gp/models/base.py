@@ -1,55 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from dataclasses import dataclass
-
-from discontinuum.data_manager import DataManager
-from discontinuum.pipeline import (
-    LogStandardPipeline,
-    LogErrorPipeline,
-    StandardPipeline,
-    StandardErrorPipeline,
-    TimePipeline,
-    UnitPipeline,
-)
-# from rating_gp.pipeline import LogUncertaintyPipeline
-
-if TYPE_CHECKING:
-    from typing import Literal
-
-@dataclass
-class ModelConfig:
-    """ """
-    transform: Literal["log", "standard"] = "log"
+from discontinuum.engines.base import DataMixin, ModelConfig
+from discontinuum.pipeline import TimePipeline, UnitPipeline
 
 
-class RatingDataMixin:
-    """ """
-    # TODO inheret a BaseModel class with abc methods like build_model
-    def build_datamanager(
-            self,
-            model_config: ModelConfig = ModelConfig(),
-            ):
-        """ """
-        covariate_pipelines = {
-            "time": TimePipeline,
-            "stage": UnitPipeline,
-        }
+class RatingDataMixin(DataMixin):
+    """Data manager configuration for rating curve models."""
 
-        if model_config.transform == "log":
-            target_pipeline = LogStandardPipeline
-            error_pipeline = LogErrorPipeline
-        elif model_config.transform == "standard":
-            target_pipeline = StandardPipeline
-            error_pipeline = StandardErrorPipeline
-        else:
-            raise ValueError(
-                "Model config transform must be 'log' or 'standard'."
-            )
-
-        self.dm = DataManager(
-            target_pipeline=target_pipeline,
-            error_pipeline=error_pipeline,
-            covariate_pipelines=covariate_pipelines
+    def build_datamanager(self, model_config: ModelConfig = ModelConfig()):
+        self._build_datamanager(
+            covariate_pipelines={
+                "time": TimePipeline,
+                "stage": UnitPipeline,
+            },
+            model_config=model_config,
         )

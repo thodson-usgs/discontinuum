@@ -19,21 +19,18 @@ if TYPE_CHECKING:
     from xarray import Dataset
 
 
+def _get_optimizer_name(optimizer_obj):
+    """Return a canonical name string for a torch optimizer."""
+    if isinstance(optimizer_obj, torch.optim.AdamW):
+        return "adamw"
+    elif isinstance(optimizer_obj, torch.optim.Adam):
+        return "adam"
+    return optimizer_obj.__class__.__name__
+
+
 class NoOpMean(gpytorch.means.Mean):
     def forward(self, x):
         return x.squeeze(-1)
-
-
-class LatentGPyTorch(BaseModel):
-    def __init__(
-        self,
-        model_config: Optional[Dict] = None,
-    ):
-        """ """
-        super().__init__(model_config=model_config)
-
-    def fit(self, covariates, target=None):
-        pass
 
 
 class MarginalGPyTorch(BaseModel):
@@ -42,10 +39,8 @@ class MarginalGPyTorch(BaseModel):
         self,
         model_config: Optional[Dict] = None,
     ):
-        """ """
         super().__init__(model_config=model_config)
-        # --- Checkpointing state ---
-        self._resume_info = None  # holds checkpoint info to resume training
+        self._resume_info = None
         self._last_optimizer = None
         self._last_scheduler = None
         self._current_iteration = 0  # track training iterations
@@ -141,17 +136,10 @@ class MarginalGPyTorch(BaseModel):
         if not hasattr(self, 'likelihood'):
             raise RuntimeError('No likelihood to save. Call fit() first.')
 
-        # Normalize optimizer name for easy restoration
         opt_name = None
         lr_val = None
         if optimizer_obj is not None:
-            if isinstance(optimizer_obj, torch.optim.AdamW):
-                opt_name = 'adamw'
-            elif isinstance(optimizer_obj, torch.optim.Adam):
-                opt_name = 'adam'
-            else:
-                opt_name = optimizer_obj.__class__.__name__
-            # capture first param group LR as hint
+            opt_name = _get_optimizer_name(optimizer_obj)
             try:
                 lr_val = optimizer_obj.param_groups[0].get('lr', None)
             except Exception:
@@ -269,20 +257,9 @@ class MarginalGPyTorch(BaseModel):
         
         # For interruption-based resume, capture current optimizer/scheduler state
         if resuming_from_interruption and hasattr(self, '_last_optimizer') and self._last_optimizer is not None:
-            # Create resume_info from current optimizer/scheduler state
-            opt_name = None
-            lr_val = None
-            if isinstance(self._last_optimizer, torch.optim.AdamW):
-                opt_name = 'adamw'
-            elif isinstance(self._last_optimizer, torch.optim.Adam):
-                opt_name = 'adam'
-            
-            if self._last_optimizer.param_groups:
-                lr_val = self._last_optimizer.param_groups[0]['lr']
-            
             resume_info = {
-                'optimizer_name': opt_name,
-                'optimizer_lr': lr_val,
+                'optimizer_name': _get_optimizer_name(self._last_optimizer),
+                'optimizer_lr': self._last_optimizer.param_groups[0]['lr'] if self._last_optimizer.param_groups else None,
                 'optimizer_state_dict': self._last_optimizer.state_dict(),
                 'scheduler_state_dict': self._last_scheduler.state_dict() if self._last_scheduler else None,
             }
@@ -414,15 +391,9 @@ class MarginalGPyTorch(BaseModel):
                 )
 
                 if has_nan_grad:
-                    # Update best objective tracking (objective is still valid, just gradients are NaN)
                     obj_item = float(objective.item())
-                    if obj_item < best_obj - min_improvement:
-                        best_obj = obj_item
-                        patience_counter = 0
-                    else:
-                        patience_counter += 1
 
-                    # Sanitize NaN/Inf gradients and update parameters to allow loss change
+                    # Sanitize NaN/Inf gradients before stepping
                     for param in self.model.parameters():
                         if param.grad is not None:
                             param.grad = torch.nan_to_num(param.grad, nan=0.0, posinf=0.0, neginf=0.0)
@@ -430,14 +401,12 @@ class MarginalGPyTorch(BaseModel):
                     if scheduler_obj is not None:
                         scheduler_obj.step(obj_item)
 
-                    # Early stopping logic (independent of scheduler)
                     if obj_item < best_obj - min_improvement:
                         best_obj = obj_item
                         patience_counter = 0
                     else:
                         patience_counter += 1
-                    
-                    current_lr = optimizer_obj.param_groups[0]['lr']
+
                     if early_stopping and patience_counter >= patience:
                         print(f"\nEarly stopping triggered after {i+1} iterations")
                         print(f"Best objective: {best_obj:.6f}")
@@ -568,7 +537,6 @@ class MarginalGPyTorch(BaseModel):
 
         target = self.dm.y_t(mu)
 
-        # TODO handle type conversion in pipeline
         index = self.dm.covariate_pipelines[coord].inverse_transform(x_coord.numpy())
         covariates = self.dm.covariate_pipelines[covariate].inverse_transform(x_cov.numpy())
 
@@ -611,8 +579,7 @@ class MarginalGPyTorch(BaseModel):
 
         sim = f_preds.sample(sample_shape=torch.Size([n]))
 
-        # TODO modify transform to handle draws
-        # flatten then reshape to work around our transformation pipeline
+        # Flatten then reshape to work around 1D transformation pipeline
         temp = self.dm.y_t(sim.flatten())
         data = temp.data.reshape(n, -1)
         attrs = temp.attrs
@@ -626,18 +593,7 @@ class MarginalGPyTorch(BaseModel):
         return da
 
     def build_model(self, X, y, **kwargs) -> gpytorch.models.ExactGP:
-        """
-        Creates an instance of pm.Model based on provided data and
-        model_config, and attaches it to self.
-
-        The subclass method must instantiate self.model and self.likelihood.
-
-        Raises
-        ------
-        NotImplementedError
-        """
-        self.model = None
-
+        """Build a GPyTorch model from data. Must be implemented by subclasses."""
         raise NotImplementedError(
             "This method must be implemented in a subclass"
             )

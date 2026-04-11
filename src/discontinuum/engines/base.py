@@ -4,13 +4,25 @@ from typing import TYPE_CHECKING
 
 import functools
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from discontinuum.data_manager import DataManager
-from discontinuum.pipeline import StandardErrorPipeline, StandardPipeline
+from discontinuum.pipeline import (
+    LogErrorPipeline,
+    LogStandardPipeline,
+    StandardErrorPipeline,
+    StandardPipeline,
+)
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
+    from typing import Dict, Literal, Optional
     from xarray import DataArray, Dataset
+
+
+@dataclass
+class ModelConfig:
+    """Configuration for model data transformations."""
+    transform: Literal["log", "standard"] = "log"
 
 
 class BaseModel(ABC):
@@ -62,19 +74,37 @@ class BaseModel(ABC):
 
     @abstractmethod
     def build_model(self, X, y):
-        """
-        TODO Sometimes this sets self.model and sometimes this returns model.
-        Not sure that we can standardize the behavior for different engines.
-        """
         pass
 
     @abstractmethod
     def build_datamanager(self):
         """Build DataManager for the model."""
+        pass
+
+
+class DataMixin:
+    """Shared logic for building a DataManager with log/standard transforms."""
+
+    def _build_datamanager(
+            self,
+            covariate_pipelines: Dict,
+            model_config: ModelConfig = ModelConfig(),
+            ):
+        if model_config.transform == "log":
+            target_pipeline = LogStandardPipeline
+            error_pipeline = LogErrorPipeline
+        elif model_config.transform == "standard":
+            target_pipeline = StandardPipeline
+            error_pipeline = StandardErrorPipeline
+        else:
+            raise ValueError(
+                "Model config transform must be 'log' or 'standard'."
+            )
+
         self.dm = DataManager(
-            target_pipeline=StandardPipeline,
-            error_pipeline=StandardErrorPipeline,
-            covariate_pipelines=StandardPipeline,
+            target_pipeline=target_pipeline,
+            error_pipeline=error_pipeline,
+            covariate_pipelines=covariate_pipelines,
         )
 
 

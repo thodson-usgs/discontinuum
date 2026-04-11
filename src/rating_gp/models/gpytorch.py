@@ -15,7 +15,8 @@ from gpytorch.priors import (
     NormalPrior,
 )
 
-from rating_gp.models.base import RatingDataMixin, ModelConfig
+from discontinuum.engines.base import ModelConfig
+from rating_gp.models.base import RatingDataMixin
 from rating_gp.plot import RatingPlotMixin
 from rating_gp.models.kernels import (
     SigmoidKernel,
@@ -69,12 +70,8 @@ class RatingGPMarginalGPyTorch(
             noise = y_unc
         else:
             noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
-        # TODO: Fix "GPInputWarning: You have passed data through a 
-        # FixedNoiseGaussianLikelihood that did not match the size of the fixed
-        # noise, *and* you did not specify noise. This is treated as a no-op."
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
-            #learn_additional_noise=False,
             learn_additional_noise=True,
             noise_prior=gpytorch.priors.HalfNormalPrior(scale=0.03),
         )
@@ -266,15 +263,10 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
     def forward(self, x):
         self.powerlaw.b.data.clamp_(1.2, 2.5)
-        #x = x.clone()
-        #q = self.powerlaw(x[:, self.stage_dim])
-        #x_t[:, self.stage_dim] = self.warp_stage_dim(x_t[:, self.stage_dim])
         x_t = x.clone()
         x_t[:, self.stage_dim[0]] = self.powerlaw(x_t[:, self.stage_dim[0]])
         q = x_t[:, self.stage_dim[0]]
         mean_x = self.mean_module(q)
-
-        #covar_x = self.covar_module(x_t)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
@@ -322,14 +314,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                #lengthscale_prior=GammaPrior(concentration=3., rate=1.),
                 lengthscale_prior=stage_prior,
                 nu=2.5,
             ) *
             MaternKernel(
                 active_dims=self.time_dim,
-                # extreme prior for fast shift at 12413470
-                #lengthscale_prior=GammaPrior(concentration=0.1, rate=100),
                 lengthscale_prior=time_prior,
                 nu=1.5,
             ),
@@ -347,7 +336,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
-                #lengthscale_prior=GammaPrior(concentration=2, rate=1),
                 lengthscale_prior=GammaPrior(concentration=3, rate=2),
             ) *
             MaternKernel(
@@ -365,7 +353,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
             eta_prior = HalfNormalPrior(scale=0.5) 
 
         if ls_prior is None:
-            #ls_prior = GammaPrior(concentration=2, rate=4)
             ls_prior = GammaPrior(concentration=9, rate=10)
 
 
@@ -385,22 +372,17 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
     
     def cov_base(self, eta_prior=None):
-        """
-        Smooth, time-independent base rating curve using a Matern kernel on stage.
-        """
+        """Smooth, time-independent base rating curve using a Matern kernel on stage."""
         if eta_prior is None:
-            eta = HalfNormalPrior(scale=1.0)
-        else:
-            eta = eta_prior
+            eta_prior = HalfNormalPrior(scale=1.0)
 
-        #ls = GammaPrior(concentration=3, rate=1)
         ls = GammaPrior(concentration=4., rate=4.)
         return ScaleKernel(
             MaternKernel(
                 active_dims=self.stage_dim,
                 lengthscale_prior=ls,
             ),
-            outputscale_prior=eta,
+            outputscale_prior=eta_prior,
         )
 
     

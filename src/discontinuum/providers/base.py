@@ -1,12 +1,12 @@
-"""
-"""
+"""Base provider types."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from xarray import Dataset
+    from typing import Optional
 
 
 @dataclass
@@ -17,20 +17,16 @@ class MetaData:
     longitude: float
 
 
-def get_covariates(
-        location: str, start_date: str, end_date: str, variable: str,
-        ) -> Dataset:
-    """Return timeseries of covariate data."""
-    raise NotImplementedError
+@dataclass
+class USGSParameter:
+    """USGS parameter definition with unit conversion."""
+    pcode: str
+    standard_name: str
+    long_name: Optional[str] = ""
+    units: Optional[str] = ""
+    conversion: Optional[float] = 1.0
 
-
-def get_target(
-        location: str, start_date: str, end_date: str, variabe: str
-        ) -> Dataset:
-    """Return target data."""
-    raise NotImplementedError
-
-
-def get_metadata(location: str) -> MetaData:
-    """Return metadata."""
-    raise NotImplementedError
+    @property
+    def name(self):
+        """Alias for standard_name."""
+        return self.standard_name

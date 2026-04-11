@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import xarray as xr
 from dataretrieval import waterdata
-from discontinuum.providers.base import MetaData
+from discontinuum.providers.base import MetaData, USGSParameter
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Union
@@ -18,20 +18,6 @@ if TYPE_CHECKING:
     from pandas import DataFrame
 
 CFS_TO_M3 = 0.0283168
-
-
-@dataclass
-class USGSParameter:
-    pcode: str
-    standard_name: str
-    long_name: Optional[str] = ""
-    units: Optional[str] = ""
-    conversion: Optional[float] = 1.0
-
-    @property
-    def name(self):
-        """Alias for standard_name."""
-        return self.standard_name
 
 
 USGSFlow = USGSParameter(
@@ -168,7 +154,7 @@ def get_daily(
 def format_daily(
         df: DataFrame,
         site_id: Optional[str] = None,
-        params: Union[List[USGSParameter], USGSParameter] = [USGSFlow],
+        params: Union[List[USGSParameter], USGSParameter] = None,
 ) -> Dataset:
     """
     Format results of waterdata.get_daily.
@@ -182,7 +168,9 @@ def format_daily(
     params : List[USGSParameter], optional
         List of parameters to retrieve. The default is flow only `[USGSFlow]`.
     """
-    if not isinstance(params, list):
+    if params is None:
+        params = [USGSFlow]
+    elif not isinstance(params, list):
         params = [params]
 
     # The waterdata API returns a long-format DataFrame with columns:

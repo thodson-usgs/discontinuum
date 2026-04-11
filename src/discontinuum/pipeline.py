@@ -53,7 +53,6 @@ def decimal_year_to_datetime(x: ArrayLike) -> ArrayLike:
     ArrayLike
         Datetime array.
     """
-    # x = x.flatten()
     year = np.floor(x).astype(int)
     remainder = x - year
 
@@ -332,7 +331,6 @@ class StandardErrorPipeline(ErrorPipeline):
                 ("metadata", MetadataManager()),
                 ("scaler", StandardScaler(with_mean=False)),
                 ("square", SquareTransformer()),
-                # clip formerly used np.abs
                 ("clip", ClipTransformer(min=0)),
             ]
         )
@@ -363,9 +361,9 @@ class StandardErrorPipeline(ErrorPipeline):
 
 
 class LogErrorPipeline(ErrorPipeline):
-    """Pipeline to transform error
+    """Pipeline to transform error.
 
-    inverse_transform converts variance (in log space) to a GSE
+    inverse_transform converts variance (in log space) to a GSE.
     """
 
     def __init__(self):
@@ -375,7 +373,6 @@ class LogErrorPipeline(ErrorPipeline):
                 ("log", LogTransformer()),
                 ("scaler", StandardScaler(with_mean=False)),
                 ("square", SquareTransformer()),
-                # clip formerly used np.abs
                 ("clip", ClipTransformer(min=1e-6)),
             ]
         )

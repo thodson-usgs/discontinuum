@@ -14,7 +14,8 @@ from gpytorch.priors import (
     NormalPrior,
 )
 
-from loadest_gp.models.base import LoadestDataMixin, ModelConfig
+from discontinuum.engines.base import ModelConfig
+from loadest_gp.models.base import LoadestDataMixin
 from loadest_gp.plot import LoadestPlotMixin
 
 
@@ -41,13 +42,7 @@ class LoadestGPMarginalGPyTorch(
         self.build_datamanager(model_config)
 
     def build_model(self, X, y) -> gpytorch.models.ExactGP:
-        """Build marginal likelihood version of LoadestGP
-        """
-        # noise_prior = HalfNormalPrior(scale=0.01)
-        # self.likelihood = gpytorch.likelihoods.GaussianLikelihood(
-        #     noise_prior=noise_prior,
-        # )
-
+        """Build marginal likelihood version of LoadestGP."""
         noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
@@ -70,9 +65,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = (
-            # may omit trend: wall 1.08s vs 990ms without,
-            # but much faster to compile
-            #self.cov_trend()
             self.cov_seasonal()
             + self.cov_covariates()
             + self.cov_residual()
@@ -89,7 +81,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         return ScaleKernel(
             RBFKernel(
-                # active_dims=(0),
                 active_dims=self.time_dim,
                 lengthscale_prior=ls,
             ),
@@ -97,7 +88,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
 
     def cov_seasonal(self):
-        # TODO add lengthscale priors
         eta = HalfNormalPrior(scale=1)
         period = NormalPrior(loc=1, scale=0.01)
 

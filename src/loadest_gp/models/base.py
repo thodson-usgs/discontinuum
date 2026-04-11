@@ -1,54 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from dataclasses import dataclass
-
-from discontinuum.data_manager import DataManager
-from discontinuum.pipeline import (
-    LogStandardPipeline,
-    LogErrorPipeline,
-    StandardPipeline,
-    StandardErrorPipeline,
-    TimePipeline,
-)
-
-if TYPE_CHECKING:
-    from typing import Literal
+from discontinuum.engines.base import DataMixin, ModelConfig
+from discontinuum.pipeline import LogStandardPipeline, TimePipeline
 
 
-@dataclass
-class ModelConfig:
-    """ """
-    transform: Literal["log", "standard"] = "log"
+class LoadestDataMixin(DataMixin):
+    """Data manager configuration for load estimation models."""
 
-
-class LoadestDataMixin:
-    """ """
-    # TODO inheret a BaseModel class with abc methods like build_model
-    def build_datamanager(
-            self,
-            model_config: ModelConfig = ModelConfig(),
-            ):
-        """ """
-        covariate_pipelines = {
-            "time": TimePipeline,
-            "flow": LogStandardPipeline
-        }
-
-        if model_config.transform == "log":
-            target_pipeline = LogStandardPipeline
-            error_pipeline = LogErrorPipeline
-        elif model_config.transform == "standard":
-            target_pipeline = StandardPipeline
-            error_pipeline = StandardErrorPipeline
-        else:
-            raise ValueError(
-                "Model config transform must be 'log' or 'standard'."
-            )
-
-        self.dm = DataManager(
-            target_pipeline=target_pipeline,
-            error_pipeline=error_pipeline,
-            covariate_pipelines=covariate_pipelines
+    def build_datamanager(self, model_config: ModelConfig = ModelConfig()):
+        self._build_datamanager(
+            covariate_pipelines={
+                "time": TimePipeline,
+                "flow": LogStandardPipeline,
+            },
+            model_config=model_config,
         )

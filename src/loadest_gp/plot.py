@@ -15,11 +15,6 @@ if TYPE_CHECKING:
     from xarray import Dataset
 
 
-DEFAULT_FIGSIZE = (5, 5)
-NARROW_LINE = 1
-REGULAR_LINE = NARROW_LINE * 1.5
-
-
 class LoadestPlotMixin(BasePlotMixin):
     """Mixin plotting functions for Model class"""
     @is_fitted

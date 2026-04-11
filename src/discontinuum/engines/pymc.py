@@ -16,18 +16,6 @@ if TYPE_CHECKING:
     from xarray import Dataset
 
 
-class LatentPyMC(BaseModel):
-    def __init__(
-        self,
-        model_config: Optional[Dict] = None,
-    ):
-        """ """
-        pass
-
-    def fit(self, covariates, target=None):
-        pass
-
-
 class MarginalPyMC(BaseModel):
     def __init__(
         self,
@@ -110,9 +98,6 @@ class MarginalPyMC(BaseModel):
         x_coord = np.linspace(x_min[coord_dim], x_max[coord_dim], n_coord)
         x_cov = np.linspace(x_min[covariate_dim], x_max[covariate_dim], n_cov)
 
-        # TODO check dependency
-        # tested with this on WSL with pymc v5.14.0
-        # X_grid = pm.math.cartesian(x_cov[:, None], x_coord[None, :])
         X_grid = pm.math.cartesian(x_coord, x_cov)
 
         mu, _ = self.gp.predict(
@@ -176,7 +161,7 @@ class MarginalPyMC(BaseModel):
         rng = np.random.default_rng()
         sim = rng.multivariate_normal(mu, cov, size=n, method=method, tol=tol)
 
-        # TODO modify transform to handle samples/draws HACK
+        # Flatten then reshape to work around 1D transformation pipeline
         temp = self.dm.y_t(sim)
         data = temp.data.reshape(n, -1)
         attrs = temp.attrs
@@ -190,21 +175,7 @@ class MarginalPyMC(BaseModel):
         return da
 
     def build_model(self, X, y, **kwargs):
-        """
-        TODO: move this to parent?
-
-        Creates an instance of pm.Model based on provided data and
-        model_config, and attaches it to self.
-
-        The subclass method must instantiate self.model and self.gp.
-
-        Raises
-        ------
-        NotImplementedError
-        """
-        self.model = None
-        self.gp = None
-
+        """Build a PyMC model from data. Must be implemented by subclasses."""
         raise NotImplementedError(
             "This method must be implemented in a subclass"
             )
