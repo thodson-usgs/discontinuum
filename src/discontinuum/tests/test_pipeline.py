@@ -1,17 +1,17 @@
 import numpy as np
 import xarray as xr
+
 from discontinuum.pipeline import LogErrorPipeline, TimeTransformer
 
 
 def test_time_transform():
-    """ Test the TimeTransformer class.
-    """
+    """Test the TimeTransformer class."""
     # Create sample data
     data = np.array(
         ["2022-01-01", "2022-02-01", "2022-03-01"],
-        dtype="datetime64[ns]"  # ns precision
-        )
-    expected_result = np.array([2022. , 2022.08493151, 2022.16164384])
+        dtype="datetime64[ns]",  # ns precision
+    )
+    expected_result = np.array([2022.0, 2022.08493151, 2022.16164384])
 
     # Create TimeTransformer instance
     transformer = TimeTransformer()

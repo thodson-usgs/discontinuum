@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import functools
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from discontinuum.data_manager import DataManager
 from discontinuum.pipeline import (
@@ -15,18 +14,20 @@ from discontinuum.pipeline import (
 )
 
 if TYPE_CHECKING:
-    from typing import Dict, Literal, Optional
+    from typing import Literal
+
     from xarray import DataArray, Dataset
 
 
 @dataclass
 class ModelConfig:
     """Configuration for model data transformations."""
+
     transform: Literal["log", "standard"] = "log"
 
 
 class BaseModel(ABC):
-    def __init__(self, model_config: Optional[Dict] = None):
+    def __init__(self, model_config: dict | None = None):
         """Base class for all models.
 
         Parameters
@@ -42,11 +43,12 @@ class BaseModel(ABC):
         self.is_fitted = False
 
     @abstractmethod
-    def fit(self,
-            covariates: Dataset,
-            target: Dataset,
-            **kwargs,
-            ):
+    def fit(
+        self,
+        covariates: Dataset,
+        target: Dataset,
+        **kwargs,
+    ):
         """Fit model to data.
 
         Parameters
@@ -70,7 +72,6 @@ class BaseModel(ABC):
         covariates : Dataset
             Covariates for prediction.
         """
-        pass
 
     @abstractmethod
     def build_model(self, X, y):
@@ -79,17 +80,18 @@ class BaseModel(ABC):
     @abstractmethod
     def build_datamanager(self):
         """Build DataManager for the model."""
-        pass
 
 
 class DataMixin:
     """Shared logic for building a DataManager with log/standard transforms."""
 
     def _build_datamanager(
-            self,
-            covariate_pipelines: Dict,
-            model_config: ModelConfig = ModelConfig(),
-            ):
+        self,
+        covariate_pipelines: dict,
+        model_config: ModelConfig | None = None,
+    ):
+        if model_config is None:
+            model_config = ModelConfig()
         if model_config.transform == "log":
             target_pipeline = LogStandardPipeline
             error_pipeline = LogErrorPipeline
@@ -97,9 +99,7 @@ class DataMixin:
             target_pipeline = StandardPipeline
             error_pipeline = StandardErrorPipeline
         else:
-            raise ValueError(
-                "Model config transform must be 'log' or 'standard'."
-            )
+            raise ValueError("Model config transform must be 'log' or 'standard'.")
 
         self.dm = DataManager(
             target_pipeline=target_pipeline,
@@ -114,9 +114,7 @@ def is_fitted(func):
     @functools.wraps(func)
     def inner(self, *args, **kwargs):
         if not self.is_fitted:
-            raise RuntimeError(
-                "The model hasn't been fitted yet, call .fit()."
-            )
+            raise RuntimeError("The model hasn't been fitted yet, call .fit().")
         return func(self, *args, **kwargs)
 
     return inner

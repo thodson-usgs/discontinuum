@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import gpytorch
 import numpy as np
 import torch
-from discontinuum.engines.gpytorch import MarginalGPyTorch
 from gpytorch.kernels import (
     MaternKernel,
     PeriodicKernel,
@@ -15,6 +16,7 @@ from gpytorch.priors import (
 )
 
 from discontinuum.engines.base import ModelConfig
+from discontinuum.engines.gpytorch import MarginalGPyTorch
 from loadest_gp.models.base import LoadestDataMixin
 from loadest_gp.plot import LoadestPlotMixin
 
@@ -32,11 +34,13 @@ class LoadestGPMarginalGPyTorch(
     fast but does not account for censored data. Censored data require a slower
     latent variable implementation.
     """
+
     def __init__(
-            self,
-            model_config: ModelConfig = ModelConfig(),
+        self,
+        model_config: ModelConfig | None = None,
     ):
-        """ """
+        if model_config is None:
+            model_config = ModelConfig()
         # Ensure MarginalGPyTorch.__init__ executes to set checkpoint fields
         super().__init__(model_config=model_config)
         self.build_datamanager(model_config)
@@ -64,11 +68,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.cov_dims = self.dims[1:]
 
         self.mean_module = gpytorch.means.ConstantMean()
-        self.covar_module = (
-            self.cov_seasonal()
-            + self.cov_covariates()
-            + self.cov_residual()
-        )
+        self.covar_module = self.cov_seasonal() + self.cov_covariates() + self.cov_residual()
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -95,12 +95,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
             PeriodicKernel(
                 period_length_prior=period,
                 active_dims=self.time_dim,
-                )
-            * MaternKernel(
-                nu=2.5,
-                active_dims=self.time_dim
-               ),
-           outputscale_prior=eta,
+            )
+            * MaternKernel(nu=2.5, active_dims=self.time_dim),
+            outputscale_prior=eta,
         )
 
     def cov_covariates(self):

@@ -1,18 +1,17 @@
 # Retrieve data from the National Water Quality Assessment Program (NAWQA)
 
-import boto3
 import io
+from dataclasses import dataclass
+
+import boto3
 import lithops
-import os
 import pandas as pd
 import xarray as xr
-
-from dataclasses import dataclass
 from matplotlib import pyplot as plt
 
 from discontinuum.utils import aggregate_to_daily
-from loadest_gp.providers.usgs import format_nwis_daily, format_wqp_samples
 from loadest_gp import LoadestGPMarginalGPyTorch as LoadestGP
+from loadest_gp.providers.usgs import format_nwis_daily, format_wqp_samples
 
 PROJECT = "National Water Quality Assessment Program (NAWQA)"
 START_DATE = "1991-01-01"  # verify start date
@@ -39,14 +38,14 @@ class SiteRecord:
 def map_retrieval(record: SiteRecord):
     """Map function to pull data from NWIS and WQP"""
     # download covariates (daily streamflow)
-    #daily = usgs.get_daily(
+    # daily = usgs.get_daily(
     #    site=record.site_id,
     #    start_date=record.start_date,
     #    end_date=record.end_date
     #    )
 
     # download target (concentration)
-    #samples = usgs.get_samples(
+    # samples = usgs.get_samples(
     #    site=record.site_id,
     #    start_date=record.start_date,
     #    end_date=record.end_date,
@@ -62,7 +61,7 @@ def map_retrieval(record: SiteRecord):
     try:
         daily = pd.read_parquet(f"{DAILY_BUCKET}/site_no={site}")
         samples = pd.read_parquet(f"{SAMPLES_BUCKET}/MonitoringLocationIdentifier=USGS-{site}")
-    except:
+    except (FileNotFoundError, OSError):
         print(f"Site {site} partion does not exist.")
         return
 
@@ -79,7 +78,7 @@ def map_retrieval(record: SiteRecord):
 
     # check censoring threshold
     n = samples["ResultMeasureValue"].count()
-    if n/len(samples) < 0.8:
+    if n / len(samples) < 0.8:
         print(f"Site {site} has too many censored values.")
         return
     samples = format_wqp_samples(samples)
@@ -88,26 +87,23 @@ def map_retrieval(record: SiteRecord):
     daily = format_nwis_daily(daily)
 
     # TODO fix this upstream, data from other sites is being appended not updated
-    daily = daily.drop_duplicates('time')
-    daily = daily.dropna('time', how='any')
+    daily = daily.drop_duplicates("time")
+    daily = daily.dropna("time", how="any")
 
     training_data = xr.merge([samples, daily], join="inner")
-    #training_data = training_data.dropna('time', how='any')
+    # training_data = training_data.dropna('time', how='any')
 
     min_obs = 50
-    if len(training_data['time']) <= min_obs:
+    if len(training_data["time"]) <= min_obs:
         print(f"Site {site} has fewer than {min_obs} observations.")
         return
 
     model = LoadestGP()
 
     try:
-        model.fit(
-            target=training_data["concentration"],
-            covariates=training_data[["time", "flow"]]
-            )
+        model.fit(target=training_data["concentration"], covariates=training_data[["time", "flow"]])
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Site {site} failed to fit model: {e}")
         return
 
@@ -117,18 +113,18 @@ def map_retrieval(record: SiteRecord):
 
     # save the figure to S3
     img_data = io.BytesIO()
-    fig.savefig(img_data, format='png')
+    fig.savefig(img_data, format="png")
     img_data.seek(0)
 
-    s3 = boto3.resource('s3')
+    s3 = boto3.resource("s3")
     bucket = s3.Bucket(DESTINATION_BUCKET)
     bucket.put_object(
         Body=img_data,
-        ContentType='image/png',
+        ContentType="image/png",
         Key="{path}/nwqn-{site_id}-{characteristic}-{fraction}.png".format(
             path=DESTINATION_PATH,
             **record.__dict__,
-            )
+        ),
     )
 
 
@@ -136,12 +132,12 @@ if __name__ == "__main__":
     project = "National Water Quality Assessment Program (NAWQA)"
 
     site_df = pd.read_csv(
-        'NWQN_sites.csv',
-        comment='#',
-        dtype={'SITE_QW_ID': str, 'SITE_FLOW_ID': str},
-        )
+        "NWQN_sites.csv",
+        comment="#",
+        dtype={"SITE_QW_ID": str, "SITE_FLOW_ID": str},
+    )
 
-    site_list = site_df['SITE_QW_ID'].to_list()
+    site_list = site_df["SITE_QW_ID"].to_list()
 
     sites = [
         SiteRecord(
@@ -151,11 +147,11 @@ if __name__ == "__main__":
             characteristic=CHARACTERISTIC,
             fraction=FRACTION,
             project=PROJECT,
-            )
+        )
         for site in site_list
     ]
 
-    #sites = sites[:4]  # prune for testing
+    # sites = sites[:4]  # prune for testing
 
     fexec = lithops.FunctionExecutor(config_file="lithops.yaml")
     futures = fexec.map(map_retrieval, sites)

@@ -16,8 +16,6 @@ from discontinuum.pipeline import (
 )
 
 if TYPE_CHECKING:
-    from typing import Dict, Type
-
     from numpy.typing import ArrayLike
 
 
@@ -32,15 +30,11 @@ class Data:
 class DataManager:
     """Manages data transformations between raw and model space."""
 
-    target_pipeline: Type[Pipeline] = LogStandardPipeline
-    error_pipeline: Type[Pipeline] = LogErrorPipeline
-    covariate_pipelines: Dict[str, Pipeline] = None
+    target_pipeline: type[Pipeline] = LogStandardPipeline
+    error_pipeline: type[Pipeline] = LogErrorPipeline
+    covariate_pipelines: dict[str, Pipeline] = None
 
-    def fit(
-            self,
-            target: Dataset,
-            covariates: Dataset,
-            target_unc: Dataset = None):
+    def fit(self, target: Dataset, covariates: Dataset, target_unc: Dataset = None):
         """Initialize DataManager for a given data distribution.
 
         Parameters
@@ -72,10 +66,7 @@ class DataManager:
 
     def transform_covariates(self, covariates: Dataset) -> ArrayLike:
         """Transform covariates into design matrix."""
-        coords_shape = tuple(
-            s for coord in covariates.coords
-            for s in covariates.coords[coord].shape
-        )
+        coords_shape = tuple(s for coord in covariates.coords for s in covariates.coords[coord].shape)
         X = np.empty(coords_shape + (len(self.covariate_pipelines),))
         for i, (key, value) in enumerate(self.covariate_pipelines.items()):
             X[..., i] = value.transform(covariates[key]).flatten()
@@ -124,7 +115,6 @@ class DataManager:
         int
             Column index in design matrix.
         """
-        cov_list = (list(self.data.covariates.coords)
-                    + list(self.data.covariates))
+        cov_list = list(self.data.covariates.coords) + list(self.data.covariates)
 
         return cov_list.index(dim)

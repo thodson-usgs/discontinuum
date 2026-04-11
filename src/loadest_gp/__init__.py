@@ -6,6 +6,7 @@ __all__ = ["LoadestGPMarginalGPyTorch"]
 
 try:
     import pymc  # noqa: F401
+
     from .models.pymc import LoadestGPMarginalPyMC  # noqa: F401
 
     __all__.append("LoadestGPMarginalPyMC")

@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
 import pymc as pm
-from discontinuum.engines.pymc import MarginalPyMC
 
 from discontinuum.engines.base import ModelConfig
+from discontinuum.engines.pymc import MarginalPyMC
 from loadest_gp.models.base import LoadestDataMixin
 from loadest_gp.plot import LoadestPlotMixin
 
@@ -15,17 +17,18 @@ class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
     fast but does not account for censored data. Censored data require a slower
     latent variable implementation.
     """
+
     def __init__(
-            self,
-            model_config: ModelConfig = ModelConfig(),
+        self,
+        model_config: ModelConfig | None = None,
     ):
-        """ """
+        if model_config is None:
+            model_config = ModelConfig()
         super().__init__(model_config=model_config)
         self.build_datamanager(model_config)
 
     def build_model(self, X, y) -> pm.Model:
-        """Build marginal likelihood version of LoadestGP
-        """
+        """Build marginal likelihood version of LoadestGP"""
         n_d = X.shape[1]  # number of dimensions
         dims = np.arange(n_d)
         time_dim = [dims[0]]
@@ -47,9 +50,7 @@ class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
             gp_seasonal = pm.gp.Marginal(cov_func=cov_seasonal)
 
             # longterm trend
-            eta_trend = pm.Exponential(
-                "eta_trend", scale=1.5
-            )  # Exponential might dampen outlier effects
+            eta_trend = pm.Exponential("eta_trend", scale=1.5)  # Exponential might dampen outlier effects
             ls_trend = pm.Gamma("ls_trend", alpha=4, beta=1)
             cov_trend = eta_trend**2 * pm.gp.cov.ExpQuad(n_d, ls_trend, active_dims=time_dim)
             gp_trend = pm.gp.Marginal(cov_func=cov_trend)
@@ -62,10 +63,9 @@ class LoadestGPMarginalPyMC(LoadestDataMixin, LoadestPlotMixin, MarginalPyMC):
                 alpha=2,
                 beta=3,
                 initval=[0.5],
-                shape=n_d-1,  # exclude time
-                )
-            cov_covariates = eta_covariates**2 \
-                * pm.gp.cov.ExpQuad(n_d, ls=ls_covariates, active_dims=cov_dims)
+                shape=n_d - 1,  # exclude time
+            )
+            cov_covariates = eta_covariates**2 * pm.gp.cov.ExpQuad(n_d, ls=ls_covariates, active_dims=cov_dims)
             gp_covariates = pm.gp.Marginal(cov_func=cov_covariates)
 
             # residual trend

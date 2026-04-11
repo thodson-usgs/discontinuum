@@ -7,16 +7,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     from matplotlib.pyplot import Axes
     from xarray import DataArray
 
 
 def concentration_to_flux(
-        concentration: DataArray,
-        flow: DataArray,
-        ) -> DataArray:
+    concentration: DataArray,
+    flow: DataArray,
+) -> DataArray:
     """Convert concentration (mg/l) to flux (kg).
 
     Parameters
@@ -31,30 +29,25 @@ def concentration_to_flux(
     DataArray
         Flux data.
     """
-    time_delta = np.unique(
-        concentration.time.diff(dim="time").dt.total_seconds()
-    )
+    time_delta = np.unique(concentration.time.diff(dim="time").dt.total_seconds())
     mg_l_to_kg_m3 = 1e-3
 
     if len(time_delta) != 1:
-        warn("Time delta is not constant",
-             UserWarning,
-             stacklevel=2)
+        warn("Time delta is not constant", UserWarning, stacklevel=2)
 
     if flow.units != "cubic meters per second":
         warn(
-            "Check that flow is 'cubic meters per second'. "
-            "Set flow.units = 'cubic meters per second' to silence.",
+            "Check that flow is 'cubic meters per second'. Set flow.units = 'cubic meters per second' to silence.",
             UserWarning,
             stacklevel=2,
-            )
+        )
 
     if "mg/l" not in concentration.units:
-        warn("Check that concentration is in 'mg/l'. "
-             "Set concentration.units = 'mg/l' to silence.",
-             UserWarning,
-             stacklevel=2,
-             )
+        warn(
+            "Check that concentration is in 'mg/l'. Set concentration.units = 'mg/l' to silence.",
+            UserWarning,
+            stacklevel=2,
+        )
 
     flux = concentration * flow * time_delta * mg_l_to_kg_m3
     flux.attrs = concentration.attrs
@@ -64,10 +57,10 @@ def concentration_to_flux(
 
 
 def plot_annual_flux(
-        flux: DataArray,
-        ax: Optional[Axes] = None,
-        **boxplot_kwargs,
-        ) -> Axes:
+    flux: DataArray,
+    ax: Axes | None = None,
+    **boxplot_kwargs,
+) -> Axes:
     """Plot annual flux.
 
     Parameters
@@ -99,9 +92,7 @@ def plot_annual_flux(
     annual_df = annual.to_dataframe(name=annual.attrs["standard_name"])
     annual_df.boxplot(by="time", ax=ax, **default_boxplot_kwargs)
 
-    ax.set_ylabel(
-        "{}\n[{}]".format(annual.attrs["long_name"], annual.attrs["units"])
-        )
+    ax.set_ylabel("{}\n[{}]".format(annual.attrs["long_name"], annual.attrs["units"]))
     ax.set_xlabel("Year")
     ax.tick_params(axis="x", labelrotation=90)
 

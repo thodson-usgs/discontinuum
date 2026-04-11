@@ -7,7 +7,9 @@ from discontinuum.pipeline import TimePipeline, UnitPipeline
 class RatingDataMixin(DataMixin):
     """Data manager configuration for rating curve models."""
 
-    def build_datamanager(self, model_config: ModelConfig = ModelConfig()):
+    def build_datamanager(self, model_config: ModelConfig | None = None):
+        if model_config is None:
+            model_config = ModelConfig()
         self._build_datamanager(
             covariate_pipelines={
                 "time": TimePipeline,

@@ -4,21 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-
 from discontinuum.engines.base import is_fitted
 from discontinuum.plot import BasePlotMixin
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
-
     from matplotlib.pyplot import Axes
     from xarray import Dataset
 
 
 class LoadestPlotMixin(BasePlotMixin):
     """Mixin plotting functions for Model class"""
+
     @is_fitted
-    def plot_flux(self, covariates: Dataset, ax: Optional[Axes] = None):
+    def plot_flux(self, covariates: Dataset, ax: Axes | None = None):
         """Plot predicted flux versus time.
 
         Parameters
@@ -45,9 +43,7 @@ class LoadestPlotMixin(BasePlotMixin):
 
         flux.plot.line(ax=ax, lw=1, zorder=2)
 
-        ax.fill_between(
-            flux["time"], (flux - ci), (flux + ci), color="b", alpha=0.1, zorder=1
-        )
+        ax.fill_between(flux["time"], (flux - ci), (flux + ci), color="b", alpha=0.1, zorder=1)
 
         return ax
 
@@ -55,8 +51,8 @@ class LoadestPlotMixin(BasePlotMixin):
     def contourf(
         self,
         covariate: str = "flow",
-        ax: Optional[Axes] = None,
-        cbar_kwargs: Optional[Dict] = None,
+        ax: Axes | None = None,
+        cbar_kwargs: dict | None = None,
         y_scale: str = "log",
         **kwargs,
     ):
@@ -84,15 +80,10 @@ class LoadestPlotMixin(BasePlotMixin):
         ax.set_yscale(y_scale)
 
         da = self.predict_grid(covariate=covariate, t_step=12)
-        cs = da.plot.contourf(x='time',
-                              y=covariate,
-                              ax=ax,
-                              cbar_kwargs=cbar_kwargs,
-                              **kwargs
-                             )
+        da.plot.contourf(x="time", y=covariate, ax=ax, cbar_kwargs=cbar_kwargs, **kwargs)
 
         return ax
 
     @is_fitted
-    def countourf_diff(self, ax: Optional[Axes] = None):
+    def countourf_diff(self, ax: Axes | None = None):
         pass

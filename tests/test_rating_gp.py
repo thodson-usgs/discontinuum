@@ -1,11 +1,10 @@
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
 import xarray as xr
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
 
-from rating_gp.providers import usgs
 from rating_gp.models.gpytorch import RatingGPMarginalGPyTorch as RatingGP
 
 
@@ -16,15 +15,15 @@ def training_data():
     times = pd.date_range("2000-01-01", "2010-12-31", periods=n)
     discharge = np.exp(np.random.randn(n))  # Random streamflow data
     discharge_unc = 1 + 0.1 * np.random.rand(n)  # Random uncertainty data
-    stage = np.random.randn(n) # Random stage data
+    stage = np.random.randn(n)  # Random stage data
 
     ds = xr.Dataset(
         data_vars={
-            'discharge': ('time', discharge),
-            'discharge_unc': ('time', discharge_unc),
-            'stage': ('time', stage),
+            "discharge": ("time", discharge),
+            "discharge_unc": ("time", discharge_unc),
+            "stage": ("time", stage),
         },
-        coords={'time': times},
+        coords={"time": times},
     )
 
     return ds
@@ -33,19 +32,19 @@ def training_data():
 def test_rating_gp(training_data):
 
     model = RatingGP()
-    model.fit(target=training_data['discharge'],
-              covariates=training_data[['stage']],
-              target_unc=training_data['discharge_unc'],
-              iterations=10)
+    model.fit(
+        target=training_data["discharge"],
+        covariates=training_data[["stage"]],
+        target_unc=training_data["discharge_unc"],
+        iterations=10,
+    )
     assert model.is_fitted
 
     assert isinstance(model.plot_stage(), Axes)
     assert isinstance(model.plot_discharge(), Axes)
     assert isinstance(model.plot_observed_rating(), Axes)
-    assert isinstance(model.plot_rating(covariates=training_data[['stage']]), Axes)
-    ax = model.plot_ratings_in_time(
-        time=pd.date_range('1990', '2021', freq='5YS-OCT'), ci=0.95
-    )
+    assert isinstance(model.plot_rating(covariates=training_data[["stage"]]), Axes)
+    ax = model.plot_ratings_in_time(time=pd.date_range("1990", "2021", freq="5YS-OCT"), ci=0.95)
     assert isinstance(ax, Axes)
     assert isinstance(model.add_time_colorbar(ax=ax), Colorbar)
 
@@ -54,9 +53,9 @@ def test_rating_gp_with_monotonic_penalty(training_data):
     model = RatingGP()
     # Run a short training with the monotonicity penalty enabled to ensure it integrates
     model.fit(
-        target=training_data['discharge'],
-        covariates=training_data[['stage']],
-        target_unc=training_data['discharge_unc'],
+        target=training_data["discharge"],
+        covariates=training_data[["stage"]],
+        target_unc=training_data["discharge_unc"],
         iterations=5,
         scheduler=False,
         monotonic_penalty_weight=0.5,

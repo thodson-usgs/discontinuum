@@ -1,12 +1,10 @@
 import gpytorch
 import numpy as np
 import torch
-
 from linear_operator.operators import MatmulLinearOperator
 
 
 class TanhWarp(torch.nn.Module):
-
     def __init__(self):
         super().__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
@@ -22,6 +20,7 @@ class LogWarp(torch.nn.Module):
 
     Note: good smoother
     """
+
     def __init__(self):
         super().__init__()
         self.a = torch.nn.Parameter(torch.rand(1))
@@ -36,12 +35,10 @@ class StageTimeKernel(gpytorch.kernels.Kernel):
     A scalar length scale is multiplied by the stage, which is taken to a
     variable power, to impose a stage variablity.
     """
+
     has_lengthscale = True
 
-    def __init__(self,
-                 a_prior=None,
-                 a_constraint=gpytorch.constraints.Positive(),
-                 **kwargs):
+    def __init__(self, a_prior=None, a_constraint=None, **kwargs):
         """Initialize the kernel
 
         Parameters
@@ -52,12 +49,11 @@ class StageTimeKernel(gpytorch.kernels.Kernel):
             The constraint to impose on the power variable
         """
         super().__init__(**kwargs)
+        if a_constraint is None:
+            a_constraint = gpytorch.constraints.Positive()
 
         # register the raw parameters
-        self.register_parameter(
-            name='raw_a',
-            parameter=torch.nn.Parameter(torch.ones(*self.batch_shape, 1, 1))
-        )
+        self.register_parameter(name="raw_a", parameter=torch.nn.Parameter(torch.ones(*self.batch_shape, 1, 1)))
 
         # register the constraints
         # if a_constraint is not None:
@@ -70,7 +66,7 @@ class StageTimeKernel(gpytorch.kernels.Kernel):
                 "a_prior",
                 a_prior,
                 lambda m: m.a,
-                lambda m, v : m._set_a(v),
+                lambda m, v: m._set_a(v),
             )
 
     # now set up the 'actual' paramter
@@ -99,9 +95,9 @@ class StageTimeKernel(gpytorch.kernels.Kernel):
         # shift stage to have a minimum value of 1
         x1_stage = x1[:, stage_dim] - x1[:, stage_dim].min() + 1
         x2_stage = x2[:, stage_dim] - x2[:, stage_dim].min() + 1
-        
-        x1_stage_dep_time_lengthscale = self.lengthscale * x1_stage ** self.a
-        x2_stage_dep_time_lengthscale = self.lengthscale * x2_stage ** self.a
+
+        x1_stage_dep_time_lengthscale = self.lengthscale * x1_stage**self.a
+        x2_stage_dep_time_lengthscale = self.lengthscale * x2_stage**self.a
 
         # apply lengthscale
         x1_ = x1[:, time_dim].div(x1_stage_dep_time_lengthscale)
@@ -120,14 +116,17 @@ class PowerLawKernel(gpytorch.kernels.Kernel):
 
         f(x) = a + (b * ln(x - c))
     """
-    def __init__(self,
-                 a_prior=None,
-                 a_constraint=None,
-                 b_prior=None,
-                 b_constraint=gpytorch.constraints.Positive(),
-                 c_prior=None,
-                 c_constraint=gpytorch.constraints.Positive(),
-                 **kwargs):
+
+    def __init__(
+        self,
+        a_prior=None,
+        a_constraint=None,
+        b_prior=None,
+        b_constraint=None,
+        c_prior=None,
+        c_constraint=None,
+        **kwargs,
+    ):
         """Initialize the kernel
 
         Parameters
@@ -148,23 +147,18 @@ class PowerLawKernel(gpytorch.kernels.Kernel):
         super().__init__(**kwargs)
 
         # register the raw parameters
-        self.register_parameter(
-            name='raw_a',
-            parameter=torch.nn.Parameter(torch.rand(*self.batch_shape, 1, 1))
-        )
+        self.register_parameter(name="raw_a", parameter=torch.nn.Parameter(torch.rand(*self.batch_shape, 1, 1)))
         b_start = torch.rand(*self.batch_shape, 1, 1)
-        self.register_parameter(
-            name='raw_b',
-            parameter=torch.nn.Parameter(b_start)
-        )
-        self.register_parameter(
-            name='raw_c',
-            parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1))
-        )
+        self.register_parameter(name="raw_b", parameter=torch.nn.Parameter(b_start))
+        self.register_parameter(name="raw_c", parameter=torch.nn.Parameter(torch.zeros(*self.batch_shape, 1, 1)))
 
         # register the constraints
         if a_constraint is None:
             a_constraint = gpytorch.constraints.Interval(-10, 10)
+        if b_constraint is None:
+            b_constraint = gpytorch.constraints.Positive()
+        if c_constraint is None:
+            c_constraint = gpytorch.constraints.Positive()
         self.register_constraint("raw_a", a_constraint)
         self.register_constraint("raw_b", b_constraint)
         self.register_constraint("raw_c", c_constraint)
@@ -175,21 +169,21 @@ class PowerLawKernel(gpytorch.kernels.Kernel):
                 "a_prior",
                 a_prior,
                 lambda m: m.a,
-                lambda m, v : m._set_a(v),
+                lambda m, v: m._set_a(v),
             )
         if b_prior is not None:
             self.register_prior(
                 "b_prior",
                 b_prior,
                 lambda m: m.b,
-                lambda m, v : m._set_b(v),
+                lambda m, v: m._set_b(v),
             )
         if c_prior is not None:
             self.register_prior(
                 "c_prior",
                 c_prior,
                 lambda m: m.c,
-                lambda m, v : m._set_c(v),
+                lambda m, v: m._set_c(v),
             )
 
     # set the actual parameters
@@ -255,12 +249,13 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
     slope. This can be turned back into a parameter, but it cause numerical
     instabilities during fitting.
     """
+
     def __init__(
         self,
         b_constraint,
         b_prior=None,
         **kwargs,
-        ):
+    ):
         """Initialize the kernel
 
         Parameters
@@ -280,10 +275,7 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         l = b_constraint.lower_bound
         init_b = l + torch.rand((*self.batch_shape, 1, 1)) * (u - l)
 
-        self.register_parameter(
-            name='raw_b',
-            parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1)))
-        )
+        self.register_parameter(name="raw_b", parameter=torch.nn.Parameter(torch.zeros((*self.batch_shape, 1, 1))))
 
         b_prior = gpytorch.priors.NormalPrior(0, 1)
 
@@ -317,14 +309,15 @@ class SigmoidKernel(gpytorch.kernels.Kernel):
         # `a` is the sharpness of the slope, larger absolute values = sharper slope
         # the sign of `a` determines which side of the curve is 0 and the other is 1
         # `b` is the offset of of the curve at a sigmoid value of 0.5
-        x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
-        x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
-        
+        x1_ = 1 / (1 + torch.exp(self.a * (x1 - self.b)))
+        x2_ = 1 / (1 + torch.exp(self.a * (x2 - self.b)))
+
         prod = MatmulLinearOperator(x1_, x2_.transpose(-2, -1))
         if diag:
             return prod.diagonal(dim1=-1, dim2=-2)
         else:
             return prod
+
 
 # Inverted sigmoid kernel as a proper GPyTorch kernel
 class InvertedSigmoidKernel(SigmoidKernel):
@@ -333,7 +326,7 @@ class InvertedSigmoidKernel(SigmoidKernel):
         gpytorch.kernels.Kernel.__init__(self)
         self.sigmoid_kernel = sigmoid_kernel
         if active_dims is not None:
-            self.register_buffer('active_dims', torch.tensor(active_dims, dtype=torch.long))
+            self.register_buffer("active_dims", torch.tensor(active_dims, dtype=torch.long))
 
     @property
     def a(self):
@@ -354,8 +347,8 @@ class InvertedSigmoidKernel(SigmoidKernel):
 
     def forward(self, x1, x2, last_dim_is_batch=False, diag=False, **params):
         # Compute standard sigmoid using shared b
-        x1_ = 1/(1 + torch.exp(self.a * (x1 - self.b)))
-        x2_ = 1/(1 + torch.exp(self.a * (x2 - self.b)))
+        x1_ = 1 / (1 + torch.exp(self.a * (x1 - self.b)))
+        x2_ = 1 / (1 + torch.exp(self.a * (x2 - self.b)))
         # Invert: 1 - sigmoid
         x1_inv = 1.0 - x1_
         x2_inv = 1.0 - x2_
@@ -371,6 +364,7 @@ class LogWarpKernel(gpytorch.kernels.Kernel):
     """
     Wraps a base kernel and applies torch.log(x + eps) to a specified input dimension to avoid log(0).
     """
+
     def __init__(self, base_kernel, dim, eps=1e-6):
         super().__init__()
         self.base_kernel = base_kernel
@@ -392,6 +386,7 @@ class PowerLawWarpKernel(gpytorch.kernels.Kernel):
     """
     Wraps a base kernel and applies a PowerLawTransform to the stage input.
     """
+
     def __init__(self, base_kernel, powerlaw_transform, stage_dim):
         super().__init__()
         self.base_kernel = base_kernel
