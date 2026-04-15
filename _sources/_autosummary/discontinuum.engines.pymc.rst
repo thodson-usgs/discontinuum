@@ -8,6 +8,5 @@ discontinuum.engines.pymc
 
    .. autosummary::
    
-      LatentPyMC
       MarginalPyMC
    

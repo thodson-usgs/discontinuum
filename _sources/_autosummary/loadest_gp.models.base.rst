@@ -9,5 +9,4 @@ loadest\_gp.models.base
    .. autosummary::
    
       LoadestDataMixin
-      ModelConfig
    

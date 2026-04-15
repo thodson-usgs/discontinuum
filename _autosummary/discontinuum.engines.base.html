@@ -54,7 +54,7 @@
     <link rel="prev" title="discontinuum.engines" href="discontinuum.engines.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
+  <meta name="docsearch:version" content="0.1.dev1+g94e335a2e" />
   </head>
   
   
@@ -343,11 +343,12 @@
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel"><code class="docutils literal notranslate"><span class="pre">BaseModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.build_datamanager"><code class="docutils literal notranslate"><span class="pre">BaseModel.build_datamanager()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.build_model"><code class="docutils literal notranslate"><span class="pre">BaseModel.build_model()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.fit"><code class="docutils literal notranslate"><span class="pre">BaseModel.fit()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.predict"><code class="docutils literal notranslate"><span class="pre">BaseModel.predict()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.DataMixin"><code class="docutils literal notranslate"><span class="pre">DataMixin</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.ModelConfig"><code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.is_fitted"><code class="docutils literal notranslate"><span class="pre">is_fitted()</span></code></a></li>
 </ul>
             </nav>
@@ -377,23 +378,22 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.engines.base.BaseModel" title="discontinuum.engines.base.BaseModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseModel</span></code></a>([model_config])</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#discontinuum.engines.base.DataMixin" title="discontinuum.engines.base.DataMixin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataMixin</span></code></a>()</p></td>
+<td><p>Shared logic for building a DataManager with log/standard transforms.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.engines.base.ModelConfig" title="discontinuum.engines.base.ModelConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelConfig</span></code></a>([transform])</p></td>
+<td><p>Configuration for model data transformations.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="discontinuum.engines.base.BaseModel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.base.</span></span><span class="sig-name descname"><span class="pre">BaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.base.BaseModel" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.base.</span></span><span class="sig-name descname"><span class="pre">BaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.base.BaseModel" title="Link to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="discontinuum.engines.base.BaseModel.build_datamanager">
 <span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">build_datamanager</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.base.BaseModel.build_datamanager" title="Link to this definition">#</a></dt>
 <dd><p>Build DataManager for the model.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="discontinuum.engines.base.BaseModel.build_model">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.base.BaseModel.build_model" title="Link to this definition">#</a></dt>
-<dd><p>TODO Sometimes this sets self.model and sometimes this returns model.
-Not sure that we can standardize the behavior for different engines.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -422,6 +422,18 @@ Not sure that we can standardize the behavior for different engines.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="discontinuum.engines.base.DataMixin">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.base.</span></span><span class="sig-name descname"><span class="pre">DataMixin</span></span><a class="headerlink" href="#discontinuum.engines.base.DataMixin" title="Link to this definition">#</a></dt>
+<dd><p>Shared logic for building a DataManager with log/standard transforms.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="discontinuum.engines.base.ModelConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.base.</span></span><span class="sig-name descname"><span class="pre">ModelConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'log'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'standard'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'log'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.base.ModelConfig" title="Link to this definition">#</a></dt>
+<dd><p>Configuration for model data transformations.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -481,11 +493,12 @@ Not sure that we can standardize the behavior for different engines.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel"><code class="docutils literal notranslate"><span class="pre">BaseModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.build_datamanager"><code class="docutils literal notranslate"><span class="pre">BaseModel.build_datamanager()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.build_model"><code class="docutils literal notranslate"><span class="pre">BaseModel.build_model()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.fit"><code class="docutils literal notranslate"><span class="pre">BaseModel.fit()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.BaseModel.predict"><code class="docutils literal notranslate"><span class="pre">BaseModel.predict()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.DataMixin"><code class="docutils literal notranslate"><span class="pre">DataMixin</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.ModelConfig"><code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.base.is_fitted"><code class="docutils literal notranslate"><span class="pre">is_fitted()</span></code></a></li>
 </ul>
   </nav></div>

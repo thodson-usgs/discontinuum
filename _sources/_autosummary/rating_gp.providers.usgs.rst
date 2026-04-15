@@ -17,5 +17,4 @@ rating\_gp.providers.usgs
    .. autosummary::
    
       NWISColumn
-      USGSParameter
    

@@ -15,9 +15,3 @@ loadest\_gp.providers.usgs
       get_parameters
       get_samples
    
-   .. rubric:: Classes
-
-   .. autosummary::
-   
-      USGSParameter
-   

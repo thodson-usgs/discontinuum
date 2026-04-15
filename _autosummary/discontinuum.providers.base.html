@@ -54,7 +54,7 @@
     <link rel="prev" title="discontinuum.providers" href="discontinuum.providers.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
+  <meta name="docsearch:version" content="0.1.dev1+g94e335a2e" />
   </head>
   
   
@@ -342,9 +342,10 @@
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.MetaData"><code class="docutils literal notranslate"><span class="pre">MetaData</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.get_covariates"><code class="docutils literal notranslate"><span class="pre">get_covariates()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.get_metadata"><code class="docutils literal notranslate"><span class="pre">get_metadata()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.get_target"><code class="docutils literal notranslate"><span class="pre">get_target()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.USGSParameter"><code class="docutils literal notranslate"><span class="pre">USGSParameter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.USGSParameter.name"><code class="docutils literal notranslate"><span class="pre">USGSParameter.name</span></code></a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -358,26 +359,15 @@
                   
   <section id="module-discontinuum.providers.base">
 <span id="discontinuum-providers-base"></span><h1>discontinuum.providers.base<a class="headerlink" href="#module-discontinuum.providers.base" title="Link to this heading">#</a></h1>
-<p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.providers.base.get_covariates" title="discontinuum.providers.base.get_covariates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_covariates</span></code></a>(location, start_date, ...)</p></td>
-<td><p>Return timeseries of covariate data.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#discontinuum.providers.base.get_metadata" title="discontinuum.providers.base.get_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata</span></code></a>(location)</p></td>
-<td><p>Return metadata.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.providers.base.get_target" title="discontinuum.providers.base.get_target"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_target</span></code></a>(location, start_date, end_date, ...)</p></td>
-<td><p>Return target data.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>Base provider types.</p>
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.providers.base.MetaData" title="discontinuum.providers.base.MetaData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MetaData</span></code></a>(id, name, latitude, longitude)</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#discontinuum.providers.base.USGSParameter" title="discontinuum.providers.base.USGSParameter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">USGSParameter</span></code></a>(pcode, standard_name[, ...])</p></td>
+<td><p>USGS parameter definition with unit conversion.</p></td>
 </tr>
 </tbody>
 </table>
@@ -387,22 +377,16 @@
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.providers.base.</span></span><span class="sig-name descname"><span class="pre">MetaData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'float'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'float'</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.providers.base.MetaData" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="discontinuum.providers.base.get_covariates">
-<span class="sig-prename descclassname"><span class="pre">discontinuum.providers.base.</span></span><span class="sig-name descname"><span class="pre">get_covariates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#discontinuum.providers.base.get_covariates" title="Link to this definition">#</a></dt>
-<dd><p>Return timeseries of covariate data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="discontinuum.providers.base.USGSParameter">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.providers.base.</span></span><span class="sig-name descname"><span class="pre">USGSParameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pcode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standard_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">long_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.providers.base.USGSParameter" title="Link to this definition">#</a></dt>
+<dd><p>USGS parameter definition with unit conversion.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="discontinuum.providers.base.USGSParameter.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#discontinuum.providers.base.USGSParameter.name" title="Link to this definition">#</a></dt>
+<dd><p>Alias for standard_name.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="discontinuum.providers.base.get_metadata">
-<span class="sig-prename descclassname"><span class="pre">discontinuum.providers.base.</span></span><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#discontinuum.providers.base.MetaData" title="discontinuum.providers.base.MetaData"><span class="pre">MetaData</span></a></span></span><a class="headerlink" href="#discontinuum.providers.base.get_metadata" title="Link to this definition">#</a></dt>
-<dd><p>Return metadata.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="discontinuum.providers.base.get_target">
-<span class="sig-prename descclassname"><span class="pre">discontinuum.providers.base.</span></span><span class="sig-name descname"><span class="pre">get_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variabe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#discontinuum.providers.base.get_target" title="Link to this definition">#</a></dt>
-<dd><p>Return target data.</p>
 </dd></dl>
 
 </section>
@@ -455,9 +439,10 @@
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.MetaData"><code class="docutils literal notranslate"><span class="pre">MetaData</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.get_covariates"><code class="docutils literal notranslate"><span class="pre">get_covariates()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.get_metadata"><code class="docutils literal notranslate"><span class="pre">get_metadata()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.get_target"><code class="docutils literal notranslate"><span class="pre">get_target()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.USGSParameter"><code class="docutils literal notranslate"><span class="pre">USGSParameter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.providers.base.USGSParameter.name"><code class="docutils literal notranslate"><span class="pre">USGSParameter.name</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

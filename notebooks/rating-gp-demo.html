@@ -54,7 +54,7 @@
     <link rel="prev" title="loadest-gp (prototype)" href="loadest-gp-demo.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
+  <meta name="docsearch:version" content="0.1.dev1+g94e335a2e" />
   </head>
   
   
@@ -364,7 +364,7 @@ This model seeks to expand the typical rating curve fitting process to include s
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
 
-<span class="c1">#!pip install discontinuum[rating_gp]</span>
+<span class="c1"># !pip install discontinuum[rating_gp]</span>
 </pre></div>
 </div>
 </div>
@@ -372,8 +372,6 @@ This model seeks to expand the typical rating curve fitting process to include s
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
@@ -386,10 +384,10 @@ This model seeks to expand the typical rating curve fitting process to include s
 <p>Let’s select a site that has a nice variation in the rating curve with time. For this example, we will use USGS site 10154200, as it has a very clear shifting with time.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">site</span> <span class="o">=</span> <span class="s1">&#39;10154200&#39;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;10154200&quot;</span>
 
 <span class="c1"># Select a date range</span>
-<span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;1988-10-01&quot;</span> 
+<span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;1988-10-01&quot;</span>
 <span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2021-09-30&quot;</span>
 </pre></div>
 </div>
@@ -960,10 +958,10 @@ Data variables:
     stage            (time) float64 3kB 0.4694 0.4938 0.5243 ... 0.765 0.6706
     discharge        (time) float64 3kB 1.07 1.116 1.54 ... 17.98 1.682 0.7447
     discharge_unc    (time) float64 3kB 1.025 1.025 1.025 ... 1.04 1.025 1.04
-    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-1dd101c2-60bd-4bc3-b9cd-e65c3beccd07' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-1dd101c2-60bd-4bc3-b9cd-e65c3beccd07' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div></li><li class='xr-section-item'><input id='section-d89a01e7-0792-44c5-b011-52c47fe908ae' class='xr-section-summary-in' type='checkbox' checked /><label for='section-d89a01e7-0792-44c5-b011-52c47fe908ae' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[us]</div><div class='xr-var-preview xr-preview'>1988-10-04T14:35:00 ... 2021-08-...</div><input id='attrs-a5cf37da-c802-4b46-a02c-49e6ffee8830' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a5cf37da-c802-4b46-a02c-49e6ffee8830' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a29ad7fa-bee1-4a14-bfd5-374df5e170b6' class='xr-var-data-in' type='checkbox'><label for='data-a29ad7fa-bee1-4a14-bfd5-374df5e170b6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T14:35:00.000000&#x27;, &#x27;1988-11-16T18:50:00.000000&#x27;,
+    control_type_cd  (time) category 375B Clear Clear Clear ... Clear Clear</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-687a9716-a059-45d5-a8ef-66bcb95f48f1' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-687a9716-a059-45d5-a8ef-66bcb95f48f1' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 319</li></ul></div></li><li class='xr-section-item'><input id='section-27a7a8c8-5bc5-44ca-8432-056d190d794a' class='xr-section-summary-in' type='checkbox' checked /><label for='section-27a7a8c8-5bc5-44ca-8432-056d190d794a' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[us]</div><div class='xr-var-preview xr-preview'>1988-10-04T14:35:00 ... 2021-08-...</div><input id='attrs-efb61253-afde-4bf7-a6e8-c8995ac83330' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-efb61253-afde-4bf7-a6e8-c8995ac83330' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1e7164e0-2a01-490c-868a-b81c4fa0058c' class='xr-var-data-in' type='checkbox'><label for='data-1e7164e0-2a01-490c-868a-b81c4fa0058c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1988-10-04T14:35:00.000000&#x27;, &#x27;1988-11-16T18:50:00.000000&#x27;,
        &#x27;1989-01-03T21:15:00.000000&#x27;, ..., &#x27;2021-05-19T17:11:07.000000&#x27;,
        &#x27;2021-07-02T14:12:50.000000&#x27;, &#x27;2021-08-17T19:45:31.000000&#x27;],
-      shape=(319,), dtype=&#x27;datetime64[us]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-dc470265-96ec-414e-ad4d-8c0fed081a43' class='xr-section-summary-in' type='checkbox' checked /><label for='section-dc470265-96ec-414e-ad4d-8c0fed081a43' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-728d3a18-345d-4eeb-9f73-df17cf6ef38f' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-728d3a18-345d-4eeb-9f73-df17cf6ef38f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-231b68bd-f8a1-4ea7-b3ad-da91f209f2a7' class='xr-var-data-in' type='checkbox'><label for='data-231b68bd-f8a1-4ea7-b3ad-da91f209f2a7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>stage</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
+      shape=(319,), dtype=&#x27;datetime64[us]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-7843f7ac-0ea5-4c64-aeb1-d91c8def1a64' class='xr-section-summary-in' type='checkbox' checked /><label for='section-7843f7ac-0ea5-4c64-aeb1-d91c8def1a64' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>stage</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>0.4694 0.4938 ... 0.765 0.6706</div><input id='attrs-aaa2d674-c4f6-40d7-895e-1534fe36f488' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-aaa2d674-c4f6-40d7-895e-1534fe36f488' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7d4638d9-6e9d-4c90-9cb0-0c43dbb28faf' class='xr-var-data-in' type='checkbox'><label for='data-7d4638d9-6e9d-4c90-9cb0-0c43dbb28faf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>stage</dd><dt><span>standard_name :</span></dt><dd>stage</dd><dt><span>long_name :</span></dt><dd>Stream stage</dd><dt><span>units :</span></dt><dd>meters</dd><dt><span>conversion :</span></dt><dd>0.3048</dd></dl></div><div class='xr-var-data'><pre>array([0.469392, 0.493776, 0.524256, 0.524256, 0.600456, 1.103376,
        1.057656, 0.646176, 0.505968, 0.521208, 0.493776, 0.530352,
        0.524256, 0.530352, 0.896112, 1.335024, 1.338072, 1.55448 ,
        1.030224, 0.536448, 0.466344, 0.554736, 0.505968, 0.499872,
@@ -1003,7 +1001,7 @@ Data variables:
        0.728472, 0.740664, 0.765048, 0.771144, 1.594104, 1.344168,
        0.969264, 0.813816, 0.783336, 0.694944, 0.6858  , 0.691896,
        0.710184, 0.688848, 0.865632, 0.862584, 1.32588 , 0.765048,
-       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-f5d26e21-dc43-4ba6-ba48-1ad8d12e9ca6' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f5d26e21-dc43-4ba6-ba48-1ad8d12e9ca6' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0e3832b4-33f3-4d0f-b252-631531404a83' class='xr-var-data-in' type='checkbox'><label for='data-0e3832b4-33f3-4d0f-b252-631531404a83' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
+       0.67056 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.07 1.116 1.54 ... 1.682 0.7447</div><input id='attrs-08876f12-237f-4894-8691-55550b8b59f0' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-08876f12-237f-4894-8691-55550b8b59f0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c0fbc292-2e29-4bf8-bad1-fb41628405e8' class='xr-var-data-in' type='checkbox'><label for='data-c0fbc292-2e29-4bf8-bad1-fb41628405e8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>discharge</dd><dt><span>standard_name :</span></dt><dd>discharge</dd><dt><span>long_name :</span></dt><dd>Stream discharge</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([ 1.07037504,  1.11568192,  1.54043392,  1.61122592,  2.39560128,
        17.0467136 , 14.299984  ,  3.0298976 ,  1.3025728 ,  1.4016816 ,
         1.10718688,  1.46114688,  1.3167312 ,  1.6140576 ,  8.1835552 ,
        27.6938304 , 26.6461088 , 40.209856  , 12.600976  ,  1.80378016,
@@ -1043,7 +1041,7 @@ Data variables:
         0.95144448,  1.05338496,  1.46681024,  1.76130496, 33.413824  ,
        18.122752  ,  5.4651424 ,  2.22853216,  1.77829504,  0.91463264,
         0.83817728,  0.91180096,  1.1185136 ,  0.94011776,  3.114848  ,
-        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-4cc94e64-2d85-4711-bc97-b862c5662bcb' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4cc94e64-2d85-4711-bc97-b862c5662bcb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-313f241f-18df-4d16-893e-babe0c70f600' class='xr-var-data-in' type='checkbox'><label for='data-313f241f-18df-4d16-893e-babe0c70f600' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measurement_rated</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
+        3.1714816 , 17.981168  ,  1.68201792,  0.74473184])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>discharge_unc</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.025 1.025 1.025 ... 1.025 1.04</div><input id='attrs-de7251e5-d9ee-4a29-a149-5f90f7c9862d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-de7251e5-d9ee-4a29-a149-5f90f7c9862d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b7508997-f2ee-41f4-8e05-c4d395fa4da3' class='xr-var-data-in' type='checkbox'><label for='data-b7508997-f2ee-41f4-8e05-c4d395fa4da3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>column_name :</span></dt><dd>measurement_rated</dd><dt><span>standard_name :</span></dt><dd>discharge_unc</dd><dt><span>long_name :</span></dt><dd>Stream discharge uncertainty estimated from qualitative measurement rating codes</dd><dt><span>units :</span></dt><dd>cubic meters per second</dd><dt><span>conversion :</span></dt><dd>0.0283168</dd></dl></div><div class='xr-var-data'><pre>array([1.025, 1.025, 1.025, 1.025, 1.04 , 1.04 , 1.06 , 1.025, 1.04 ,
        1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.025,
        1.025, 1.025, 1.025, 1.04 , 1.025, 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.025, 1.025, 1.025, 1.025, 1.025, 1.025, 1.04 ,
@@ -1078,7 +1076,7 @@ Data variables:
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
        1.04 , 1.04 , 1.06 , 1.06 , 1.06 , 1.04 , 1.04 , 1.025, 1.04 ,
        1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 , 1.04 ,
-       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-8db77177-52b5-43f4-b8d3-92185131a16c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-8db77177-52b5-43f4-b8d3-92185131a16c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8b710a35-bd22-4366-821a-5d88b755daa0' class='xr-var-data-in' type='checkbox'><label for='data-8b710a35-bd22-4366-821a-5d88b755daa0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
+       1.04 , 1.04 , 1.025, 1.04 ])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>control_type_cd</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>category</div><div class='xr-var-preview xr-preview'>Clear Clear Clear ... Clear Clear</div><input id='attrs-72d6b4e5-5ada-44a5-9748-29334d41baa9' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-72d6b4e5-5ada-44a5-9748-29334d41baa9' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8fb64089-83e4-4d45-af9f-ba7f7600296f' class='xr-var-data-in' type='checkbox'><label for='data-8fb64089-83e4-4d45-af9f-ba7f7600296f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>[&#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, ..., &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;, &#x27;Clear&#x27;]
 Length: 319
 Categories (7, str): [&#x27;Clear&#x27;, &#x27;Debris - Heavy&#x27;, &#x27;Debris - Light&#x27;, &#x27;Ice - Shore&#x27;, &#x27;Unspecifed&#x27;, &#x27;Unspecified&#x27;, &#x27;Vegetation - Light&#x27;]</pre></div></li></ul></div></li></ul></div></div></div></div>
 </div>
@@ -1090,12 +1088,13 @@ Categories (7, str): [&#x27;Clear&#x27;, &#x27;Debris - Heavy&#x27;, &#x27;Debri
 <span class="kn">from</span><span class="w"> </span><span class="nn">rating_gp.models.gpytorch</span><span class="w"> </span><span class="kn">import</span> <span class="n">RatingGPMarginalGPyTorch</span> <span class="k">as</span> <span class="n">RatingGP</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">RatingGP</span><span class="p">()</span>
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;discharge&#39;</span><span class="p">],</span>
-          <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s1">&#39;stage&#39;</span><span class="p">]],</span>
-          <span class="n">target_unc</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;discharge_unc&#39;</span><span class="p">],</span>
-          <span class="n">iterations</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-          <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-          <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;discharge&quot;</span><span class="p">],</span>
+    <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s2">&quot;stage&quot;</span><span class="p">]],</span>
+    <span class="n">target_unc</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;discharge_unc&quot;</span><span class="p">],</span>
+    <span class="n">iterations</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1108,10 +1107,10 @@ Categories (7, str): [&#x27;Clear&#x27;, &#x27;Debris - Heavy&#x27;, &#x27;Debri
   warnings.warn(
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1821 iterations
-Best objective: -1.189443
-CPU times: user 2min 26s, sys: 884 ms, total: 2min 27s
-Wall time: 1min 18s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1831 iterations
+Best objective: -1.189435
+CPU times: user 2min 48s, sys: 1.22 s, total: 2min 49s
+Wall time: 1min 30s
 </pre></div>
 </div>
 </div>
@@ -1119,11 +1118,11 @@ Wall time: 1min 18s
 <p>With the model fit, we can generate some nice plots of an observed rating curve and time series of both stage and discharge.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="s1">&#39;col&#39;</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="s1">&#39;row&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="s2">&quot;col&quot;</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_stage</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_discharge</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_observed_rating</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">add_time_colorbar</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -1136,19 +1135,20 @@ Wall time: 1min 18s
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;1990&#39;</span><span class="p">,</span> <span class="s1">&#39;2021&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5YS-OCT&#39;</span><span class="p">))</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;2020-10-01&#39;</span><span class="p">],</span> <span class="n">ci</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s2">&quot;1990&quot;</span><span class="p">,</span> <span class="s2">&quot;2021&quot;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;5YS-OCT&quot;</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2020-10-01&quot;</span><span class="p">],</span> <span class="n">ci</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_observed_rating</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8f81ed01b97c7c408ad4b6ffc18877b9f7abf2dad415d5710294325ef7ea2915.png" src="../_images/8f81ed01b97c7c408ad4b6ffc18877b9f7abf2dad415d5710294325ef7ea2915.png" />
+<img alt="../_images/97393b964e934dd78c22ea2ceffb648ecc91db38e081ed9b6f2af7e799e75039.png" src="../_images/97393b964e934dd78c22ea2ceffb648ecc91db38e081ed9b6f2af7e799e75039.png" />
 </div>
 </div>
 <p>Nice! The shifts with time are clearly predicted by the model. These results are are promising for <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> to be able to model shift in rating curves effectively.</p>
@@ -1158,10 +1158,12 @@ Wall time: 1min 18s
 <p>As a final show of how well <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> works, let’s select some sites that have a nice variety of rating curves, rather then a single one. We will include ones with clear breaks and shifts and others without breaks and minimal shifts. USGS site number 12413470 is a good example of a rating with a clear break around a stage of 2.7m and very recent and drastic shift. 10131000 is another good example of a rating with a break, but no real shifts in time. 09261000 is a site with no breaks and minimal shifts making it an ideal basic example. Finally, we will keep 10154200 as it has no prominent breaks, but it does have a very clear shifting with time. Therefore, these four sites should be a nice standard for testing how <code class="docutils literal notranslate"><span class="pre">rating-gp</span></code> performs on different rating curves.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sites</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;12413470&quot;</span><span class="p">:</span> <span class="s1">&#39;SF Coeur D Alene River nr Pinehurst, ID&#39;</span><span class="p">,</span>
-         <span class="s1">&#39;10131000&#39;</span><span class="p">:</span> <span class="s1">&#39;CHALK CREEK AT COALVILLE, UT&#39;</span><span class="p">,</span>
-         <span class="s1">&#39;09261000&#39;</span><span class="p">:</span> <span class="s1">&#39;GREEN RIVER NEAR JENSEN, UT&#39;</span><span class="p">,</span>
-         <span class="s1">&#39;10154200&#39;</span><span class="p">:</span> <span class="s1">&#39;PROVO RIVER NEAR WOODLAND, UT&#39;</span><span class="p">}</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sites</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;12413470&quot;</span><span class="p">:</span> <span class="s2">&quot;SF Coeur D Alene River nr Pinehurst, ID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;10131000&quot;</span><span class="p">:</span> <span class="s2">&quot;CHALK CREEK AT COALVILLE, UT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;09261000&quot;</span><span class="p">:</span> <span class="s2">&quot;GREEN RIVER NEAR JENSEN, UT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;10154200&quot;</span><span class="p">:</span> <span class="s2">&quot;PROVO RIVER NEAR WOODLAND, UT&quot;</span><span class="p">,</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -1198,32 +1200,33 @@ Wall time: 1min 18s
 <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
     <span class="n">training_data</span> <span class="o">=</span> <span class="n">training_data_dict</span><span class="p">[</span><span class="n">site</span><span class="p">]</span>
     <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">RatingGP</span><span class="p">()</span>
-    <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;discharge&#39;</span><span class="p">],</span>
-                    <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s1">&#39;stage&#39;</span><span class="p">]],</span>
-                    <span class="n">target_unc</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;discharge_unc&#39;</span><span class="p">],</span>
-                    <span class="n">iterations</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-                    <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="p">)</span>
+    <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+        <span class="n">target</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;discharge&quot;</span><span class="p">],</span>
+        <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s2">&quot;stage&quot;</span><span class="p">]],</span>
+        <span class="n">target_unc</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;discharge_unc&quot;</span><span class="p">],</span>
+        <span class="n">iterations</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+        <span class="n">early_stopping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1291 iterations
-Best objective: -0.613948
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1068 iterations
+Best objective: -0.613814
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 994 iterations
-Best objective: -1.059047
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 899 iterations
+Best objective: -1.058700
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 934 iterations
-Best objective: -1.481605
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 799 iterations
+Best objective: -1.481445
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1935 iterations
-Best objective: -1.189452
-CPU times: user 7min 26s, sys: 1.8 s, total: 7min 28s
-Wall time: 3min 54s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Early stopping triggered after 1985 iterations
+Best objective: -1.189446
+CPU times: user 8min, sys: 5.15 s, total: 8min 6s
+Wall time: 4min 14s
 </pre></div>
 </div>
 </div>
@@ -1233,19 +1236,19 @@ Wall time: 3min 54s
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="n">axes</span><span class="o">.</span><span class="n">flatten</span><span class="p">()):</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;1990&#39;</span><span class="p">,</span> <span class="s1">&#39;2021&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5YS-OCT&#39;</span><span class="p">))</span>    
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;2020-10-01&#39;</span><span class="p">],</span> <span class="n">ci</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>    
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s2">&quot;1990&quot;</span><span class="p">,</span> <span class="s2">&quot;2021&quot;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;5YS-OCT&quot;</span><span class="p">))</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">plot_ratings_in_time</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2020-10-01&quot;</span><span class="p">],</span> <span class="n">ci</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">plot_observed_rating</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">sites</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">sites</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5776ded286f1276314141becc37a81ef9e4b4323d93dc7417a7e7cbb7bfa3ae8.png" src="../_images/5776ded286f1276314141becc37a81ef9e4b4323d93dc7417a7e7cbb7bfa3ae8.png" />
+<img alt="../_images/3d54c08f538c0749cbb3742dd7875d09f1e3bfb7fab69035431bcc0e23738301.png" src="../_images/3d54c08f538c0749cbb3742dd7875d09f1e3bfb7fab69035431bcc0e23738301.png" />
 </div>
 </div>
 </section>

@@ -54,7 +54,7 @@
     <link rel="prev" title="discontinuum.engines.gpytorch" href="discontinuum.engines.gpytorch.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
+  <meta name="docsearch:version" content="0.1.dev1+g94e335a2e" />
   </head>
   
   
@@ -341,10 +341,6 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.LatentPyMC"><code class="docutils literal notranslate"><span class="pre">LatentPyMC</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.LatentPyMC.fit"><code class="docutils literal notranslate"><span class="pre">LatentPyMC.fit()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.MarginalPyMC"><code class="docutils literal notranslate"><span class="pre">MarginalPyMC</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.MarginalPyMC.build_model"><code class="docutils literal notranslate"><span class="pre">MarginalPyMC.build_model()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.MarginalPyMC.fit"><code class="docutils literal notranslate"><span class="pre">MarginalPyMC.fit()</span></code></a></li>
@@ -370,50 +366,19 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.engines.pymc.LatentPyMC" title="discontinuum.engines.pymc.LatentPyMC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LatentPyMC</span></code></a>([model_config])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#discontinuum.engines.pymc.MarginalPyMC" title="discontinuum.engines.pymc.MarginalPyMC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarginalPyMC</span></code></a>([model_config])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#discontinuum.engines.pymc.MarginalPyMC" title="discontinuum.engines.pymc.MarginalPyMC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MarginalPyMC</span></code></a>([model_config])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="discontinuum.engines.pymc.LatentPyMC">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.pymc.</span></span><span class="sig-name descname"><span class="pre">LatentPyMC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.LatentPyMC" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="discontinuum.engines.pymc.LatentPyMC.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.LatentPyMC.fit" title="Link to this definition">#</a></dt>
-<dd><p>Fit model to data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>covariates</strong> (<em>Dataset</em>) – Covariates for training.</p></li>
-<li><p><strong>target</strong> (<em>Dataset</em>) – Target data for training.</p></li>
-<li><p><strong>kwargs</strong> (<em>dict</em>) – Additional keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="discontinuum.engines.pymc.MarginalPyMC">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.pymc.</span></span><span class="sig-name descname"><span class="pre">MarginalPyMC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.MarginalPyMC" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">discontinuum.engines.pymc.</span></span><span class="sig-name descname"><span class="pre">MarginalPyMC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.MarginalPyMC" title="Link to this definition">#</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="discontinuum.engines.pymc.MarginalPyMC.build_model">
 <span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.MarginalPyMC.build_model" title="Link to this definition">#</a></dt>
-<dd><p>TODO: move this to parent?</p>
-<p>Creates an instance of pm.Model based on provided data and
-model_config, and attaches it to self.</p>
-<p>The subclass method must instantiate self.model and self.gp.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>NotImplementedError</strong> – </p>
-</dd>
-</dl>
+<dd><p>Build a PyMC model from data. Must be implemented by subclasses.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -439,7 +404,7 @@ model_config, and attaches it to self.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="discontinuum.engines.pymc.MarginalPyMC.predict_grid">
-<span class="sig-name descname"><span class="pre">predict_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.MarginalPyMC.predict_grid" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">predict_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#discontinuum.engines.pymc.MarginalPyMC.predict_grid" title="Link to this definition">#</a></dt>
 <dd><p>Predict on a grid of points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -528,10 +493,6 @@ The default is 1e-6.</p></li>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.LatentPyMC"><code class="docutils literal notranslate"><span class="pre">LatentPyMC</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.LatentPyMC.fit"><code class="docutils literal notranslate"><span class="pre">LatentPyMC.fit()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.MarginalPyMC"><code class="docutils literal notranslate"><span class="pre">MarginalPyMC</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.MarginalPyMC.build_model"><code class="docutils literal notranslate"><span class="pre">MarginalPyMC.build_model()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discontinuum.engines.pymc.MarginalPyMC.fit"><code class="docutils literal notranslate"><span class="pre">MarginalPyMC.fit()</span></code></a></li>

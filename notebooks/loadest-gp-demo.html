@@ -54,7 +54,7 @@
     <link rel="prev" title="Getting Started" href="../getting_started.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
+  <meta name="docsearch:version" content="0.1.dev1+g94e335a2e" />
   </head>
   
   
@@ -361,8 +361,7 @@ However, LOADEST has several serious limitations, and it has been all but replac
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
@@ -373,18 +372,18 @@ However, LOADEST has several serious limitations, and it has been all but replac
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># setup</span>
 
-<span class="c1"># SF Coeur D Alene River </span>
-<span class="c1">#site = &quot;12413470&quot;</span>
-<span class="c1">#start_date = &quot;1988-10-01&quot; </span>
-<span class="c1">#end_date = &quot;2021-09-30&quot; </span>
+<span class="c1"># SF Coeur D Alene River</span>
+<span class="c1"># site = &quot;12413470&quot;</span>
+<span class="c1"># start_date = &quot;1988-10-01&quot;</span>
+<span class="c1"># end_date = &quot;2021-09-30&quot;</span>
 
 <span class="c1"># Choptank River at Greensboro, MD</span>
-<span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;01491000&quot;</span> 
+<span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;01491000&quot;</span>
 <span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;1979-10-01&quot;</span>
 <span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2011-09-30&quot;</span>
 
-<span class="n">characteristic</span> <span class="o">=</span> <span class="s1">&#39;Inorganic nitrogen (nitrate and nitrite)&#39;</span>
-<span class="n">fraction</span> <span class="o">=</span> <span class="s1">&#39;Filtered field and/or lab&#39;</span>
+<span class="n">characteristic</span> <span class="o">=</span> <span class="s2">&quot;Inorganic nitrogen (nitrate and nitrite)&quot;</span>
+<span class="n">fraction</span> <span class="o">=</span> <span class="s2">&quot;Filtered field and/or lab&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -398,11 +397,9 @@ However, LOADEST has several serious limitations, and it has been all but replac
 <span class="n">daily</span> <span class="o">=</span> <span class="n">usgs</span><span class="o">.</span><span class="n">get_daily</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
 
 <span class="c1"># download target (concentration)</span>
-<span class="n">samples</span> <span class="o">=</span> <span class="n">usgs</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> 
-                           <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> 
-                           <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> 
-                           <span class="n">characteristic</span><span class="o">=</span><span class="n">characteristic</span><span class="p">,</span> 
-                           <span class="n">fraction</span><span class="o">=</span><span class="n">fraction</span><span class="p">)</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">usgs</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span>
+    <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> <span class="n">characteristic</span><span class="o">=</span><span class="n">characteristic</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="n">fraction</span>
+<span class="p">)</span>
 
 <span class="n">samples</span>
 </pre></div>
@@ -415,9 +412,9 @@ However, LOADEST has several serious limitations, and it has been all but replac
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Geopandas not installed. Geometries will be flattened into pandas DataFrames.
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:253: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/home/runner/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:235: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
   df[name] = df[&quot;Result_Measure&quot;].astype(float)
-/home/runner/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:264: UserWarning: Censored values have been removed from the dataset.
+/home/runner/work/discontinuum/discontinuum/src/loadest_gp/providers/usgs.py:246: UserWarning: Censored values have been removed from the dataset.
   warnings.warn(
 Geopandas not installed. Geometries will be flattened into pandas DataFrames.
 </pre></div>
@@ -974,10 +971,10 @@ Attributes:
     id:         01491000
     name:       CHOPTANK RIVER NEAR GREENSBORO, MD
     latitude:   38.9971944444444
-    longitude:  -75.7858055555556</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-59512198-73e4-4c1e-a55b-2121a7b45749' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-59512198-73e4-4c1e-a55b-2121a7b45749' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 652</li></ul></div></li><li class='xr-section-item'><input id='section-d13a0c04-2e3f-4d26-b1b7-20feffd339ef' class='xr-section-summary-in' type='checkbox' checked /><label for='section-d13a0c04-2e3f-4d26-b1b7-20feffd339ef' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[us]</div><div class='xr-var-preview xr-preview'>1997-12-10T12:00:00 ... 1990-01-...</div><input id='attrs-eb97f246-910d-43a5-a0f9-defb0ac5be66' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-eb97f246-910d-43a5-a0f9-defb0ac5be66' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-eff487b7-7682-4d51-b9a8-c47efb64df58' class='xr-var-data-in' type='checkbox'><label for='data-eff487b7-7682-4d51-b9a8-c47efb64df58' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1997-12-10T12:00:00.000000&#x27;, &#x27;1997-06-25T08:30:00.000000&#x27;,
+    longitude:  -75.7858055555556</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-6820bf81-997f-4716-a97a-d7edd2a95dfb' class='xr-section-summary-in' type='checkbox' disabled /><label for='section-6820bf81-997f-4716-a97a-d7edd2a95dfb' class='xr-section-summary'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 652</li></ul></div></li><li class='xr-section-item'><input id='section-2335b8ad-5ad0-40a6-b608-7170f7bd9502' class='xr-section-summary-in' type='checkbox' checked /><label for='section-2335b8ad-5ad0-40a6-b608-7170f7bd9502' class='xr-section-summary' title='Expand/collapse section'>Coordinates: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[us]</div><div class='xr-var-preview xr-preview'>1997-12-10T12:00:00 ... 1990-01-...</div><input id='attrs-9accfaac-bad7-472d-811f-0c5c0632d590' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9accfaac-bad7-472d-811f-0c5c0632d590' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8bccec46-5759-4f26-a833-45d234b7e7b2' class='xr-var-data-in' type='checkbox'><label for='data-8bccec46-5759-4f26-a833-45d234b7e7b2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;1997-12-10T12:00:00.000000&#x27;, &#x27;1997-06-25T08:30:00.000000&#x27;,
        &#x27;2005-09-12T09:00:00.000000&#x27;, ..., &#x27;1991-09-06T13:40:00.000000&#x27;,
        &#x27;2000-07-05T12:15:00.000000&#x27;, &#x27;1990-01-02T12:00:00.000000&#x27;],
-      shape=(652,), dtype=&#x27;datetime64[us]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-06f64088-8c95-4f2e-ae5c-e4de43400271' class='xr-section-summary-in' type='checkbox' checked /><label for='section-06f64088-8c95-4f2e-ae5c-e4de43400271' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>concentration</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.57 1.2 1.23 0.39 ... 1.4 0.9 1.1</div><input id='attrs-78e98cb0-9628-4687-9c5f-733cf1098793' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-78e98cb0-9628-4687-9c5f-733cf1098793' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8b554ab7-8362-403a-8e89-a07e7fe6bef2' class='xr-var-data-in' type='checkbox'><label for='data-8b554ab7-8362-403a-8e89-a07e7fe6bef2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>pcode :</span></dt><dd>00631</dd><dt><span>standard_name :</span></dt><dd>concentration</dd><dt><span>long_name :</span></dt><dd></dd><dt><span>units :</span></dt><dd></dd><dt><span>conversion :</span></dt><dd>1.0</dd></dl></div><div class='xr-var-data'><pre>array([1.57 , 1.2  , 1.23 , 0.39 , 1.4  , 1.43 , 1.24 , 1.2  , 1.1  ,
+      shape=(652,), dtype=&#x27;datetime64[us]&#x27;)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-ca5803df-7d90-456d-abdf-e4e0f58afd72' class='xr-section-summary-in' type='checkbox' checked /><label for='section-ca5803df-7d90-456d-abdf-e4e0f58afd72' class='xr-section-summary' title='Expand/collapse section'>Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>concentration</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.57 1.2 1.23 0.39 ... 1.4 0.9 1.1</div><input id='attrs-4d27c3a4-b84b-4905-bebb-af1cd491551a' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4d27c3a4-b84b-4905-bebb-af1cd491551a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b7f01042-0f8c-42ff-91b3-b6f36b138341' class='xr-var-data-in' type='checkbox'><label for='data-b7f01042-0f8c-42ff-91b3-b6f36b138341' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>pcode :</span></dt><dd>00631</dd><dt><span>standard_name :</span></dt><dd>concentration</dd><dt><span>long_name :</span></dt><dd></dd><dt><span>units :</span></dt><dd></dd><dt><span>conversion :</span></dt><dd>1.0</dd></dl></div><div class='xr-var-data'><pre>array([1.57 , 1.2  , 1.23 , 0.39 , 1.4  , 1.43 , 1.24 , 1.2  , 1.1  ,
        1.23 , 1.54 , 0.8  , 1.2  , 1.4  , 1.1  , 2.2  , 1.01 , 1.4  ,
        1.6  , 1.1  , 0.94 , 0.99 , 0.98 , 1.7  , 0.77 , 0.58 , 0.5  ,
        0.64 , 1.3  , 1.18 , 1.3  , 1.15 , 1.7  , 1.4  , 1.4  , 0.95 ,
@@ -1017,11 +1014,11 @@ Attributes:
        0.176, 0.99 , 1.54 , 1.1  , 1.15 , 0.67 , 0.62 , 0.56 , 1.4  ,
        1.93 , 1.28 , 0.85 , 1.2  , 0.97 , 1.1  , 0.9  , 1.78 , 1.09 ,
        1.48 , 1.   , 0.94 , 0.65 , 1.5  , 1.14 , 0.48 , 1.08 , 1.67 ,
-       1.58 , 1.4  , 0.9  , 1.1  ])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-7adc5f06-568e-47d2-b297-29b73048b099' class='xr-section-summary-in' type='checkbox' checked /><label for='section-7adc5f06-568e-47d2-b297-29b73048b099' class='xr-section-summary' title='Expand/collapse section'>Attributes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>id :</span></dt><dd>01491000</dd><dt><span>name :</span></dt><dd>CHOPTANK RIVER NEAR GREENSBORO, MD</dd><dt><span>latitude :</span></dt><dd>38.9971944444444</dd><dt><span>longitude :</span></dt><dd>-75.7858055555556</dd></dl></div></li></ul></div></div></div></div>
+       1.58 , 1.4  , 0.9  , 1.1  ])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-4351acf5-dcc7-4c08-9c6e-01bc5bae672c' class='xr-section-summary-in' type='checkbox' checked /><label for='section-4351acf5-dcc7-4c08-9c6e-01bc5bae672c' class='xr-section-summary' title='Expand/collapse section'>Attributes: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>id :</span></dt><dd>01491000</dd><dt><span>name :</span></dt><dd>CHOPTANK RIVER NEAR GREENSBORO, MD</dd><dt><span>latitude :</span></dt><dd>38.9971944444444</dd><dt><span>longitude :</span></dt><dd>-75.7858055555556</dd></dl></div></li></ul></div></div></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;concentration&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;concentration&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1036,7 +1033,7 @@ Attributes:
 
 <span class="n">samples</span> <span class="o">=</span> <span class="n">aggregate_to_daily</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
 
-<span class="n">training_data</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">samples</span><span class="p">,</span> <span class="n">daily</span><span class="p">],</span> <span class="n">join</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+<span class="n">training_data</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">samples</span><span class="p">,</span> <span class="n">daily</span><span class="p">],</span> <span class="n">join</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1051,13 +1048,13 @@ Attributes:
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">LoadestGP</span><span class="p">()</span>
 
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s1">&#39;concentration&#39;</span><span class="p">],</span> <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="s1">&#39;flow&#39;</span><span class="p">]])</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">training_data</span><span class="p">[</span><span class="s2">&quot;concentration&quot;</span><span class="p">],</span> <span class="n">covariates</span><span class="o">=</span><span class="n">training_data</span><span class="p">[[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flow&quot;</span><span class="p">]])</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 9.03 s, sys: 223 ms, total: 9.26 s
-Wall time: 5.08 s
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>CPU times: user 9.85 s, sys: 265 ms, total: 10.1 s
+Wall time: 5.52 s
 </pre></div>
 </div>
 </div>
@@ -1065,7 +1062,7 @@ Wall time: 5.08 s
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot result</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">daily</span><span class="p">[[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="s1">&#39;flow&#39;</span><span class="p">]])</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">daily</span><span class="p">[[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flow&quot;</span><span class="p">]])</span>
 </pre></div>
 </div>
 </div>
@@ -1080,7 +1077,7 @@ Wall time: 5.08 s
 <p>Like WRTDS, we can also plot the variable space:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">levels</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">y_scale</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">levels</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">y_scale</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1096,7 +1093,7 @@ Wall time: 5.08 s
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># simulate concentration</span>
-<span class="n">sim_slice</span> <span class="o">=</span> <span class="n">daily</span><span class="p">[[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="s1">&#39;flow&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;1980&quot;</span><span class="p">,</span><span class="s2">&quot;2010&quot;</span><span class="p">))</span>
+<span class="n">sim_slice</span> <span class="o">=</span> <span class="n">daily</span><span class="p">[[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;flow&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;1980&quot;</span><span class="p">,</span> <span class="s2">&quot;2010&quot;</span><span class="p">))</span>
 
 <span class="n">sim</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sim_slice</span><span class="p">)</span>
 </pre></div>
@@ -1105,13 +1102,13 @@ Wall time: 5.08 s
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the first realization of concentration. </span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">draw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the first realization of concentration.</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">draw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5d325874ab1fe040d847a9c8b04e8a922bb6d36bc66dcc5e2c4ecdd0fcaba82a.png" src="../_images/5d325874ab1fe040d847a9c8b04e8a922bb6d36bc66dcc5e2c4ecdd0fcaba82a.png" />
+<img alt="../_images/1cde8dbe6da3073498f3ebe3c1e12050517128b7b922eaec7408edd44b7ee683.png" src="../_images/1cde8dbe6da3073498f3ebe3c1e12050517128b7b922eaec7408edd44b7ee683.png" />
 </div>
 </div>
 <p>In practice, we aren’t interested in a single simulated timeseries. Rather, we take a large sample of simulated series, then pass them through some function to simulate a probability distribution. For example, if we were interested in some annual value we would pass the simulations through that annual function to estimate a probability distribution. We demonstrate this concept for estimating the annual nutrient flux.</p>
@@ -1120,17 +1117,17 @@ Wall time: 5.08 s
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">loadest_gp.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">concentration_to_flux</span><span class="p">,</span> <span class="n">plot_annual_flux</span>
 
-<span class="n">flux</span> <span class="o">=</span> <span class="n">concentration_to_flux</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">sim_slice</span><span class="p">[</span><span class="s1">&#39;flow&#39;</span><span class="p">])</span>
+<span class="n">flux</span> <span class="o">=</span> <span class="n">concentration_to_flux</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">sim_slice</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">])</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">plot_annual_flux</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2521/2363971306.py:3: UserWarning: Check that concentration is in &#39;mg/l&#39;. Set concentration.units = &#39;mg/l&#39; to silence.
-  flux = concentration_to_flux(sim, sim_slice[&#39;flow&#39;])
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2435/4222387766.py:3: UserWarning: Check that concentration is in &#39;mg/l&#39;. Set concentration.units = &#39;mg/l&#39; to silence.
+  flux = concentration_to_flux(sim, sim_slice[&quot;flow&quot;])
 </pre></div>
 </div>
-<img alt="../_images/f98c0df3f3e45090189ec498ad8abd73d577623090d96afda4415b15a0fa3fec.png" src="../_images/f98c0df3f3e45090189ec498ad8abd73d577623090d96afda4415b15a0fa3fec.png" />
+<img alt="../_images/b0ea0ba742143b82a9db2c8563a57c53545960b30f1ad9a243fdac90fb9810d1.png" src="../_images/b0ea0ba742143b82a9db2c8563a57c53545960b30f1ad9a243fdac90fb9810d1.png" />
 </div>
 </div>
 <p>In most streams, flow varies substantially from year-to-year,
@@ -1155,7 +1152,7 @@ Choosing a different year should give similar results.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># create the pseudo-counterfactual</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">discontinuum.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_substitution</span>
 
-<span class="n">counterfactual</span> <span class="o">=</span> <span class="n">time_substitution</span><span class="p">(</span><span class="n">sim_slice</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;1995&quot;</span><span class="p">,</span><span class="s2">&quot;1995&quot;</span><span class="p">))</span>
+<span class="n">counterfactual</span> <span class="o">=</span> <span class="n">time_substitution</span><span class="p">(</span><span class="n">sim_slice</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;1995&quot;</span><span class="p">,</span> <span class="s2">&quot;1995&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1164,13 +1161,13 @@ Choosing a different year should give similar results.</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># simulate</span>
 <span class="n">counterfactual_sim</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">counterfactual</span><span class="p">)</span>
-<span class="n">counterfactual_flux</span> <span class="o">=</span> <span class="n">concentration_to_flux</span><span class="p">(</span><span class="n">counterfactual_sim</span><span class="p">,</span> <span class="n">sim_slice</span><span class="p">[</span><span class="s1">&#39;flow&#39;</span><span class="p">])</span>
+<span class="n">counterfactual_flux</span> <span class="o">=</span> <span class="n">concentration_to_flux</span><span class="p">(</span><span class="n">counterfactual_sim</span><span class="p">,</span> <span class="n">sim_slice</span><span class="p">[</span><span class="s2">&quot;flow&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2521/2799084493.py:3: UserWarning: Check that concentration is in &#39;mg/l&#39;. Set concentration.units = &#39;mg/l&#39; to silence.
-  counterfactual_flux = concentration_to_flux(counterfactual_sim, sim_slice[&#39;flow&#39;])
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2435/3923066555.py:3: UserWarning: Check that concentration is in &#39;mg/l&#39;. Set concentration.units = &#39;mg/l&#39; to silence.
+  counterfactual_flux = concentration_to_flux(counterfactual_sim, sim_slice[&quot;flow&quot;])
 </pre></div>
 </div>
 </div>
@@ -1183,7 +1180,7 @@ Choosing a different year should give similar results.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5adf20834d6621bf5b9067afbbbf06200f2b4c627e9f271c6acab730f6c495da.png" src="../_images/5adf20834d6621bf5b9067afbbbf06200f2b4c627e9f271c6acab730f6c495da.png" />
+<img alt="../_images/d955064eac9d98e3138759dc4075acd812db15be6eeb3fc56cdfc80d065eeadc.png" src="../_images/d955064eac9d98e3138759dc4075acd812db15be6eeb3fc56cdfc80d065eeadc.png" />
 </div>
 </div>
 <p>Now, the annual fluxes should be less variable than before, and the trend becomes apparent (depending on your choice of river).</p>

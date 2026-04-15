@@ -54,7 +54,7 @@
     <link rel="prev" title="discontinuum.utils" href="discontinuum.utils.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="0.1.dev1+g4ce2b9e1d" />
+  <meta name="docsearch:version" content="0.1.dev1+g94e335a2e" />
   </head>
   
   
@@ -364,7 +364,7 @@
 <span id="loadest-gp"></span><h1>loadest_gp<a class="headerlink" href="#module-loadest_gp" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="loadest_gp.LoadestGPMarginalGPyTorch">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">loadest_gp.</span></span><span class="sig-name descname"><span class="pre">LoadestGPMarginalGPyTorch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="loadest_gp.models.base.html#loadest_gp.models.base.ModelConfig" title="loadest_gp.models.base.ModelConfig"><span class="pre">ModelConfig</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ModelConfig(transform='log')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#loadest_gp.LoadestGPMarginalGPyTorch" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">loadest_gp.</span></span><span class="sig-name descname"><span class="pre">LoadestGPMarginalGPyTorch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="discontinuum.engines.base.html#discontinuum.engines.base.ModelConfig" title="discontinuum.engines.base.ModelConfig"><span class="pre">ModelConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#loadest_gp.LoadestGPMarginalGPyTorch" title="Link to this definition">#</a></dt>
 <dd><p>Gaussian Process implementation of the LOAD ESTimation (LOADEST) model</p>
 <p>This model currrently uses the marginal likelihood implementation, which is
 fast but does not account for censored data. Censored data require a slower
@@ -372,14 +372,14 @@ latent variable implementation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="loadest_gp.LoadestGPMarginalGPyTorch.build_model">
 <span class="sig-name descname"><span class="pre">build_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ExactGP</span></span></span><a class="headerlink" href="#loadest_gp.LoadestGPMarginalGPyTorch.build_model" title="Link to this definition">#</a></dt>
-<dd><p>Build marginal likelihood version of LoadestGP</p>
+<dd><p>Build marginal likelihood version of LoadestGP.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="loadest_gp.LoadestGPMarginalPyMC">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">loadest_gp.</span></span><span class="sig-name descname"><span class="pre">LoadestGPMarginalPyMC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="loadest_gp.models.base.html#loadest_gp.models.base.ModelConfig" title="loadest_gp.models.base.ModelConfig"><span class="pre">ModelConfig</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ModelConfig(transform='log')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#loadest_gp.LoadestGPMarginalPyMC" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">loadest_gp.</span></span><span class="sig-name descname"><span class="pre">LoadestGPMarginalPyMC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="discontinuum.engines.base.html#discontinuum.engines.base.ModelConfig" title="discontinuum.engines.base.ModelConfig"><span class="pre">ModelConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#loadest_gp.LoadestGPMarginalPyMC" title="Link to this definition">#</a></dt>
 <dd><p>Gaussian Process implementation of the LOAD ESTimation (LOADEST) model</p>
 <p>This model currrently uses the marginal likelihood implementation, which is
 fast but does not account for censored data. Censored data require a slower

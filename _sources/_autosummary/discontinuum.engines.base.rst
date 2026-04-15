@@ -15,4 +15,6 @@ discontinuum.engines.base
    .. autosummary::
    
       BaseModel
+      DataMixin
+      ModelConfig
    

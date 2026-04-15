@@ -8,6 +8,5 @@ rating\_gp.models.base
 
    .. autosummary::
    
-      ModelConfig
       RatingDataMixin
    

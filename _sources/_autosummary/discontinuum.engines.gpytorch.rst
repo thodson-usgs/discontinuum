@@ -8,7 +8,6 @@ discontinuum.engines.gpytorch
 
    .. autosummary::
    
-      LatentGPyTorch
       MarginalGPyTorch
       NoOpMean
    
