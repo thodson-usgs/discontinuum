@@ -11,29 +11,14 @@ from xarray import DataArray
 from discontinuum.engines.base import BaseModel, is_fitted
 
 if TYPE_CHECKING:
-    from typing import Dict, Optional
-
     from xarray import Dataset
-
-
-class LatentPyMC(BaseModel):
-    def __init__(
-        self,
-        model_config: Optional[Dict] = None,
-    ):
-        """ """
-        pass
-
-    def fit(self, covariates, target=None):
-        pass
 
 
 class MarginalPyMC(BaseModel):
     def __init__(
         self,
-        model_config: Optional[Dict] = None,
+        model_config: dict | None = None,
     ):
-        """ """
         pass
 
     def fit(self, covariates: Dataset, target: Dataset, method: str = "BFGS"):
@@ -79,10 +64,7 @@ class MarginalPyMC(BaseModel):
         return target, se
 
     @is_fitted
-    def predict_grid(self,
-                     covariate: str,
-                     coord: str = None,
-                     t_step: int = 12):
+    def predict_grid(self, covariate: str, coord: str | None = None, t_step: int = 12):
         """Predict on a grid of points.
 
         Parameters
@@ -96,7 +78,7 @@ class MarginalPyMC(BaseModel):
             Number of grid points per step in coord units. The default is 12.
         """
         if coord is None:
-            coord = list(self.dm.data.covariates.coords)[0]
+            coord = next(iter(self.dm.data.covariates.coords))
         coord_dim = self.dm.get_dim(coord)
         covariate_dim = self.dm.get_dim(covariate)
 
@@ -110,9 +92,6 @@ class MarginalPyMC(BaseModel):
         x_coord = np.linspace(x_min[coord_dim], x_max[coord_dim], n_coord)
         x_cov = np.linspace(x_min[covariate_dim], x_max[covariate_dim], n_cov)
 
-        # TODO check dependency
-        # tested with this on WSL with pymc v5.14.0
-        # X_grid = pm.math.cartesian(x_cov[:, None], x_coord[None, :])
         X_grid = pm.math.cartesian(x_coord, x_cov)
 
         mu, _ = self.gp.predict(
@@ -121,7 +100,7 @@ class MarginalPyMC(BaseModel):
             diag=True,
             pred_noise=True,
             model=self.model,
-            )
+        )
 
         target = self.dm.y_t(mu)
         t_pipe = self.dm.covariate_pipelines[coord]
@@ -139,16 +118,16 @@ class MarginalPyMC(BaseModel):
 
         return da
 
-
     @is_fitted
-    def sample(self,
-               covariates,
-               n=1000,
-               diag=False,
-               pred_noise=False,
-               method="cholesky",
-               tol=1e-6,
-               ) -> DataArray:
+    def sample(
+        self,
+        covariates,
+        n=1000,
+        diag=False,
+        pred_noise=False,
+        method="cholesky",
+        tol=1e-6,
+    ) -> DataArray:
         """Sample from the posterior distribution of the model.
 
         Parameters
@@ -176,7 +155,7 @@ class MarginalPyMC(BaseModel):
         rng = np.random.default_rng()
         sim = rng.multivariate_normal(mu, cov, size=n, method=method, tol=tol)
 
-        # TODO modify transform to handle samples/draws HACK
+        # Flatten then reshape to work around 1D transformation pipeline
         temp = self.dm.y_t(sim)
         data = temp.data.reshape(n, -1)
         attrs = temp.attrs
@@ -190,21 +169,5 @@ class MarginalPyMC(BaseModel):
         return da
 
     def build_model(self, X, y, **kwargs):
-        """
-        TODO: move this to parent?
-
-        Creates an instance of pm.Model based on provided data and
-        model_config, and attaches it to self.
-
-        The subclass method must instantiate self.model and self.gp.
-
-        Raises
-        ------
-        NotImplementedError
-        """
-        self.model = None
-        self.gp = None
-
-        raise NotImplementedError(
-            "This method must be implemented in a subclass"
-            )
+        """Build a PyMC model from data. Must be implemented by subclasses."""
+        raise NotImplementedError("This method must be implemented in a subclass")

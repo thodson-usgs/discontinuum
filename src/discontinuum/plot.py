@@ -5,12 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
-from discontinuum.engines.base import is_fitted
 from xarray import DataArray
 
-if TYPE_CHECKING:
-    from typing import Optional
+from discontinuum.engines.base import is_fitted
 
+if TYPE_CHECKING:
     from matplotlib.pyplot import Axes
     from xarray import Dataset
 
@@ -24,7 +23,7 @@ class BasePlotMixin:
     """Mixin plotting functions for Model class"""
 
     @staticmethod
-    def setup_plot(ax: Optional[Axes] = None):
+    def setup_plot(ax: Axes | None = None):
         """Sets up figure and axes for plot.
 
         Parameters
@@ -43,7 +42,7 @@ class BasePlotMixin:
         return ax
 
     @is_fitted
-    def plot_observations(self, ax: Optional[Axes] = None, **kwargs):
+    def plot_observations(self, ax: Axes | None = None, **kwargs):
         """Plot observations.
 
         Parameters
@@ -68,11 +67,7 @@ class BasePlotMixin:
         )
 
     @is_fitted
-    def plot(self,
-             covariates: Dataset,
-             ci: float = 0.95,
-             x: Optional[str] = None,
-             ax: Optional[Axes] = None):
+    def plot(self, covariates: Dataset, ci: float = 0.95, x: str | None = None, ax: Axes | None = None):
         """Plot predicted data.
 
         Parameters
@@ -92,7 +87,7 @@ class BasePlotMixin:
             Generated matplotlib axes.
         """
         if x is None:
-            x = list(covariates.coords)[0]
+            x = next(iter(covariates.coords))
 
         ax = self.setup_plot(ax)
 

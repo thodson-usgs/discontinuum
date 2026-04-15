@@ -8,47 +8,34 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import xarray as xr
 from dataretrieval import waterdata
+
+from discontinuum.providers.base import USGSParameter
 from loadest_gp.providers.usgs import get_metadata
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     from xarray import Dataset
 
 FT_TO_M = 0.3048
 FT3_TO_M3 = 0.0283168
 
-# Quantitative values of "measured_rating_diff"
 USGS_QUALITY_CODES = {
-    'Excellent': '0.02',
-    'Good': '0.05',
-    'Fair': '0.08',
-    'Poor': '0.12',
-    'Unspecified': '0.12',
+    "Excellent": "0.02",
+    "Good": "0.05",
+    "Fair": "0.08",
+    "Poor": "0.12",
+    "Unspecified": "0.12",
 }
 
 
 @dataclass
 class NWISColumn:
+    """Column definition for NWIS field measurement data."""
+
     column_name: str
     standard_name: str
-    long_name: Optional[str] = None
-    units: Optional[str] = None
+    long_name: str | None = None
+    units: str | None = None
     conversion: float = 1.0
-
-    @property
-    def name(self):
-        """Alias for standard_name."""
-        return self.standard_name
-
-
-@dataclass
-class USGSParameter:
-    pcode: str
-    standard_name: str
-    long_name: Optional[str] = ""
-    units: Optional[str] = ""
-    conversion: Optional[float] = 1.0
 
     @property
     def name(self):
@@ -83,8 +70,7 @@ NWISDischarge = NWISColumn(
 NWISDischargeUnc = NWISColumn(
     column_name="measurement_rated",
     standard_name="discharge_unc",
-    long_name=("Stream discharge uncertainty estimated from qualitative "
-               "measurement rating codes"),
+    long_name=("Stream discharge uncertainty estimated from qualitative measurement rating codes"),
     units="cubic meters per second",
     conversion=FT3_TO_M3,
 )
@@ -127,8 +113,7 @@ def get_daily_stage(
     )
 
     if len(df) == 0:
-        raise ValueError("No daily stage data is available for USGS site "
-                         f"number: {site}")
+        raise ValueError(f"No daily stage data is available for USGS site number: {site}")
 
     # waterdata returns long format with 'time' and 'value' columns
     df = df[["time", "value"]].copy()
@@ -152,9 +137,9 @@ def get_daily_stage(
 
 
 def get_measurements(
-        site: str,
-        start_date: str,
-        end_date: str,
+    site: str,
+    start_date: str,
+    end_date: str,
 ):
     """Get discharge measurements from the USGS Water Data API.
 
@@ -245,32 +230,25 @@ def read_measurements_df(df: pd.DataFrame) -> xr.Dataset:
 
     # Process the control_type_cd column
     if "control_type_cd" in pivot_df.columns:
-        pivot_df["control_type_cd"] = (
-            pivot_df["control_type_cd"]
-            .fillna("Unspecified")
-            .astype("category")
-        )
+        pivot_df["control_type_cd"] = pivot_df["control_type_cd"].fillna("Unspecified").astype("category")
 
     # Replace other values with 'Unspecified'
     if "measured_rating_diff" in pivot_df.columns:
-        pivot_df['measured_rating_diff'] = pivot_df['measured_rating_diff'].where(
-            pivot_df['measured_rating_diff'].isin(USGS_QUALITY_CODES.keys()),
-            'Unspecified'
+        pivot_df["measured_rating_diff"] = pivot_df["measured_rating_diff"].where(
+            pivot_df["measured_rating_diff"].isin(USGS_QUALITY_CODES.keys()), "Unspecified"
         )
 
-        pivot_df['discharge_unc_frac'] = (pivot_df['measured_rating_diff']
-                                          .replace(USGS_QUALITY_CODES)
-                                          .astype(float))
+        pivot_df["discharge_unc_frac"] = pivot_df["measured_rating_diff"].replace(USGS_QUALITY_CODES).astype(float)
     else:
-        pivot_df['discharge_unc_frac'] = float(USGS_QUALITY_CODES['Unspecified'])
+        pivot_df["discharge_unc_frac"] = float(USGS_QUALITY_CODES["Unspecified"])
 
     # Convert fractional uncertainty to uncertainty assuming the uncertainty
     # fraction is a 2 sigma gse interval. (GSE = frac + 1)
     # (GSE -> exp(sigma_ln(Q)))
-    pivot_df['discharge_unc'] = pivot_df['discharge_unc_frac'] / 2 + 1
+    pivot_df["discharge_unc"] = pivot_df["discharge_unc_frac"] / 2 + 1
 
     # drop data that is <= 0 as we need all positive data
-    pivot_df = pivot_df[(pivot_df['stage'] > 0) & (pivot_df['discharge'] > 0)]
+    pivot_df = pivot_df[(pivot_df["stage"] > 0) & (pivot_df["discharge"] > 0)]
 
     data_cols = ["stage", "discharge", "discharge_unc"]
     if "control_type_cd" in pivot_df.columns:
@@ -282,6 +260,6 @@ def read_measurements_df(df: pd.DataFrame) -> xr.Dataset:
         ds[param.name] = ds[param.name] * param.conversion
         ds[param.name].attrs = param.__dict__
 
-    ds['discharge_unc'].attrs = NWISDischargeUnc.__dict__
+    ds["discharge_unc"].attrs = NWISDischargeUnc.__dict__
 
     return ds

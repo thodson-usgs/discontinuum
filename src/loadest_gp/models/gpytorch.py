@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import gpytorch
 import numpy as np
 import torch
-from discontinuum.engines.gpytorch import MarginalGPyTorch
 from gpytorch.kernels import (
     MaternKernel,
     PeriodicKernel,
@@ -14,7 +15,9 @@ from gpytorch.priors import (
     NormalPrior,
 )
 
-from loadest_gp.models.base import LoadestDataMixin, ModelConfig
+from discontinuum.engines.base import ModelConfig
+from discontinuum.engines.gpytorch import MarginalGPyTorch
+from loadest_gp.models.base import LoadestDataMixin
 from loadest_gp.plot import LoadestPlotMixin
 
 
@@ -31,23 +34,19 @@ class LoadestGPMarginalGPyTorch(
     fast but does not account for censored data. Censored data require a slower
     latent variable implementation.
     """
+
     def __init__(
-            self,
-            model_config: ModelConfig = ModelConfig(),
+        self,
+        model_config: ModelConfig | None = None,
     ):
-        """ """
+        if model_config is None:
+            model_config = ModelConfig()
         # Ensure MarginalGPyTorch.__init__ executes to set checkpoint fields
         super().__init__(model_config=model_config)
         self.build_datamanager(model_config)
 
     def build_model(self, X, y) -> gpytorch.models.ExactGP:
-        """Build marginal likelihood version of LoadestGP
-        """
-        # noise_prior = HalfNormalPrior(scale=0.01)
-        # self.likelihood = gpytorch.likelihoods.GaussianLikelihood(
-        #     noise_prior=noise_prior,
-        # )
-
+        """Build marginal likelihood version of LoadestGP."""
         noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
@@ -69,14 +68,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.cov_dims = self.dims[1:]
 
         self.mean_module = gpytorch.means.ConstantMean()
-        self.covar_module = (
-            # may omit trend: wall 1.08s vs 990ms without,
-            # but much faster to compile
-            #self.cov_trend()
-            self.cov_seasonal()
-            + self.cov_covariates()
-            + self.cov_residual()
-        )
+        self.covar_module = self.cov_seasonal() + self.cov_covariates() + self.cov_residual()
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -89,7 +81,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
         return ScaleKernel(
             RBFKernel(
-                # active_dims=(0),
                 active_dims=self.time_dim,
                 lengthscale_prior=ls,
             ),
@@ -97,7 +88,6 @@ class ExactGPModel(gpytorch.models.ExactGP):
         )
 
     def cov_seasonal(self):
-        # TODO add lengthscale priors
         eta = HalfNormalPrior(scale=1)
         period = NormalPrior(loc=1, scale=0.01)
 
@@ -105,12 +95,9 @@ class ExactGPModel(gpytorch.models.ExactGP):
             PeriodicKernel(
                 period_length_prior=period,
                 active_dims=self.time_dim,
-                )
-            * MaternKernel(
-                nu=2.5,
-                active_dims=self.time_dim
-               ),
-           outputscale_prior=eta,
+            )
+            * MaternKernel(nu=2.5, active_dims=self.time_dim),
+            outputscale_prior=eta,
         )
 
     def cov_covariates(self):

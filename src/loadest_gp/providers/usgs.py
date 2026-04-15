@@ -3,35 +3,19 @@
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pandas as pd
 import xarray as xr
 from dataretrieval import waterdata
-from discontinuum.providers.base import MetaData
+
+from discontinuum.providers.base import MetaData, USGSParameter
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Union
-
-    from xarray import Dataset
     from pandas import DataFrame
+    from xarray import Dataset
 
 CFS_TO_M3 = 0.0283168
-
-
-@dataclass
-class USGSParameter:
-    pcode: str
-    standard_name: str
-    long_name: Optional[str] = ""
-    units: Optional[str] = ""
-    conversion: Optional[float] = 1.0
-
-    @property
-    def name(self):
-        """Alias for standard_name."""
-        return self.standard_name
 
 
 USGSFlow = USGSParameter(
@@ -44,8 +28,8 @@ USGSFlow = USGSParameter(
 
 
 def get_parameters(
-        pcodes: Dict[str, str],
-        ) -> Union[USGSParameter, List[USGSParameter]]:
+    pcodes: dict[str, str],
+) -> USGSParameter | list[USGSParameter]:
     """Get USGS parameters from a list of parameter codes.
 
     Parameters
@@ -120,7 +104,7 @@ def get_daily(
     site: str,
     start_date: str,
     end_date: str,
-    params: Union[List[USGSParameter], USGSParameter] = USGSFlow,
+    params: list[USGSParameter] | USGSParameter = USGSFlow,
     **kwargs,
 ) -> Dataset:
     """Get daily data from the USGS Water Data API.
@@ -166,9 +150,9 @@ def get_daily(
 
 
 def format_daily(
-        df: DataFrame,
-        site_id: Optional[str] = None,
-        params: Union[List[USGSParameter], USGSParameter] = [USGSFlow],
+    df: DataFrame,
+    site_id: str | None = None,
+    params: list[USGSParameter] | USGSParameter = None,
 ) -> Dataset:
     """
     Format results of waterdata.get_daily.
@@ -182,7 +166,9 @@ def format_daily(
     params : List[USGSParameter], optional
         List of parameters to retrieve. The default is flow only `[USGSFlow]`.
     """
-    if not isinstance(params, list):
+    if params is None:
+        params = [USGSFlow]
+    elif not isinstance(params, list):
         params = [params]
 
     # The waterdata API returns a long-format DataFrame with columns:
@@ -202,9 +188,7 @@ def format_daily(
     )
 
     # Rename columns from pcode to standard name
-    pivot_df = pivot_df.rename(
-        columns={pcode: pcode_to_param[pcode].name for pcode in pivot_df.columns}
-    )
+    pivot_df = pivot_df.rename(columns={pcode: pcode_to_param[pcode].name for pcode in pivot_df.columns})
 
     # Ensure time index is timezone-naive for xarray compatibility
     if hasattr(pivot_df.index, "tz") and pivot_df.index.tz is not None:
@@ -226,9 +210,9 @@ def format_daily(
 
 
 def format_wqp_samples(
-        df: DataFrame,
-        name: str = "concentration",
-        pcode: Optional[str] = None,
+    df: DataFrame,
+    name: str = "concentration",
+    pcode: str | None = None,
 ) -> Dataset:
     """Format results of waterdata.get_samples.
 
@@ -246,9 +230,7 @@ def format_wqp_samples(
     Dataset
     """
     # create datetime index
-    df.index = pd.to_datetime(
-        df["Activity_StartDate"] + " " + df["Activity_StartTime"]
-    )
+    df.index = pd.to_datetime(df["Activity_StartDate"] + " " + df["Activity_StartTime"])
 
     df[name] = df["Result_Measure"].astype(float)
     df.index.name = "time"
@@ -264,7 +246,7 @@ def format_wqp_samples(
         warnings.warn(
             "Censored values have been removed from the dataset.",
             stacklevel=1,
-            )
+        )
 
     if pcode:
         attrs = get_parameters({name: pcode})
@@ -274,15 +256,15 @@ def format_wqp_samples(
 
 
 def get_samples(
-        site: str,
-        start_date: str,
-        end_date: str,
-        characteristic: str,
-        fraction: str,
-        provider: str = "NWIS",
-        name: str = "concentration",
-        filter_pcodes: Optional[List[str]] = None,
-        **kwargs,
+    site: str,
+    start_date: str,
+    end_date: str,
+    characteristic: str,
+    fraction: str,
+    provider: str = "NWIS",
+    name: str = "concentration",
+    filter_pcodes: list[str] | None = None,
+    **kwargs,
 ) -> Dataset:
     """Get sample data from the Water Quality Portal API.
 
@@ -349,7 +331,7 @@ def get_samples(
 
     if provider == "NWIS":
         # strip the "USGS-" prefix from the site number
-        site_id = site[5:] if site.startswith("USGS-") else site
+        site_id = site.removeprefix("USGS-")
         ds.attrs = get_metadata(site_id).__dict__
 
     if provider == "STORET":
