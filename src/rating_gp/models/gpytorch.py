@@ -67,7 +67,11 @@ class RatingGPMarginalGPyTorch(
         if y_unc is not None:
             noise = y_unc
         else:
-            noise = 0.1**2 * torch.ones(y.shape[0]).reshape(1, -1)
+            # shape (n,), matching the y_unc branch and FixedNoiseGaussianLikelihood's
+            # contract; a (1, n) shape injects a spurious batch dim that makes the
+            # marginal covariance (1, n, n) and non-finite, so the exact-MLL Cholesky
+            # fails from the first iteration when fitting without target_unc.
+            noise = 0.1**2 * torch.ones(y.shape[0])
         self.likelihood = gpytorch.likelihoods.FixedNoiseGaussianLikelihood(
             noise=noise,
             learn_additional_noise=True,
