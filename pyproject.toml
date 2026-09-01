@@ -1,25 +1,35 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=77", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "discontinuum"
 description = "Estimate discontinuous timeseries from continuous covariates."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 keywords = ["timeseries", "Gaussian processes", "discontinuous"]
-license = {file = "LICENSE.md"}
+license = "CC0-1.0"
+license-files = ["LICENSE.md"]
 maintainers = [
   {name = "Timothy Hodson", email = "thodson@usgs.gov"},
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 dependencies = [
     "gpytorch",
+    "linear_operator",
     "matplotlib",
+    "numpy",
+    "pandas",
     "scikit-learn",
+    "scipy",
+    "torch",
     "tqdm",
     "xarray",
 ]
@@ -34,7 +44,7 @@ package-dir = {"" = "src"}
 dev = [
   "flake8",
   "ruff",
-  "pytest-cov[all]",
+  "pytest-cov",
   "requests_mock",
   "dataretrieval > 1.1.0",
 ]
